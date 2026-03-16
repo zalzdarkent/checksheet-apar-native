@@ -96,6 +96,18 @@
                         </ul>
                     </div>
                 </li>
+                <li class="nav-item">
+                    <a href="#">
+                        <i class="fas fa-file-alt"></i>
+                        <p>Report</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#">
+                        <i class="fas fa-users"></i>
+                        <p>User Management</p>
+                    </a>
+                </li>
             </ul>
         </div>
     </div>
