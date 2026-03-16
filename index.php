@@ -29,6 +29,12 @@ include("module/fragments/head.php");
                 <!-- End Navbar -->
             </div>
 
+            <!-- Script JS -->
+            <?php
+            include("module/fragments/script.php");
+            ?>
+            <!-- End script JS -->
+
             <div class="container">
                 <!-- content -->
                 <?php
@@ -52,11 +58,6 @@ include("module/fragments/head.php");
             <!-- End footer -->
         </div>
     </div>
-    <!-- Script JS -->
-    <?php
-    include("module/fragments/script.php");
-    ?>
-    <!-- End script JS -->
 </body>
 
 </html>

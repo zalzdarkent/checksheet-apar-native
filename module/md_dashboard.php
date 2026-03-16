@@ -287,10 +287,6 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
-                                <?php else: ?>
-                                    <tr>
-                                        <td colspan="11" class="text-center text-muted">No abnormal cases</td>
-                                    </tr>
                                 <?php endif; ?>
                             </tbody>
                         </table>
@@ -360,10 +356,6 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
-                                <?php else: ?>
-                                    <tr>
-                                        <td colspan="11" class="text-center text-muted">No abnormal cases</td>
-                                    </tr>
                                 <?php endif; ?>
                             </tbody>
                         </table>
@@ -375,10 +367,7 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
 </div>
 
 <!-- Javascript -->
-<script src="assets/js/core/jquery-3.7.1.min.js"></script>
-<script src="assets/js/apexchart.js"></script>
-<script src="assets/js/plugin/datatables/datatables.min.js"></script>
-<!-- apar dan hydrant -->
+<!-- Javascript logic -->
 <script>
     var totalAparProses = <?php echo $totalAparProses; ?>;
     var totalAparOK = <?php echo $totalAparOK; ?>;
@@ -420,29 +409,46 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
 <!-- datatables -->
 <script>
     $(document).ready(function () {
-        // Initialize APAR table
-        var aparTable = $("#table-apar").DataTable({
+        var aparTable, hydrantTable;
+        var hydrantTableInitialized = false;
+
+        // Configuration for both tables
+        var dtConfig = {
             paging: true,
             searching: true,
             ordering: true,
-            responsive: true
-        });
+            responsive: true,
+            retrieve: true, // Safety against re-initialization
+            columnDefs: [
+                { orderable: false, targets: -1 } // Disable sorting on Action column
+            ],
+            language: {
+                emptyTable: "No abnormal cases"
+            }
+        };
 
-        // Initialize Hydrant table
-        var hydrantTable = $("#table-hydrant").DataTable({
-            paging: true,
-            searching: true,
-            ordering: true,
-            responsive: true
-        });
+        // Initialize APAR table immediately
+        aparTable = $("#table-apar").DataTable(dtConfig);
 
-        // Re-initialize DataTable when tab changes for proper column width adjustment
-        $('button[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
-            var target = $(e.target).attr("data-bs-target");
-            if (target === '#apar-content') {
-                aparTable.columns.adjust().draw();
-            } else if (target === '#hydrant-content') {
+        // Initialize Hydrant table when tab is shown
+        $('#hydrant-tab').on('shown.bs.tab', function (e) {
+            if (!hydrantTableInitialized) {
+                hydrantTable = $("#table-hydrant").DataTable(dtConfig);
+                hydrantTableInitialized = true;
+            } else if (hydrantTable) {
                 hydrantTable.columns.adjust().draw();
+            }
+        });
+
+        // Ensure columns adjust when tabs are switched
+        $('button[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
+            var targetId = $(e.target).attr('data-bs-target');
+            var tableId = targetId === '#apar-content' ? '#table-apar' : '#table-hydrant';
+            var table = $(tableId).DataTable();
+            if (table) {
+                setTimeout(function() {
+                    table.columns.adjust().draw();
+                }, 100);
             }
         });
     });
