@@ -38,14 +38,25 @@ include("module/fragments/head.php");
             <div class="container">
                 <!-- content -->
                 <?php
-                $halaman = isset($_GET['halaman']) ? $_GET['halaman'] : 'dashboard';
+                $page = isset($_GET['page']) ? $_GET['page'] : 'dashboard';
+                $file = "";
 
-                $file = "module/md_" . $halaman . ".php";
+                $routes = [
+                    'dashboard' => 'module/md_dashboard.php',
+                    'apar-ace' => 'module/ace/index.php',
+                    'hydrant-ace' => 'module/hydrant/ace/index.php'
+                ];
+
+                if (array_key_exists($page, $routes)) {
+                    $file = $routes[$page];
+                } else {
+                    $file = "module/md_" . $page . ".php";
+                }
 
                 if (file_exists($file)) {
                     include($file);
                 } else {
-                    echo "<h1>Halaman tidak ditemukan</h1>";
+                    echo "<h1>Halaman <b>" . htmlspecialchars($page) . "</b> tidak ditemukan ($file)</h1>";
                 }
                 ?>
                 <!-- End content -->
