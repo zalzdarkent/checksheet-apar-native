@@ -38,7 +38,8 @@
                             <?php echo $_SESSION['error']; ?>
                         </div>
                     <?php endif; ?>
-                    <form id="formAddUser" action="actions/user/ac_user.php" method="POST" enctype="multipart/form-data">
+                    <form id="formAddUser" action="actions/user/ac_user.php" method="POST"
+                        enctype="multipart/form-data">
 
                         <div class="row">
                             <!-- LEFT -->
@@ -72,7 +73,8 @@
                                     <input type="password" class="form-control" name="password" id="passwordInput"
                                         placeholder="Masukkan password" required>
                                     <?php if (isset($_SESSION['error_password'])): ?>
-                                        <span class="text-danger error-server"><?php echo $_SESSION['error_password']; ?></span>
+                                        <span
+                                            class="text-danger error-server"><?php echo $_SESSION['error_password']; ?></span>
                                     <?php endif; ?>
                                 </div>
 
@@ -80,8 +82,10 @@
                                     <label>Confirm Password</label>
                                     <input type="password"
                                         class="form-control <?php echo isset($_SESSION['error_password']) ? 'is-invalid' : ''; ?>"
-                                        name="confirm_password" id="confirmPasswordInput" placeholder="Ulangi password" required>
-                                    <span class="text-danger" id="passwordErrorMsg" style="display: none;">Password dan Confirm Password harus sama!</span>
+                                        name="confirm_password" id="confirmPasswordInput" placeholder="Ulangi password"
+                                        required>
+                                    <span class="text-danger" id="passwordErrorMsg" style="display: none;">Password dan
+                                        Confirm Password harus sama!</span>
                                     <?php if (isset($_SESSION['error_password'])): ?>
                                         <span class="text-danger error-server">
                                             <?php echo $_SESSION['error_password']; ?>
@@ -92,8 +96,14 @@
                                 <div class="form-group mb-3">
                                     <label>Foto Profile (Optional)</label>
                                     <input type="file" class="form-control" name="photo" id="photoInput"
-                                        accept="image/*">
-                                    <small class="text-muted">Upload foto untuk melihat preview</small>
+                                        accept=".png, .jpg, .jpeg">
+                                    <span class="text-danger mt-1" id="photoErrorMsg" style="display: none;"></span>
+                                    <?php if (isset($_SESSION['error_photo'])): ?>
+                                        <span
+                                            class="text-danger mt-1 error-server"><?php echo $_SESSION['error_photo']; ?></span>
+                                    <?php endif; ?>
+                                    <small class="text-muted d-block mt-1">Upload foto untuk melihat preview (Maks 5MB,
+                                        format: png, jpg, jpeg)</small>
                                 </div>
 
                                 <!-- Preview Avatar -->
@@ -117,19 +127,45 @@
     </div>
 </div>
 
-<?php 
-// Hapus session error setelah ditampilkan agar tidak menetap
+<?php
 unset($_SESSION['error_password']);
+unset($_SESSION['error_photo']);
 unset($_SESSION['error']);
 ?>
-
 <script>
-    document.getElementById('photoInput').addEventListener('change', function (event) {
+    const photoInput = document.getElementById('photoInput');
+    const photoErrorMsg = document.getElementById('photoErrorMsg');
+
+    photoInput.addEventListener('change', function (event) {
         const file = event.target.files[0];
         const preview = document.getElementById('previewImage');
         const container = document.getElementById('previewContainer');
 
+        photoErrorMsg.style.display = 'none';
+        photoInput.classList.remove('is-invalid');
+
         if (file) {
+            // Check extension
+            const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+            if (!allowedTypes.includes(file.type)) {
+                photoErrorMsg.textContent = 'Format file harus berupa PNG, JPG, atau JPEG!';
+                photoErrorMsg.style.display = 'block';
+                photoInput.classList.add('is-invalid');
+                photoInput.value = '';
+                container.style.display = 'none';
+                return;
+            }
+
+            // Check size max 5MB
+            if (file.size > 5 * 1024 * 1024) {
+                photoErrorMsg.textContent = 'Ukuran file terlalu besar! Maksimal 5 MB.';
+                photoErrorMsg.style.display = 'block';
+                photoInput.classList.add('is-invalid');
+                photoInput.value = '';
+                container.style.display = 'none';
+                return;
+            }
+
             preview.src = URL.createObjectURL(file);
             container.style.display = 'block';
         } else {
@@ -170,7 +206,7 @@ unset($_SESSION['error']);
 
     formAddUser.addEventListener('submit', function (e) {
         if (!validatePassword()) {
-            e.preventDefault(); 
+            e.preventDefault();
             confirmPasswordInput.focus();
         }
     });

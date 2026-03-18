@@ -51,7 +51,8 @@ include("components/fragments/head.php");
                     'apar-ace' => 'module/ace/index.php',
                     'hydrant-ace' => 'module/hydrant/ace/index.php',
                     'user-management' => 'module/user/index.php',
-                    'add-user' => 'module/user/create.php'
+                    'add-user' => 'module/user/create.php',
+                    'edit-user' => 'module/user/edit.php'
                 ];
 
                 if (array_key_exists($page, $routes)) {

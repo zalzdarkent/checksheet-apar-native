@@ -59,7 +59,21 @@ $getAllUsers = get_all_users();
                                     ?>
                                     <tr>
                                         <td><?php echo $no++; ?></td>
-                                        <td><?php echo $user['name']; ?></td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar avatar-sm me-3">
+                                                    <?php 
+                                                    $photoPath = !empty($user['photo']) && file_exists('storage/users/' . $user['photo']) 
+                                                                ? 'storage/users/' . $user['photo'] 
+                                                                : 'assets/img/placeholder-profile.jpg';
+                                                    ?>
+                                                    <img src="<?php echo $photoPath; ?>" alt="Profile" class="avatar-img rounded-circle" style="object-fit:cover;">
+                                                </div>
+                                                <div>
+                                                    <?php echo $user['name']; ?>
+                                                </div>
+                                            </div>
+                                        </td>
                                         <td><?php echo $user['npk']; ?></td>
                                         <td><?php echo $user['role']; ?></td>
                                         <td>
@@ -70,12 +84,18 @@ $getAllUsers = get_all_users();
                                             <?php endif; ?>
                                         </td>
                                         <td>
-                                            <a href="#" class="btn btn-warning btn-sm text-white">
+                                            <a href="?page=edit-user&id=<?php echo $user['id']; ?>" class="btn btn-warning btn-sm text-white">
                                                 <i class="fas fa-edit"></i> Edit
                                             </a>
-                                            <a href="#" class="btn btn-danger btn-sm text-white">
-                                                <i class="fas fa-ban"></i> Nonaktif
-                                            </a>
+                                            <?php if ($user['is_active'] == 1): ?>
+                                                <button class="btn btn-danger btn-sm text-white" onclick="set_status(<?php echo $user['id']; ?>, '<?php echo $user['name']; ?>', 'nonaktifkan')">
+                                                    <i class="fas fa-ban"></i> Nonaktif
+                                                </button>
+                                            <?php else: ?>
+                                                <button class="btn btn-success btn-sm text-white" onclick="set_status(<?php echo $user['id']; ?>, '<?php echo $user['name']; ?>', 'aktifkan')">
+                                                    <i class="fas fa-check-circle"></i> Aktifkan
+                                                </button>
+                                            <?php endif; ?>
                                         </td>
                                     </tr>
                                     <?php
@@ -104,6 +124,51 @@ $getAllUsers = get_all_users();
             }
         });
     });
+
+    function set_status(id, name, action) {
+        let title = action === 'nonaktifkan' ? "Nonaktifkan User?" : "Aktifkan User?";
+        let text = action === 'nonaktifkan' ? "Apakah anda yakin ingin menonaktifkan " + name + "?" : "Apakah anda yakin ingin mengaktifkan " + name + "?";
+        let icon = action === 'nonaktifkan' ? "warning" : "info";
+        let confirmBtnColor = action === 'nonaktifkan' ? "#d33" : "#28a745";
+
+        swal({
+            title: title,
+            text: text,
+            icon: icon,
+            buttons: {
+                cancel: {
+                    text: "Batal",
+                    value: null,
+                    visible: true,
+                    className: "btn btn-danger"
+                },
+                confirm: {
+                    text: "Ya, lanjutkan!",
+                    value: true,
+                    visible: true,
+                    className: action === 'nonaktifkan' ? "btn btn-warning" : "btn btn-success"
+                }
+            }
+        }).then((willDelete) => {
+            if (willDelete) {
+                $.ajax({
+                    url: "actions/user/ac_user.php",
+                    type: "POST",
+                    data: {
+                        action: "set_status",
+                        id: id
+                    },
+                    success: function (response) {
+                        // Response success akan direload dan notify muncul dari session
+                        location.reload();
+                    },
+                    error: function (xhr, status, error) {
+                        swal("Ups!", "Terjadi kesalahan: " + error, "error");
+                    }
+                });
+            }
+        });
+    }
 </script>
 
 <!-- notify alert -->
