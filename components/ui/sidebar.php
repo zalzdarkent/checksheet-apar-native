@@ -126,8 +126,8 @@ $grupHydrantAktif = cekGrupAktif($halamanSekarang, 'hydrant-');
                         </ul>
                     </div>
                 </li>
-                <li class="nav-item">
-                    <a href="#">
+                <li class="nav-item <?= cekMenuAktif($halamanSekarang, 'report') ?>">
+                    <a href="index.php?page=report">
                         <i class="fas fa-file-alt"></i>
                         <p>Report</p>
                     </a>

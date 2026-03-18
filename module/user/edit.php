@@ -64,7 +64,7 @@ $user = get_user_by_id($id);
                                         class="rounded-circle border border-4 border-white shadow-lg profile-avatar-img">
 
                                     <label for="photoInput" class="btn-camera-upload shadow-sm">
-                                        <i class="fas fa-camera"></i>
+                                        <i class="fas fa-pen text-white"></i>
                                     </label>
                                 </div>
                             </div>
