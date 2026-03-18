@@ -1,15 +1,20 @@
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 
 <?php
-include("module/fragments/head.php");
+include("components/fragments/head.php");
 ?>
 
 <body>
     <div class="wrapper">
         <!-- Sidebar -->
         <?php
-        include("module/ui/sidebar.php");
+        include("components/ui/sidebar.php");
         ?>
         <!-- End Sidebar -->
 
@@ -18,20 +23,20 @@ include("module/fragments/head.php");
                 <div class="main-header-logo">
                     <!-- Logo Header -->
                     <?php
-                    include("module/ui/logo.php");
+                    include("components/ui/logo.php");
                     ?>
                     <!-- End Logo Header -->
                 </div>
                 <!-- Navbar Header -->
                 <?php
-                include("module/ui/navbar.php");
+                include("components/ui/navbar.php");
                 ?>
                 <!-- End Navbar -->
             </div>
 
             <!-- Script JS -->
             <?php
-            include("module/fragments/script.php");
+            include("components/fragments/script.php");
             ?>
             <!-- End script JS -->
 
@@ -44,7 +49,9 @@ include("module/fragments/head.php");
                 $routes = [
                     'dashboard' => 'module/md_dashboard.php',
                     'apar-ace' => 'module/ace/index.php',
-                    'hydrant-ace' => 'module/hydrant/ace/index.php'
+                    'hydrant-ace' => 'module/hydrant/ace/index.php',
+                    'user-management' => 'module/user/index.php',
+                    'add-user' => 'module/user/create.php'
                 ];
 
                 if (array_key_exists($page, $routes)) {
@@ -64,7 +71,7 @@ include("module/fragments/head.php");
 
             <!-- footer -->
             <?php
-            include("module/ui/footer.php");
+            include("components/ui/footer.php");
             ?>
             <!-- End footer -->
         </div>

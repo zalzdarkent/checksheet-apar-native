@@ -1,36 +1,3 @@
-<style>
-    /* Custom Slim Datatable for ACE */
-    table.dataTable.table-slim > thead > tr > th,
-    table.dataTable.table-slim > tbody > tr > td {
-        padding: 6px 10px !important;
-        font-size: 13px !important;
-        vertical-align: middle !important;
-    }
-    table.dataTable.table-slim > thead > tr > th {
-        padding-right: 25px !important;
-    }
-    table.dataTable.table-slim > thead > tr > th::before,
-    table.dataTable.table-slim > thead > tr > th::after {
-        bottom: 6px !important;
-        right: 5px !important;
-    }
-    table.dataTable.table-slim .btn {
-        padding: 3px 8px !important;
-        font-size: 12px !important;
-        line-height: 1.5;
-    }
-    .dataTables_wrapper .dataTables_info,
-    .dataTables_wrapper .dataTables_length,
-    .dataTables_wrapper .dataTables_filter,
-    .dataTables_wrapper .dataTables_paginate {
-        font-size: 13px !important;
-        margin-bottom: 8px;
-    }
-    table.dataTable.table-slim th {
-        background-color: #f8f9fa !important;
-    }
-</style>
-
 <div class="page-inner">
     <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
         <div>
