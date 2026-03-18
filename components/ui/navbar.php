@@ -35,38 +35,6 @@
                                         <span class="time">5 minutes ago</span>
                                     </div>
                                 </a>
-                                <a href="#">
-                                    <div class="notif-img">
-                                        <img src="assets/img/chadengle.jpg" alt="Img Profile" />
-                                    </div>
-                                    <div class="notif-content">
-                                        <span class="subject">Chad</span>
-                                        <span class="block"> Ok, Thanks ! </span>
-                                        <span class="time">12 minutes ago</span>
-                                    </div>
-                                </a>
-                                <a href="#">
-                                    <div class="notif-img">
-                                        <img src="assets/img/mlane.jpg" alt="Img Profile" />
-                                    </div>
-                                    <div class="notif-content">
-                                        <span class="subject">Jhon Doe</span>
-                                        <span class="block">
-                                            Ready for the meeting today...
-                                        </span>
-                                        <span class="time">12 minutes ago</span>
-                                    </div>
-                                </a>
-                                <a href="#">
-                                    <div class="notif-img">
-                                        <img src="assets/img/talha.jpg" alt="Img Profile" />
-                                    </div>
-                                    <div class="notif-content">
-                                        <span class="subject">Talha</span>
-                                        <span class="block"> Hi, Apa Kabar ? </span>
-                                        <span class="time">17 minutes ago</span>
-                                    </div>
-                                </a>
                             </div>
                         </div>
                     </li>
@@ -76,11 +44,17 @@
                     </li>
                 </ul>
             </li>
+            <li class="nav-item">
+                <button class="btn btn-info btn-sm btn-round px-3 me-2 d-none d-md-flex align-items-center"
+                    data-bs-toggle="modal" data-bs-target="#globalMapViewModal">
+                    <i class="fas fa-map-marked-alt me-2"></i> Lihat Map
+                </button>
+            </li>
             <li class="nav-item topbar-icon dropdown hidden-caret">
                 <a class="nav-link dropdown-toggle" href="#" id="notifDropdown" role="button" data-bs-toggle="dropdown"
                     aria-haspopup="true" aria-expanded="false">
                     <i class="fa fa-bell"></i>
-                    <span class="notification">4</span>
+                    <span class="notification">1</span>
                 </a>
                 <ul class="dropdown-menu notif-box animated fadeIn" aria-labelledby="notifDropdown">
                     <li>
