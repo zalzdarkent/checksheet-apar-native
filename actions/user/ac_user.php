@@ -122,6 +122,12 @@ function update_user($id)
             }
         }
 
+        // Update session if editing own profile
+        if (isset($_SESSION['user_id']) && $_SESSION['user_id'] == $id) {
+            $_SESSION['user_name'] = $name;
+            $_SESSION['user_photo'] = $photo;
+        }
+
         $_SESSION['success'] = "User berhasil diupdate!";
         header("Location: ../../index.php?page=user-management");
         exit;

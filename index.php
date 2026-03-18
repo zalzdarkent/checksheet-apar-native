@@ -2,6 +2,8 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
+include(__DIR__ . "/config/middleware/auth_middleware.php");
+check_auth();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -44,6 +46,13 @@ include("components/fragments/head.php");
                 <!-- content -->
                 <?php
                 $page = isset($_GET['page']) ? $_GET['page'] : 'dashboard';
+                
+                // Role Protection
+                $protected_pages = ['user-management', 'add-user', 'edit-user'];
+                if (in_array($page, $protected_pages)) {
+                    check_admin();
+                }
+
                 $file = "";
 
                 $routes = [
@@ -368,6 +377,31 @@ include("components/fragments/head.php");
         // Fix table header alignment when switching to list tab
         $('#global-list-tab').on('shown.bs.tab', function () {
             if (globalDt) globalDt.columns.adjust().draw();
+        });
+
+        // Logout Handler
+        $('#logoutBtn').on('click', function(e) {
+            e.preventDefault();
+            swal({
+                title: 'Apakah anda yakin?',
+                text: "Sesi anda akan segera berakhir!",
+                type: 'warning',
+                buttons: {
+                    cancel: {
+                        visible: true,
+                        text: 'Tidak, tetap disini',
+                        className: 'btn btn-danger'
+                    },
+                    confirm: {
+                        text: 'Ya, Logout!',
+                        className: 'btn btn-success'
+                    }
+                }
+            }).then((willLogout) => {
+                if (willLogout) {
+                    window.location.href = 'actions/auth/ac_auth.php?action=logout';
+                }
+            });
         });
     });
     </script>
