@@ -1,9 +1,8 @@
 <?php
-$area = 'Ace';
-include(__DIR__ . '/../../../actions/ace/ac_get_data_apar.php');
+include(__DIR__ . '/../../../actions/machining/ac_get_data_hydrant.php');
 ?>
 
-<div class="page-inner">
+<div class="page-inner">    
     <style>
         .apar-card-container {
             display: grid;
@@ -289,7 +288,7 @@ include(__DIR__ . '/../../../actions/ace/ac_get_data_apar.php');
 
     <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
         <div>
-            <h3 class="fw-bold mb-3">apar Management - ACE</h3>
+            <h3 class="fw-bold mb-3">Hydrant Management - Machining</h3>
         </div>
         <div class="ms-md-auto py-2 py-md-0 d-flex gap-2">
             <div class="dropdown" id="selected-actions-btn">
@@ -318,16 +317,16 @@ include(__DIR__ . '/../../../actions/ace/ac_get_data_apar.php');
             <i class="fas fa-search search-icon"></i>
             <input type="text" id="search-input" class="search-input" placeholder="Search code, location, type...">
         </div>
-        <div id="item-count" class="text-white small">Showing <?php echo count($apar_data); ?> Items</div>
+        <div id="item-count" class="text-white small">Showing <?php echo count($hydrant_data); ?> Items</div>
     </div>
 
     <div id="apar-container" class="apar-card-container">
-        <?php if (empty($apar_data)): ?>
-            <div id="no-data-msg" class="text-center w-100 py-5"
-                style="grid-column: 1 / -1; color: #a0a0a0; font-size: 1.2rem;">Data tidak ditemukan</div>
+        <?php if (empty($hydrant_data)): ?>
+            <div id="no-data-msg" class="text-center w-100 py-5" style="grid-column: 1 / -1; color: #a0a0a0; font-size: 1.2rem;">Data tidak
+                ditemukan</div>
         <?php else: ?>
-            <?php foreach ($apar_data as $item): ?>
-                <?php $statusClass = $item['status'] === 'Good' ? 'status-ok' : 'status-abnormal'; ?>
+            <?php foreach ($hydrant_data as $item): ?>
+                <?php $statusClass = ($item['status'] === 'OK' || $item['status'] === 'Good') ? 'status-ok' : 'status-abnormal'; ?>
                 <div class="apar-card" data-id="<?php echo $item['id']; ?>">
                     <input type="checkbox" class="card-checkbox item-checkbox">
                     <button class="delete-btn" title="Delete"><i class="fas fa-trash"></i></button>
@@ -374,7 +373,7 @@ include(__DIR__ . '/../../../actions/ace/ac_get_data_apar.php');
     $(document).ready(function () {
         let currentPage = 1;
         let isLoading = false;
-        let hasMore = <?php echo count($apar_data) >= 12 ? 'true' : 'false'; ?>;
+        let hasMore = <?php echo count($hydrant_data) >= 12 ? 'true' : 'false'; ?>;
         let searchQuery = "";
         let searchTimeout;
 
@@ -419,10 +418,10 @@ include(__DIR__ . '/../../../actions/ace/ac_get_data_apar.php');
             alert('Printing QR Code for IDs: ' + selectedIds.join(', '));
         });
 
-        $('#search-input').on('input', function () {
+        $('#search-input').on('input', function() {
             clearTimeout(searchTimeout);
             searchQuery = $(this).val();
-            searchTimeout = setTimeout(function () {
+            searchTimeout = setTimeout(function() {
                 currentPage = 0; // Will be incremented to 1 in loadMore
                 hasMore = true;
                 $('#apar-container').empty();
@@ -431,7 +430,7 @@ include(__DIR__ . '/../../../actions/ace/ac_get_data_apar.php');
         });
 
         function createCardHtml(item) {
-            const statusClass = item.status === 'OK' ? 'status-ok' : 'status-abnormal';
+            const statusClass = (item.status === 'OK' || item.status === 'Good') ? 'status-ok' : 'status-abnormal';
             return `
                 <div class="apar-card" data-id="${item.id}">
                     <input type="checkbox" class="card-checkbox item-checkbox">
@@ -469,7 +468,7 @@ include(__DIR__ . '/../../../actions/ace/ac_get_data_apar.php');
             currentPage++;
 
             $.ajax({
-                url: 'actions/ace/ac_get_data_apar.php',
+                url: 'actions/machining/ac_get_data_hydrant.php',
                 type: 'GET',
                 data: { p: currentPage, limit: 12, q: searchQuery },
                 dataType: 'json',
@@ -520,7 +519,7 @@ include(__DIR__ . '/../../../actions/ace/ac_get_data_apar.php');
 
         // Back to Top Logic
         const backToTop = $('#back-to-top');
-        $(window).scroll(function () {
+        $(window).scroll(function() {
             if ($(window).scrollTop() > 300) {
                 backToTop.addClass('show');
             } else {
@@ -528,7 +527,7 @@ include(__DIR__ . '/../../../actions/ace/ac_get_data_apar.php');
             }
         });
 
-        backToTop.on('click', function () {
+        backToTop.on('click', function() {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         });
     });

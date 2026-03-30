@@ -113,7 +113,7 @@
                         <a href="?page=dashboard">E-Checksheet</a>
                     </li>
                     <li class="breadcrumb-item active" aria-current="page">
-                        All list APAR
+                        All list Hydrant
                     </li>
                 </ol>
             </nav>
@@ -165,7 +165,7 @@
         <div class="col-md-12">
             <div class="card">
                 <div class="card-header">
-                    <h4 class="card-title mb-0">APAR Inventory List</h4>
+                    <h4 class="card-title mb-0">Hydrant Inventory List</h4>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
@@ -176,8 +176,6 @@
                                     <th>Code</th>
                                     <th>Area</th>
                                     <th>Location</th>
-                                    <th>Weight</th>
-                                    <th>Exp Date</th>
                                     <th>Status</th>
                                     <th>Action</th>
                                 </tr>
@@ -204,7 +202,7 @@
             pageLength: 10,
             responsive: true,
             ajax: {
-                url: 'actions/ac_all_apar.php',
+                url: 'actions/ac_all_hydrant.php',
                 dataSrc: '',
                 data: function (d) {
                     d.area = $('#filter-area').val();
@@ -222,28 +220,6 @@
                 { data: 'code' },
                 { data: 'area' },
                 { data: 'location' },
-                {
-                    data: 'weight',
-                    render: function (data) {
-                        return data ? data + ' Kg' : '-';
-                    }
-                },
-                {
-                    data: 'expired_date',
-                    render: function (data) {
-                        if (!data) return '-';
-
-                        const date = new Date(data);
-
-                        const options = {
-                            day: 'numeric',
-                            month: 'long',
-                            year: 'numeric'
-                        };
-
-                        return date.toLocaleDateString('id-ID', options);
-                    }
-                },
                 {
                     data: 'status',
                     render: function (data) {
@@ -292,7 +268,7 @@
         // View action (placeholder)
         $('#all-apar-table').on('click', '.btn-view', function () {
             const id = $(this).data('id');
-            alert('Viewing details for APAR ID: ' + id);
+            alert('Viewing details for Hydrant ID: ' + id);
         });
 
         // Back to Top Logic

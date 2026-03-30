@@ -288,7 +288,7 @@ include(__DIR__ . '/../../../actions/office/ac_get_data_apar.php');
 
     <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
         <div>
-            <h3 class="fw-bold mb-3">APAR Management - Office</h3>
+            <h3 class="fw-bold mb-3">apar Management - Office</h3>
         </div>
         <div class="ms-md-auto py-2 py-md-0 d-flex gap-2">
             <div class="dropdown" id="selected-actions-btn">

@@ -25,8 +25,6 @@ $sql = "SELECT
             code,
             location,
             area,
-            weight,
-            expired_date,
             status,
             type,
             last_inspection_date

@@ -12,10 +12,10 @@ $params = [];
 
 if ($search !== "") {
     $where_search = " AND (
-        a.code LIKE ? OR 
-        a.location LIKE ? OR 
-        a.type LIKE ? OR 
-        CAST(a.last_inspection_date AS VARCHAR) LIKE ?
+        h.code LIKE ? OR 
+        h.location LIKE ? OR 
+        h.type LIKE ? OR 
+        CAST(h.last_inspection_date AS VARCHAR) LIKE ?
     )";
     $search_param = "%$search%";
     $params = [$search_param, $search_param, $search_param, $search_param];
@@ -31,9 +31,9 @@ $sql = "SELECT
             type,
             status,
             last_inspection_date as last_inspection
-        FROM [apar].[dbo].[hydrants] a
-        WHERE a.area = 'Ace' $where_search
-        ORDER BY a.code ASC
+        FROM [apar].[dbo].[hydrants] h
+        WHERE h.area = 'Machining' $where_search
+        ORDER BY h.code ASC
         OFFSET ? ROWS
         FETCH NEXT ? ROWS ONLY";
 

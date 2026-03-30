@@ -1,18 +1,17 @@
 <?php
-$area = 'Ace';
-include(__DIR__ . '/../../../actions/ace/ac_get_data_apar.php');
+include(__DIR__ . '/../../../actions/office/ac_get_data_hydrant.php');
 ?>
 
 <div class="page-inner">
     <style>
-        .apar-card-container {
+        .hydrant-card-container {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 20px;
             padding: 20px 0;
         }
 
-        .apar-card {
+        .hydrant-card {
             background: #1a2035;
             border-radius: 12px;
             padding: 15px;
@@ -27,13 +26,13 @@ include(__DIR__ . '/../../../actions/ace/ac_get_data_apar.php');
             align-items: center;
         }
 
-        .apar-card:hover {
+        .hydrant-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
             border-color: #3498db;
         }
 
-        .apar-card.selected {
+        .hydrant-card.selected {
             border: 2px solid #3498db;
             background: #1d2b4a;
         }
@@ -72,7 +71,7 @@ include(__DIR__ . '/../../../actions/ace/ac_get_data_apar.php');
             transform: scale(1.1);
         }
 
-        .apar-qr-placeholder {
+        .hydrant-qr-placeholder {
             background: #fff;
             padding: 8px;
             border-radius: 8px;
@@ -110,26 +109,26 @@ include(__DIR__ . '/../../../actions/ace/ac_get_data_apar.php');
             color: #fff;
         }
 
-        .apar-info {
+        .hydrant-info {
             text-align: center;
             width: 100%;
             margin-bottom: 15px;
         }
 
-        .apar-code {
+        .hydrant-code {
             font-size: 1.2rem;
             font-weight: 800;
             margin-bottom: 5px;
             color: #fff;
         }
 
-        .apar-location {
+        .hydrant-location {
             color: #a0a0a0;
             font-size: 0.85rem;
             margin-bottom: 10px;
         }
 
-        .apar-details {
+        .hydrant-details {
             font-size: 0.8rem;
             color: #ddd;
             line-height: 1.4;
@@ -241,7 +240,7 @@ include(__DIR__ . '/../../../actions/ace/ac_get_data_apar.php');
 
         /* Responsive optimizations */
         @media (max-width: 576px) {
-            .apar-card-container {
+            .hydrant-card-container {
                 grid-template-columns: repeat(auto-fill, minmax(100%, 1fr));
                 gap: 15px;
             }
@@ -289,7 +288,7 @@ include(__DIR__ . '/../../../actions/ace/ac_get_data_apar.php');
 
     <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
         <div>
-            <h3 class="fw-bold mb-3">apar Management - ACE</h3>
+            <h3 class="fw-bold mb-3">Hydrant Management - Office</h3>
         </div>
         <div class="ms-md-auto py-2 py-md-0 d-flex gap-2">
             <div class="dropdown" id="selected-actions-btn">
@@ -318,32 +317,33 @@ include(__DIR__ . '/../../../actions/ace/ac_get_data_apar.php');
             <i class="fas fa-search search-icon"></i>
             <input type="text" id="search-input" class="search-input" placeholder="Search code, location, type...">
         </div>
-        <div id="item-count" class="text-white small">Showing <?php echo count($apar_data); ?> Items</div>
+        <div id="item-count" class="text-white small">Showing <?php echo count($hydrant_data); ?> Items</div>
     </div>
 
-    <div id="apar-container" class="apar-card-container">
-        <?php if (empty($apar_data)): ?>
+    <div id="hydrant-container" class="hydrant-card-container">
+        <?php if (empty($hydrant_data)): ?>
             <div id="no-data-msg" class="text-center w-100 py-5"
-                style="grid-column: 1 / -1; color: #a0a0a0; font-size: 1.2rem;">Data tidak ditemukan</div>
+                style="grid-column: 1 / -1; color: #a0a0a0; font-size: 1.2rem;">Data tidak
+                ditemukan</div>
         <?php else: ?>
-            <?php foreach ($apar_data as $item): ?>
-                <?php $statusClass = $item['status'] === 'Good' ? 'status-ok' : 'status-abnormal'; ?>
-                <div class="apar-card" data-id="<?php echo $item['id']; ?>">
+            <?php foreach ($hydrant_data as $item): ?>
+                <?php $statusClass = ($item['status'] === 'OK' || $item['status'] === 'Good') ? 'status-ok' : 'status-abnormal'; ?>
+                <div class="hydrant-card" data-id="<?php echo $item['id']; ?>">
                     <input type="checkbox" class="card-checkbox item-checkbox">
                     <button class="delete-btn" title="Delete"><i class="fas fa-trash"></i></button>
 
-                    <div class="apar-qr-placeholder">
+                    <div class="hydrant-qr-placeholder">
                         <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=<?php echo $item['code']; ?>"
                             alt="QR Code" class="qr-img">
                     </div>
 
-                    <div class="apar-info">
+                    <div class="hydrant-info">
                         <div class="status-badge <?php echo $statusClass; ?>"><?php echo $item['status']; ?></div>
-                        <div class="apar-code"><?php echo $item['code']; ?></div>
-                        <div class="apar-location">
+                        <div class="hydrant-code"><?php echo $item['code']; ?></div>
+                        <div class="hydrant-location">
                             <i class="fas fa-map-marker-alt"></i> <?php echo $item['location']; ?>
                         </div>
-                        <div class="apar-details text-left">
+                        <div class="hydrant-details text-left">
                             <strong>Type:</strong> <?php echo $item['type'] ?: 'N/A'; ?><br>
                             <strong>Last Insp:</strong> <?php echo $item['last_inspection']; ?>
                         </div>
@@ -374,7 +374,7 @@ include(__DIR__ . '/../../../actions/ace/ac_get_data_apar.php');
     $(document).ready(function () {
         let currentPage = 1;
         let isLoading = false;
-        let hasMore = <?php echo count($apar_data) >= 12 ? 'true' : 'false'; ?>;
+        let hasMore = <?php echo count($hydrant_data) >= 12 ? 'true' : 'false'; ?>;
         let searchQuery = "";
         let searchTimeout;
 
@@ -388,8 +388,8 @@ include(__DIR__ . '/../../../actions/ace/ac_get_data_apar.php');
         }
 
         // Use event delegation for cards and checkboxes
-        $('#apar-container').on('change', '.item-checkbox', function () {
-            const card = $(this).closest('.apar-card');
+        $('#hydrant-container').on('change', '.item-checkbox', function () {
+            const card = $(this).closest('.hydrant-card');
             if ($(this).is(':checked')) {
                 card.addClass('selected');
             } else {
@@ -399,7 +399,7 @@ include(__DIR__ . '/../../../actions/ace/ac_get_data_apar.php');
             toggleSelectedActions();
         });
 
-        $('#apar-container').on('click', '.apar-card', function (e) {
+        $('#hydrant-container').on('click', '.hydrant-card', function (e) {
             if ($(e.target).closest('.item-checkbox, .delete-btn, .btn-action').length === 0) {
                 const checkbox = $(this).find('.item-checkbox');
                 checkbox.prop('checked', !checkbox.is(':checked')).trigger('change');
@@ -414,7 +414,7 @@ include(__DIR__ . '/../../../actions/ace/ac_get_data_apar.php');
         $('#print-qr-selected').on('click', function (e) {
             e.preventDefault();
             const selectedIds = $('.item-checkbox:checked').map(function () {
-                return $(this).closest('.apar-card').data('id');
+                return $(this).closest('.hydrant-card').data('id');
             }).get();
             alert('Printing QR Code for IDs: ' + selectedIds.join(', '));
         });
@@ -425,29 +425,29 @@ include(__DIR__ . '/../../../actions/ace/ac_get_data_apar.php');
             searchTimeout = setTimeout(function () {
                 currentPage = 0; // Will be incremented to 1 in loadMore
                 hasMore = true;
-                $('#apar-container').empty();
+                $('#hydrant-container').empty();
                 loadMore();
             }, 300);
         });
 
         function createCardHtml(item) {
-            const statusClass = item.status === 'OK' ? 'status-ok' : 'status-abnormal';
+            const statusClass = (item.status === 'OK' || item.status === 'Good') ? 'status-ok' : 'status-abnormal';
             return `
-                <div class="apar-card" data-id="${item.id}">
+                <div class="hydrant-card" data-id="${item.id}">
                     <input type="checkbox" class="card-checkbox item-checkbox">
                     <button class="delete-btn" title="Delete"><i class="fas fa-trash"></i></button>
                     
-                    <div class="apar-qr-placeholder">
+                    <div class="hydrant-qr-placeholder">
                         <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${item.code}" alt="QR Code" class="qr-img">
                     </div>
 
-                    <div class="apar-info">
+                    <div class="hydrant-info">
                         <div class="status-badge ${statusClass}">${item.status}</div>
-                        <div class="apar-code">${item.code}</div>
-                        <div class="apar-location">
+                        <div class="hydrant-code">${item.code}</div>
+                        <div class="hydrant-location">
                             <i class="fas fa-map-marker-alt"></i> ${item.location}
                         </div>
-                        <div class="apar-details text-left">
+                        <div class="hydrant-details text-left">
                             <strong>Type:</strong> ${item.type || 'N/A'}<br>
                             <strong>Last Insp:</strong> ${item.last_inspection}
                         </div>
@@ -469,7 +469,7 @@ include(__DIR__ . '/../../../actions/ace/ac_get_data_apar.php');
             currentPage++;
 
             $.ajax({
-                url: 'actions/ace/ac_get_data_apar.php',
+                url: 'actions/office/ac_get_data_hydrant.php',
                 type: 'GET',
                 data: { p: currentPage, limit: 12, q: searchQuery },
                 dataType: 'json',
@@ -477,11 +477,11 @@ include(__DIR__ . '/../../../actions/ace/ac_get_data_apar.php');
                     if (data && data.length > 0) {
                         $('#no-data-msg').remove();
                         data.forEach(item => {
-                            $('#apar-container').append(createCardHtml(item));
+                            $('#hydrant-container').append(createCardHtml(item));
                         });
 
                         // Update "Showing X Items" count
-                        const currentCount = $('.apar-card').length;
+                        const currentCount = $('.hydrant-card').length;
                         $('#item-count').text(`Showing ${currentCount} Items`);
 
                         if (data.length < 12) {
@@ -490,7 +490,7 @@ include(__DIR__ . '/../../../actions/ace/ac_get_data_apar.php');
                     } else {
                         hasMore = false;
                         if (currentPage === 1) {
-                            $('#apar-container').html('<div id="no-data-msg" class="text-center w-100 py-5" style="grid-column: 1 / -1; color: #a0a0a0; font-size: 1.2rem;">Data tidak ditemukan</div>');
+                            $('#hydrant-container').html('<div id="no-data-msg" class="text-center w-100 py-5" style="grid-column: 1 / -1; color: #a0a0a0; font-size: 1.2rem;">Data tidak ditemukan</div>');
                             $('#item-count').text(`Showing 0 Items`);
                         }
                     }
@@ -520,7 +520,7 @@ include(__DIR__ . '/../../../actions/ace/ac_get_data_apar.php');
 
         // Back to Top Logic
         const backToTop = $('#back-to-top');
-        $(window).scroll(function () {
+        $(window).scroll(function() {
             if ($(window).scrollTop() > 300) {
                 backToTop.addClass('show');
             } else {
@@ -528,7 +528,7 @@ include(__DIR__ . '/../../../actions/ace/ac_get_data_apar.php');
             }
         });
 
-        backToTop.on('click', function () {
+        backToTop.on('click', function() {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         });
     });

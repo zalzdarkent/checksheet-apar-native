@@ -32,7 +32,7 @@ $sql = "SELECT
             status,
             last_inspection_date as last_inspection
         FROM [apar].[dbo].[hydrants] a
-        WHERE a.area = 'Ace' $where_search
+        WHERE a.area = 'Disa' $where_search
         ORDER BY a.code ASC
         OFFSET ? ROWS
         FETCH NEXT ? ROWS ONLY";
@@ -52,7 +52,7 @@ if ($result !== false) {
 }
 
 // Only echo JSON if hit directly
-if (basename($_SERVER['PHP_SELF']) == 'ac_get_data_hydrant.php') {
+if (basename($_SERVER['PHP_SELF']) == 'ac_get_data_hydrants.php') {
     header('Content-Type: application/json');
     echo json_encode($hydrant_data);
 }
