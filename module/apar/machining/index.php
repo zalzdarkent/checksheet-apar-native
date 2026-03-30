@@ -326,13 +326,13 @@ include(__DIR__ . '/../../../actions/machining/ac_get_data_apar.php');
                 ditemukan</div>
         <?php else: ?>
             <?php foreach ($apar_data as $item): ?>
-                <?php $statusClass = $item['status'] === 'OK' ? 'status-ok' : 'status-abnormal'; ?>
+                <?php $statusClass = ($item['status'] === 'OK' || $item['status'] === 'Good') ? 'status-ok' : 'status-abnormal'; ?>
                 <div class="apar-card" data-id="<?php echo $item['id']; ?>">
                     <input type="checkbox" class="card-checkbox item-checkbox">
                     <button class="delete-btn" title="Delete"><i class="fas fa-trash"></i></button>
 
                     <div class="apar-qr-placeholder">
-                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=<?php echo $item['code']; ?>"
+                        <img src="actions/qrcode/generate.php?data=<?php echo $item['code']; ?>"
                             alt="QR Code" class="qr-img">
                     </div>
 
@@ -349,7 +349,7 @@ include(__DIR__ . '/../../../actions/machining/ac_get_data_apar.php');
                     </div>
 
                     <div class="card-footer-actions">
-                        <button class="btn btn-info btn-action" title="View Details"><i class="fas fa-eye"></i></button>
+                        <a href="?page=apar-detail&id=<?php echo $item['id']; ?>" class="btn btn-info btn-action" title="View Details"><i class="fas fa-eye"></i></a>
                         <button class="btn btn-warning btn-action" title="Print QR"><i class="fas fa-print"></i></button>
                     </div>
                 </div>
@@ -430,14 +430,14 @@ include(__DIR__ . '/../../../actions/machining/ac_get_data_apar.php');
         });
 
         function createCardHtml(item) {
-            const statusClass = item.status === 'OK' ? 'status-ok' : 'status-abnormal';
+            const statusClass = (item.status === 'OK' || item.status === 'Good') ? 'status-ok' : 'status-abnormal';
             return `
                 <div class="apar-card" data-id="${item.id}">
                     <input type="checkbox" class="card-checkbox item-checkbox">
                     <button class="delete-btn" title="Delete"><i class="fas fa-trash"></i></button>
                     
                     <div class="apar-qr-placeholder">
-                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${item.code}" alt="QR Code" class="qr-img">
+                        <img src="actions/qrcode/generate.php?data=${item.code}" alt="QR Code" class="qr-img">
                     </div>
 
                     <div class="apar-info">
@@ -453,7 +453,7 @@ include(__DIR__ . '/../../../actions/machining/ac_get_data_apar.php');
                     </div>
 
                     <div class="card-footer-actions">
-                        <button class="btn btn-info btn-action" title="View Details"><i class="fas fa-eye"></i></button>
+                        <a href="?page=apar-detail&id=${item.id}" class="btn btn-info btn-action" title="View Details"><i class="fas fa-eye"></i></a>
                         <button class="btn btn-warning btn-action" title="Print QR"><i class="fas fa-print"></i></button>
                     </div>
                 </div>

@@ -320,7 +320,7 @@ include(__DIR__ . '/../../../actions/machining/ac_get_data_hydrant.php');
         <div id="item-count" class="text-white small">Showing <?php echo count($hydrant_data); ?> Items</div>
     </div>
 
-    <div id="apar-container" class="apar-card-container">
+    <div id="hydrant-container" class="apar-card-container">
         <?php if (empty($hydrant_data)): ?>
             <div id="no-data-msg" class="text-center w-100 py-5" style="grid-column: 1 / -1; color: #a0a0a0; font-size: 1.2rem;">Data tidak
                 ditemukan</div>
@@ -332,7 +332,7 @@ include(__DIR__ . '/../../../actions/machining/ac_get_data_hydrant.php');
                     <button class="delete-btn" title="Delete"><i class="fas fa-trash"></i></button>
 
                     <div class="apar-qr-placeholder">
-                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=<?php echo $item['code']; ?>"
+                        <img src="actions/qrcode/generate.php?data=<?php echo $item['code']; ?>"
                             alt="QR Code" class="qr-img">
                     </div>
 
@@ -349,7 +349,7 @@ include(__DIR__ . '/../../../actions/machining/ac_get_data_hydrant.php');
                     </div>
 
                     <div class="card-footer-actions">
-                        <button class="btn btn-info btn-action" title="View Details"><i class="fas fa-eye"></i></button>
+                        <a href="?page=hydrant-detail&id=<?php echo $item['id']; ?>" class="btn btn-info btn-action" title="View Details"><i class="fas fa-eye"></i></a>
                         <button class="btn btn-warning btn-action" title="Print QR"><i class="fas fa-print"></i></button>
                     </div>
                 </div>
@@ -424,7 +424,7 @@ include(__DIR__ . '/../../../actions/machining/ac_get_data_hydrant.php');
             searchTimeout = setTimeout(function() {
                 currentPage = 0; // Will be incremented to 1 in loadMore
                 hasMore = true;
-                $('#apar-container').empty();
+                $('#hydrant-container').empty();
                 loadMore();
             }, 300);
         });
@@ -437,7 +437,7 @@ include(__DIR__ . '/../../../actions/machining/ac_get_data_hydrant.php');
                     <button class="delete-btn" title="Delete"><i class="fas fa-trash"></i></button>
                     
                     <div class="apar-qr-placeholder">
-                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${item.code}" alt="QR Code" class="qr-img">
+                        <img src="actions/qrcode/generate.php?data=${item.code}" alt="QR Code" class="qr-img">
                     </div>
 
                     <div class="apar-info">
@@ -453,7 +453,7 @@ include(__DIR__ . '/../../../actions/machining/ac_get_data_hydrant.php');
                     </div>
 
                     <div class="card-footer-actions">
-                        <button class="btn btn-info btn-action" title="View Details"><i class="fas fa-eye"></i></button>
+                        <a href="?page=hydrant-detail&id=${item.id}" class="btn btn-info btn-action" title="View Details"><i class="fas fa-eye"></i></a>
                         <button class="btn btn-warning btn-action" title="Print QR"><i class="fas fa-print"></i></button>
                     </div>
                 </div>
@@ -476,7 +476,7 @@ include(__DIR__ . '/../../../actions/machining/ac_get_data_hydrant.php');
                     if (data && data.length > 0) {
                         $('#no-data-msg').remove();
                         data.forEach(item => {
-                            $('#apar-container').append(createCardHtml(item));
+                            $('#hydrant-container').append(createCardHtml(item));
                         });
 
                         // Update "Showing X Items" count

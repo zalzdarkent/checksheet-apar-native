@@ -332,7 +332,7 @@ include(__DIR__ . '/../../../actions/disa/ac_get_data_hydrant.php');
                     <button class="delete-btn" title="Delete"><i class="fas fa-trash"></i></button>
 
                     <div class="hydrant-qr-placeholder">
-                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=<?php echo $item['code']; ?>"
+                        <img src="actions/qrcode/generate.php?data=<?php echo $item['code']; ?>"
                             alt="QR Code" class="qr-img">
                     </div>
 
@@ -349,7 +349,7 @@ include(__DIR__ . '/../../../actions/disa/ac_get_data_hydrant.php');
                     </div>
 
                     <div class="card-footer-actions">
-                        <button class="btn btn-info btn-action" title="View Details"><i class="fas fa-eye"></i></button>
+                        <a href="?page=hydrant-detail&id=<?php echo $item['id']; ?>" class="btn btn-info btn-action" title="View Details"><i class="fas fa-eye"></i></a>
                         <button class="btn btn-warning btn-action" title="Print QR"><i class="fas fa-print"></i></button>
                     </div>
                 </div>
@@ -437,7 +437,7 @@ include(__DIR__ . '/../../../actions/disa/ac_get_data_hydrant.php');
                     <button class="delete-btn" title="Delete"><i class="fas fa-trash"></i></button>
                     
                     <div class="hydrant-qr-placeholder">
-                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${item.code}" alt="QR Code" class="qr-img">
+                        <img src="actions/qrcode/generate.php?data=${item.code}" alt="QR Code" class="qr-img">
                     </div>
 
                     <div class="hydrant-info">
@@ -453,7 +453,7 @@ include(__DIR__ . '/../../../actions/disa/ac_get_data_hydrant.php');
                     </div>
 
                     <div class="card-footer-actions">
-                        <button class="btn btn-info btn-action" title="View Details"><i class="fas fa-eye"></i></button>
+                        <a href="?page=hydrant-detail&id=${item.id}" class="btn btn-info btn-action" title="View Details"><i class="fas fa-eye"></i></a>
                         <button class="btn btn-warning btn-action" title="Print QR"><i class="fas fa-print"></i></button>
                     </div>
                 </div>

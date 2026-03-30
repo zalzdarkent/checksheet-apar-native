@@ -232,9 +232,9 @@
                     orderable: false,
                     render: function (data) {
                         return `
-                            <button class="btn btn-info btn-xs btn-view" data-id="${data}">
+                            <a href="?page=hydrant-detail&id=${data}" class="btn btn-info btn-xs">
                                 <i class="fas fa-eye"></i> View
-                            </button>
+                            </a>
                         `;
                     }
                 }
@@ -265,11 +265,6 @@
             }
         });
 
-        // View action (placeholder)
-        $('#all-apar-table').on('click', '.btn-view', function () {
-            const id = $(this).data('id');
-            alert('Viewing details for Hydrant ID: ' + id);
-        });
 
         // Back to Top Logic
         const backToTop = $('#back-to-top');
