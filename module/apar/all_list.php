@@ -5,47 +5,66 @@
             padding: 15px;
             border-radius: 8px;
             margin-bottom: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
             display: flex;
             flex-wrap: wrap;
             align-items: center;
             gap: 15px;
         }
+
         .filter-group {
             display: flex;
             align-items: center;
             gap: 10px;
         }
+
         .filter-label {
             font-weight: 600;
             margin-bottom: 0;
             white-space: nowrap;
         }
+
         .form-control-sm {
             height: 35px;
         }
+
         .btn-action-group {
             margin-left: auto;
             display: flex;
             gap: 8px;
         }
+
         .status-badge {
             padding: 5px 12px;
             border-radius: 4px;
             font-weight: bold;
             font-size: 0.75rem;
         }
-        .status-ok { background: #27ae60; color: #fff; }
-        .status-abnormal { background: #e74c3c; color: #fff; }
-        
-        .breadcrumb-item a { color: #3498db; }
-        .breadcrumb-item.active { color: #666; }
-        
+
+        .status-ok {
+            background: #27ae60;
+            color: #fff;
+        }
+
+        .status-abnormal {
+            background: #e74c3c;
+            color: #fff;
+        }
+
+        .breadcrumb-item a {
+            color: #3498db;
+        }
+
+        .breadcrumb-item.active {
+            color: #666;
+        }
+
         /* Dark mode support if applicable */
         [data-background-color="dark"] .filter-bar {
             background: #1a2035;
             color: #fff;
         }
+
         [data-background-color="dark"] .filter-label {
             color: #fff;
         }
@@ -125,7 +144,8 @@
         </div>
         <div class="filter-group">
             <label class="filter-label">Search:</label>
-            <input type="text" id="filter-search" class="form-control form-control-sm" placeholder="Code/Location..." style="width: 200px;">
+            <input type="text" id="filter-search" class="form-control form-control-sm" placeholder="Code/Location..."
+                style="width: 200px;">
         </div>
         <button id="btn-filter" class="btn btn-primary btn-sm">
             <i class="fas fa-filter"></i> Filter
@@ -186,15 +206,15 @@
             ajax: {
                 url: 'actions/ac_all_apar.php',
                 dataSrc: '',
-                data: function(d) {
+                data: function (d) {
                     d.area = $('#filter-area').val();
                     d.q = $('#filter-search').val();
                     d.ajax = 1;
                 }
             },
             columns: [
-                { 
-                    data: null, 
+                {
+                    data: null,
                     render: function (data, type, row, meta) {
                         return meta.row + 1;
                     }
@@ -202,24 +222,39 @@
                 { data: 'code' },
                 { data: 'area' },
                 { data: 'location' },
-                { 
+                {
                     data: 'weight',
-                    render: function(data) {
+                    render: function (data) {
                         return data ? data + ' Kg' : '-';
                     }
                 },
-                { data: 'expired_date' },
-                { 
+                {
+                    data: 'expired_date',
+                    render: function (data) {
+                        if (!data) return '-';
+
+                        const date = new Date(data);
+
+                        const options = {
+                            day: 'numeric',
+                            month: 'long',
+                            year: 'numeric'
+                        };
+
+                        return date.toLocaleDateString('id-ID', options);
+                    }
+                },
+                {
                     data: 'status',
-                    render: function(data) {
+                    render: function (data) {
                         const badgeClass = data === 'OK' ? 'status-ok' : 'status-abnormal';
                         return `<span class="status-badge ${badgeClass}">${data}</span>`;
                     }
                 },
-                { 
+                {
                     data: 'id',
                     orderable: false,
-                    render: function(data) {
+                    render: function (data) {
                         return `
                             <button class="btn btn-info btn-xs btn-view" data-id="${data}">
                                 <i class="fas fa-eye"></i> View
@@ -233,36 +268,36 @@
                 processing: '<div class="spinner-border text-primary" role="status"></div>'
             },
             dom: "<'row'<'col-sm-12 col-md-6'l><'col-sm-12 col-md-6'f>>" +
-                 "<'row'<'col-sm-12'tr>>" +
-                 "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
+                "<'row'<'col-sm-12'tr>>" +
+                "<'row'<'col-sm-12 col-md-5'i><'col-sm-12 col-md-7'p>>",
         });
 
         // Custom filter button trigger
-        $('#btn-filter').on('click', function() {
+        $('#btn-filter').on('click', function () {
             table.ajax.reload();
         });
 
         // Also trigger on area change
-        $('#filter-area').on('change', function() {
+        $('#filter-area').on('change', function () {
             table.ajax.reload();
         });
 
         // Handle Search input Enter key
-        $('#filter-search').on('keypress', function(e) {
-            if(e.which == 13) {
+        $('#filter-search').on('keypress', function (e) {
+            if (e.which == 13) {
                 table.ajax.reload();
             }
         });
 
         // View action (placeholder)
-        $('#report-table').on('click', '.btn-view', function() {
+        $('#report-table').on('click', '.btn-view', function () {
             const id = $(this).data('id');
             alert('Viewing details for APAR ID: ' + id);
         });
 
         // Back to Top Logic
         const backToTop = $('#back-to-top');
-        $(window).scroll(function() {
+        $(window).scroll(function () {
             if ($(window).scrollTop() > 300) {
                 backToTop.addClass('show');
             } else {
@@ -270,7 +305,7 @@
             }
         });
 
-        backToTop.on('click', function() {
+        backToTop.on('click', function () {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         });
     });
