@@ -58,6 +58,9 @@ include("components/fragments/head.php");
                 $routes = [
                     'dashboard' => 'module/md_dashboard.php',
                     'apar-ace' => 'module/ace/index.php',
+                    'apar-machining' => 'module/machining/index.php',
+                    'apar-office' => 'module/office/index.php',
+                    'apar-disa' => 'module/disa/index.php',
                     'hydrant-ace' => 'module/hydrant/ace/index.php',
                     'user-management' => 'module/user/index.php',
                     'add-user' => 'module/user/create.php',

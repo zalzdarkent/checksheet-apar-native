@@ -127,7 +127,7 @@
                     <div class="quick-actions-scroll scrollbar-outer">
                         <div class="quick-actions-items">
                             <div class="row m-0">
-                                <a class="col-6 col-md-6 p-0" href="#">
+                                <a class="col-6 col-md-6 p-0" href="?page=apar-office">
                                     <div class="quick-actions-item">
                                         <div class="avatar-item bg-danger rounded-circle">
                                             <i class="far fa-building"></i>
@@ -135,7 +135,7 @@
                                         <span class="text">Office</span>
                                     </div>
                                 </a>
-                                <a class="col-6 col-md-6 p-0" href="#">
+                                <a class="col-6 col-md-6 p-0" href="?page=apar-disa">
                                     <div class="quick-actions-item">
                                         <div class="avatar-item bg-warning rounded-circle">
                                             <i class="fas fa-building"></i>
@@ -143,7 +143,7 @@
                                         <span class="text">Disa</span>
                                     </div>
                                 </a>
-                                <a class="col-6 col-md-6 p-0" href="#">
+                                <a class="col-6 col-md-6 p-0" href="?page=apar-machining">
                                     <div class="quick-actions-item">
                                         <div class="avatar-item bg-info rounded-circle">
                                             <i class="fas fa-building"></i>
@@ -151,7 +151,7 @@
                                         <span class="text">Machining</span>
                                     </div>
                                 </a>
-                                <a class="col-6 col-md-6 p-0" href="#">
+                                <a class="col-6 col-md-6 p-0" href="?page=apar-ace">
                                     <div class="quick-actions-item">
                                         <div class="avatar-item bg-success rounded-circle">
                                             <i class="fas fa-building"></i>
