@@ -147,6 +147,9 @@ $statusClass = ($apar['status'] === 'OK' || $apar['status'] === 'Good') ? 'statu
         <a href="?page=apar-inspect&id=<?php echo $apar['id']; ?>" class="btn btn-inspeksi">
             <i class="fas fa-clipboard-check"></i> Mulai Inspeksi
         </a>
+        <a href="print_qr.php?type=apar&ids=<?php echo $apar['id']; ?>" target="_blank" class="btn btn-inspeksi bg-warning text-dark border-0">
+            <i class="fas fa-print"></i> Print QR
+        </a>
 
         <div class="d-block">
             <div class="status-badge <?php echo $statusClass; ?>">

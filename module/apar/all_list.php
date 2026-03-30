@@ -259,6 +259,9 @@
                             <a href="?page=apar-detail&id=${data}" class="btn btn-info btn-xs">
                                 <i class="fas fa-eye"></i> View
                             </a>
+                            <button class="btn btn-warning btn-xs btn-print-qr" data-id="${data}">
+                                <i class="fas fa-print"></i> Print
+                            </button>
                         `;
                     }
                 }
@@ -289,7 +292,11 @@
             }
         });
 
-        // View action handled by <a> link
+        // Print QR Code
+        $('#all-apar-table').on('click', '.btn-print-qr', function () {
+            const id = $(this).data('id');
+            window.open('print_qr.php?type=apar&ids=' + id, '_blank');
+        });
 
         // Back to Top Logic
         const backToTop = $('#back-to-top');

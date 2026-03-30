@@ -147,6 +147,9 @@ $statusClass = ($hydrant['status'] === 'OK' || $hydrant['status'] === 'Good') ? 
         <a href="?page=hydrant-inspect&id=<?php echo $hydrant['id']; ?>" class="btn btn-inspeksi">
             <i class="fas fa-clipboard-check"></i> Mulai Inspeksi
         </a>
+        <a href="print_qr.php?type=hydrant&ids=<?php echo $hydrant['id']; ?>" target="_blank" class="btn btn-inspeksi bg-warning text-dark border-0">
+            <i class="fas fa-print"></i> Print QR
+        </a>
 
         <div class="d-block">
             <div class="status-badge <?php echo $statusClass; ?>">

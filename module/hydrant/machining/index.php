@@ -350,7 +350,7 @@ include(__DIR__ . '/../../../actions/machining/ac_get_data_hydrant.php');
 
                     <div class="card-footer-actions">
                         <a href="?page=hydrant-detail&id=<?php echo $item['id']; ?>" class="btn btn-info btn-action" title="View Details"><i class="fas fa-eye"></i></a>
-                        <button class="btn btn-warning btn-action" title="Print QR"><i class="fas fa-print"></i></button>
+                        <button class="btn btn-warning btn-action btn-print-qr" data-id="<?php echo $item['id']; ?>" title="Print QR"><i class="fas fa-print"></i></button>
                     </div>
                 </div>
             <?php endforeach; ?>
@@ -413,9 +413,21 @@ include(__DIR__ . '/../../../actions/machining/ac_get_data_hydrant.php');
         $('#print-qr-selected').on('click', function (e) {
             e.preventDefault();
             const selectedIds = $('.item-checkbox:checked').map(function () {
-                return $(this).closest('.apar-card').data('id');
+                return $(this).closest('.apar-card, .hydrant-card').data('id');
             }).get();
-            alert('Printing QR Code for IDs: ' + selectedIds.join(', '));
+            
+            if (selectedIds.length === 0) {
+                alert('Pilih item terlebih dahulu');
+                return;
+            }
+            
+            window.open('print_qr.php?type=hydrant&ids=' + selectedIds.join(','), '_blank');
+        });
+
+        $('#hydrant-container, #apar-container').on('click', '.btn-print-qr', function (e) {
+            e.stopPropagation();
+            const id = $(this).data('id');
+            window.open('print_qr.php?type=hydrant&ids=' + id, '_blank');
         });
 
         $('#search-input').on('input', function() {
@@ -454,7 +466,7 @@ include(__DIR__ . '/../../../actions/machining/ac_get_data_hydrant.php');
 
                     <div class="card-footer-actions">
                         <a href="?page=hydrant-detail&id=${item.id}" class="btn btn-info btn-action" title="View Details"><i class="fas fa-eye"></i></a>
-                        <button class="btn btn-warning btn-action" title="Print QR"><i class="fas fa-print"></i></button>
+                        <button class="btn btn-warning btn-action btn-print-qr" data-id="${item.id}" title="Print QR"><i class="fas fa-print"></i></button>
                     </div>
                 </div>
             `;
