@@ -1,5 +1,5 @@
 <?php
-include(__DIR__ . '/../../config/db_koneksi.php');
+include(__DIR__ . '/../config/db_koneksi.php');
 
 $area = isset($_GET['area']) ? $_GET['area'] : 'All Areas';
 $search = isset($_GET['q']) ? $_GET['q'] : '';
@@ -30,7 +30,7 @@ $sql = "SELECT
             status,
             type,
             last_inspection_date
-        FROM [apar].[dbo].[apars] a
+        FROM [apar].[dbo].[hydrants] a
         $where_clause
         ORDER BY a.area ASC, a.code ASC";
 
@@ -60,7 +60,7 @@ if ($result !== false) {
 }
 
 // Support both include and direct AJAX
-if (basename($_SERVER['PHP_SELF']) == 'ac_all_apar.php' || isset($_GET['ajax'])) {
+if (basename($_SERVER['PHP_SELF']) == 'ac_all_hydrant.php' || isset($_GET['ajax'])) {
     header('Content-Type: application/json');
     echo json_encode($apar_data);
     exit;

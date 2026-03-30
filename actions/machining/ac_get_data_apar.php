@@ -1,5 +1,5 @@
 <?php
-include(__DIR__ . '/../../../config/db_koneksi.php');
+include(__DIR__ . '/../../config/db_koneksi.php');
 
 $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 12;
 $page = isset($_GET['p']) ? (int)$_GET['p'] : 1;
@@ -33,7 +33,7 @@ $sql = "SELECT
             expired_date,
             last_inspection_date as last_inspection
         FROM [apar].[dbo].[apars] a
-        WHERE a.area = 'Office' $where_search
+        WHERE a.area = 'Machining' $where_search
         ORDER BY a.code ASC
         OFFSET ? ROWS
         FETCH NEXT ? ROWS ONLY";

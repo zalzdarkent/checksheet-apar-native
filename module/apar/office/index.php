@@ -1,5 +1,5 @@
 <?php
-include(__DIR__ . '/../../../actions/apar/office/ac_get_data_apar.php');
+include(__DIR__ . '/../../../actions/office/ac_get_data_apar.php');
 ?>
 
 <div class="page-inner">
@@ -249,6 +249,41 @@ include(__DIR__ . '/../../../actions/apar/office/ac_get_data_apar.php');
                 padding: 10px 15px;
             }
         }
+
+        /* Back to Top Button */
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 45px;
+            height: 45px;
+            background: #3498db;
+            color: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            transition: all 0.3s;
+            opacity: 0;
+            visibility: hidden;
+            border: none;
+            outline: none;
+        }
+
+        .back-to-top.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .back-to-top:hover {
+            background: #2980b9;
+            transform: scale(1.1);
+            color: #fff;
+        }
     </style>
 
     <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
@@ -328,6 +363,11 @@ include(__DIR__ . '/../../../actions/apar/office/ac_get_data_apar.php');
             <span class="sr-only">Loading...</span>
         </div>
     </div>
+
+    <!-- Back to Top Button -->
+    <button id="back-to-top" class="back-to-top" title="Back to Top">
+        <i class="fas fa-arrow-up"></i>
+    </button>
 </div>
 
 <script>
@@ -429,7 +469,7 @@ include(__DIR__ . '/../../../actions/apar/office/ac_get_data_apar.php');
             currentPage++;
 
             $.ajax({
-                url: 'actions/apar/office/ac_get_data_apar.php',
+                url: 'actions/office/ac_get_data_apar.php',
                 type: 'GET',
                 data: { p: currentPage, limit: 12, q: searchQuery },
                 dataType: 'json',
@@ -477,5 +517,19 @@ include(__DIR__ . '/../../../actions/apar/office/ac_get_data_apar.php');
         }, { threshold: 0.1 });
 
         observer.observe(document.getElementById('load-more-sentinel'));
+
+        // Back to Top Logic
+        const backToTop = $('#back-to-top');
+        $(window).scroll(function() {
+            if ($(window).scrollTop() > 300) {
+                backToTop.addClass('show');
+            } else {
+                backToTop.removeClass('show');
+            }
+        });
+
+        backToTop.on('click', function() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
     });
 </script>

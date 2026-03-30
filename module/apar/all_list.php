@@ -49,6 +49,41 @@
         [data-background-color="dark"] .filter-label {
             color: #fff;
         }
+
+        /* Back to Top Button */
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 45px;
+            height: 45px;
+            background: #3498db;
+            color: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            transition: all 0.3s;
+            opacity: 0;
+            visibility: hidden;
+            border: none;
+            outline: none;
+        }
+
+        .back-to-top.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .back-to-top:hover {
+            background: #2980b9;
+            transform: scale(1.1);
+            color: #fff;
+        }
     </style>
 
     <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
@@ -114,7 +149,7 @@
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table id="report-table" class="display table table-striped table-hover table-slim w-100">
+                        <table id="all-apar-table" class="display table table-striped table-hover table-slim w-100">
                             <thead>
                                 <tr>
                                     <th>No</th>
@@ -136,15 +171,20 @@
             </div>
         </div>
     </div>
+
+    <!-- Back to Top Button -->
+    <button id="back-to-top" class="back-to-top" title="Back to Top">
+        <i class="fas fa-arrow-up"></i>
+    </button>
 </div>
 
 <script>
     $(document).ready(function () {
-        const table = $("#report-table").DataTable({
+        const table = $("#all-apar-table").DataTable({
             pageLength: 10,
             responsive: true,
             ajax: {
-                url: 'actions/apar/ac_all_apar.php',
+                url: 'actions/ac_all_apar.php',
                 dataSrc: '',
                 data: function(d) {
                     d.area = $('#filter-area').val();
@@ -218,6 +258,20 @@
         $('#report-table').on('click', '.btn-view', function() {
             const id = $(this).data('id');
             alert('Viewing details for APAR ID: ' + id);
+        });
+
+        // Back to Top Logic
+        const backToTop = $('#back-to-top');
+        $(window).scroll(function() {
+            if ($(window).scrollTop() > 300) {
+                backToTop.addClass('show');
+            } else {
+                backToTop.removeClass('show');
+            }
+        });
+
+        backToTop.on('click', function() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         });
     });
 </script>
