@@ -1,9 +1,8 @@
 <?php
-$area = 'Ace';
-include(__DIR__ . '/../../actions/ace/ac_get_data.php');
+include(__DIR__ . '/../../../actions/apar/machining/ac_get_data_apar.php');
 ?>
 
-<div class="page-inner">
+<div class="page-inner">    
     <style>
         .apar-card-container {
             display: grid;
@@ -100,8 +99,15 @@ include(__DIR__ . '/../../actions/ace/ac_get_data.php');
             margin-bottom: 10px;
         }
 
-        .status-ok { background: #27ae60; color: #fff; }
-        .status-abnormal { background: #e74c3c; color: #fff; }
+        .status-ok {
+            background: #27ae60;
+            color: #fff;
+        }
+
+        .status-abnormal {
+            background: #e74c3c;
+            color: #fff;
+        }
 
         .apar-info {
             text-align: center;
@@ -126,7 +132,7 @@ include(__DIR__ . '/../../actions/ace/ac_get_data.php');
             font-size: 0.8rem;
             color: #ddd;
             line-height: 1.4;
-            border-top: 1px solid rgba(255,255,255,0.1);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
             padding-top: 10px;
             margin-bottom: 15px;
         }
@@ -238,6 +244,7 @@ include(__DIR__ . '/../../actions/ace/ac_get_data.php');
                 grid-template-columns: repeat(auto-fill, minmax(100%, 1fr));
                 gap: 15px;
             }
+
             .action-bar {
                 padding: 10px 15px;
             }
@@ -246,7 +253,7 @@ include(__DIR__ . '/../../actions/ace/ac_get_data.php');
 
     <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
         <div>
-            <h3 class="fw-bold mb-3">APAR Management - ACE</h3>
+            <h3 class="fw-bold mb-3">APAR Management - Machining</h3>
         </div>
         <div class="ms-md-auto py-2 py-md-0 d-flex gap-2">
             <div class="dropdown" id="selected-actions-btn">
@@ -254,8 +261,10 @@ include(__DIR__ . '/../../actions/ace/ac_get_data.php');
                     Selected Actions
                 </button>
                 <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="#" id="print-qr-selected"><i class="fas fa-qrcode"></i> Print QR Code</a></li>
-                    <li><a class="dropdown-item text-danger" href="#" id="delete-selected"><i class="fas fa-trash"></i> Delete Selected</a></li>
+                    <li><a class="dropdown-item" href="#" id="print-qr-selected"><i class="fas fa-qrcode"></i> Print QR
+                            Code</a></li>
+                    <li><a class="dropdown-item text-danger" href="#" id="delete-selected"><i class="fas fa-trash"></i>
+                            Delete Selected</a></li>
                 </ul>
             </div>
             <button class="btn btn-primary btn-round">
@@ -278,16 +287,18 @@ include(__DIR__ . '/../../actions/ace/ac_get_data.php');
 
     <div id="apar-container" class="apar-card-container">
         <?php if (empty($apar_data)): ?>
-            <div id="no-data-msg" class="text-center w-100 py-5" style="grid-column: 1 / -1; color: #a0a0a0; font-size: 1.2rem;">Data tidak ditemukan</div>
+            <div id="no-data-msg" class="text-center w-100 py-5" style="grid-column: 1 / -1; color: #a0a0a0; font-size: 1.2rem;">Data tidak
+                ditemukan</div>
         <?php else: ?>
             <?php foreach ($apar_data as $item): ?>
                 <?php $statusClass = $item['status'] === 'OK' ? 'status-ok' : 'status-abnormal'; ?>
                 <div class="apar-card" data-id="<?php echo $item['id']; ?>">
                     <input type="checkbox" class="card-checkbox item-checkbox">
                     <button class="delete-btn" title="Delete"><i class="fas fa-trash"></i></button>
-                    
+
                     <div class="apar-qr-placeholder">
-                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=<?php echo $item['code']; ?>" alt="QR Code" class="qr-img">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=<?php echo $item['code']; ?>"
+                            alt="QR Code" class="qr-img">
                     </div>
 
                     <div class="apar-info">
@@ -325,7 +336,7 @@ include(__DIR__ . '/../../actions/ace/ac_get_data.php');
         let hasMore = <?php echo count($apar_data) >= 12 ? 'true' : 'false'; ?>;
         let searchQuery = "";
         let searchTimeout;
-        
+
         function toggleSelectedActions() {
             const selectedCount = $('.item-checkbox:checked').length;
             if (selectedCount > 0) {
@@ -336,7 +347,7 @@ include(__DIR__ . '/../../actions/ace/ac_get_data.php');
         }
 
         // Use event delegation for cards and checkboxes
-        $('#apar-container').on('change', '.item-checkbox', function() {
+        $('#apar-container').on('change', '.item-checkbox', function () {
             const card = $(this).closest('.apar-card');
             if ($(this).is(':checked')) {
                 card.addClass('selected');
@@ -347,21 +358,21 @@ include(__DIR__ . '/../../actions/ace/ac_get_data.php');
             toggleSelectedActions();
         });
 
-        $('#apar-container').on('click', '.apar-card', function(e) {
+        $('#apar-container').on('click', '.apar-card', function (e) {
             if ($(e.target).closest('.item-checkbox, .delete-btn, .btn-action').length === 0) {
                 const checkbox = $(this).find('.item-checkbox');
                 checkbox.prop('checked', !checkbox.is(':checked')).trigger('change');
             }
         });
 
-        $('#select-all-checkbox').on('change', function() {
+        $('#select-all-checkbox').on('change', function () {
             const isChecked = $(this).is(':checked');
             $('.item-checkbox').prop('checked', isChecked).trigger('change');
         });
 
-        $('#print-qr-selected').on('click', function(e) {
+        $('#print-qr-selected').on('click', function (e) {
             e.preventDefault();
-            const selectedIds = $('.item-checkbox:checked').map(function() {
+            const selectedIds = $('.item-checkbox:checked').map(function () {
                 return $(this).closest('.apar-card').data('id');
             }).get();
             alert('Printing QR Code for IDs: ' + selectedIds.join(', '));
@@ -411,23 +422,23 @@ include(__DIR__ . '/../../actions/ace/ac_get_data.php');
 
         function loadMore() {
             if (isLoading || !hasMore) return;
-            
+
             isLoading = true;
             $('#loading-spinner').show();
             currentPage++;
 
             $.ajax({
-                url: 'actions/ace/ac_get_data.php',
+                url: 'actions/apar/machining/ac_get_data_apar.php',
                 type: 'GET',
                 data: { p: currentPage, limit: 12, q: searchQuery },
                 dataType: 'json',
-                success: function(data) {
+                success: function (data) {
                     if (data && data.length > 0) {
                         $('#no-data-msg').remove();
                         data.forEach(item => {
                             $('#apar-container').append(createCardHtml(item));
                         });
-                        
+
                         // Update "Showing X Items" count
                         const currentCount = $('.apar-card').length;
                         $('#item-count').text(`Showing ${currentCount} Items`);
@@ -442,15 +453,15 @@ include(__DIR__ . '/../../actions/ace/ac_get_data.php');
                             $('#item-count').text(`Showing 0 Items`);
                         }
                     }
-                    
+
                     if ($('#select-all-checkbox').is(':checked')) {
                         $('.item-checkbox').prop('checked', true).trigger('change');
                     }
                 },
-                error: function(xhr, status, error) {
+                error: function (xhr, status, error) {
                     console.error('Error loading more data:', error);
                 },
-                complete: function() {
+                complete: function () {
                     isLoading = false;
                     $('#loading-spinner').hide();
                 }

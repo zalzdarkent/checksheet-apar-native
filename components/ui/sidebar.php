@@ -82,8 +82,8 @@ $grupHydrantAktif = cekGrupAktif($halamanSekarang, 'hydrant-');
                                     <span class="sub-item">Disa</span>
                                 </a>
                             </li>
-                            <li class="<?= cekMenuAktif($halamanSekarang, 'apar-all') ?>">
-                                <a href="index.php?page=apar-all">
+                            <li class="<?= cekMenuAktif($halamanSekarang, 'apar-all-list') ?>">
+                                <a href="index.php?page=apar-all-list">
                                     <span class="sub-item">All List</span>
                                 </a>
                             </li>
