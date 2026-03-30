@@ -1,5 +1,5 @@
 <?php
-include(__DIR__ . '/../../config/db_koneksi.php');
+include(__DIR__ . '/../config/db_koneksi.php');
 
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 

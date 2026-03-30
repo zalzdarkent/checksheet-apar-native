@@ -169,7 +169,7 @@
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
-                        <table id="all-apar-table" class="display table table-striped table-hover table-slim w-100">
+                        <table id="all-hydrant-table" class="display table table-striped table-hover table-slim w-100">
                             <thead>
                                 <tr>
                                     <th>No</th>
@@ -198,7 +198,7 @@
 
 <script>
     $(document).ready(function () {
-        const table = $("#all-apar-table").DataTable({
+        const table = $("#all-hydrant-table").DataTable({
             pageLength: 10,
             responsive: true,
             ajax: {

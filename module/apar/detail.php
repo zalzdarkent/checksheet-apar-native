@@ -1,5 +1,5 @@
 <?php
-include(__DIR__ . '/../../actions/apar/ac_get_detail.php');
+include(__DIR__ . '/../../actions/ac_get_apar_detail.php');
 
 if (!$apar) {
     echo "<div class='page-inner'><div class='alert alert-danger'>APAR tidak ditemukan atau ID tidak valid.</div></div>";

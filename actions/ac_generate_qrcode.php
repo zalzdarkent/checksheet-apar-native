@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../../assets/vendor/phpqrcode/qrlib.php';
+require_once __DIR__ . '/../assets/vendor/phpqrcode/qrlib.php';
 
 // Get data to encode from URL parameter
 $data = isset($_GET['data']) ? $_GET['data'] : 'https://google.com';

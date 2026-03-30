@@ -333,7 +333,7 @@ include(__DIR__ . '/../../../actions/office/ac_get_data_hydrant.php');
                     <button class="delete-btn" title="Delete"><i class="fas fa-trash"></i></button>
 
                     <div class="hydrant-qr-placeholder">
-                        <img src="actions/qrcode/generate.php?data=<?php echo $item['code']; ?>"
+                        <img src="actions/ac_generate_qrcode.php?data=<?php echo $item['code']; ?>"
                             alt="QR Code" class="qr-img">
                     </div>
 
@@ -438,7 +438,7 @@ include(__DIR__ . '/../../../actions/office/ac_get_data_hydrant.php');
                     <button class="delete-btn" title="Delete"><i class="fas fa-trash"></i></button>
                     
                     <div class="hydrant-qr-placeholder">
-                        <img src="actions/qrcode/generate.php?data=${item.code}" alt="QR Code" class="qr-img">
+                        <img src="actions/ac_generate_qrcode.php?data=${item.code}" alt="QR Code" class="qr-img">
                     </div>
 
                     <div class="hydrant-info">

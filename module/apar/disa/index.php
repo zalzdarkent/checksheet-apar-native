@@ -332,7 +332,7 @@ include(__DIR__ . '/../../../actions/disa/ac_get_data_apar.php');
                     <button class="delete-btn" title="Delete"><i class="fas fa-trash"></i></button>
 
                     <div class="apar-qr-placeholder">
-                        <img src="actions/qrcode/generate.php?data=<?php echo $item['code']; ?>"
+                        <img src="actions/ac_generate_qrcode.php?data=<?php echo $item['code']; ?>"
                             alt="QR Code" class="qr-img">
                     </div>
 
@@ -437,7 +437,7 @@ include(__DIR__ . '/../../../actions/disa/ac_get_data_apar.php');
                     <button class="delete-btn" title="Delete"><i class="fas fa-trash"></i></button>
                     
                     <div class="apar-qr-placeholder">
-                        <img src="actions/qrcode/generate.php?data=${item.code}" alt="QR Code" class="qr-img">
+                        <img src="actions/ac_generate_qrcode.php?data=${item.code}" alt="QR Code" class="qr-img">
                     </div>
 
                     <div class="apar-info">
