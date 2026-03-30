@@ -115,55 +115,6 @@
                     </li>
                 </ul>
             </li>
-            <li class="nav-item topbar-icon dropdown hidden-caret">
-                <a class="nav-link" data-bs-toggle="dropdown" href="#" aria-expanded="false">
-                    <i class="fas fa-layer-group"></i>
-                </a>
-                <div class="dropdown-menu quick-actions animated fadeIn">
-                    <div class="quick-actions-header">
-                        <span class="title mb-1">Quick Actions</span>
-                        <span class="subtitle op-7">Shortcuts</span>
-                    </div>
-                    <div class="quick-actions-scroll scrollbar-outer">
-                        <div class="quick-actions-items">
-                            <div class="row m-0">
-                                <a class="col-6 col-md-6 p-0" href="?page=apar-office">
-                                    <div class="quick-actions-item">
-                                        <div class="avatar-item bg-danger rounded-circle">
-                                            <i class="far fa-building"></i>
-                                        </div>
-                                        <span class="text">Office</span>
-                                    </div>
-                                </a>
-                                <a class="col-6 col-md-6 p-0" href="?page=apar-disa">
-                                    <div class="quick-actions-item">
-                                        <div class="avatar-item bg-warning rounded-circle">
-                                            <i class="fas fa-building"></i>
-                                        </div>
-                                        <span class="text">Disa</span>
-                                    </div>
-                                </a>
-                                <a class="col-6 col-md-6 p-0" href="?page=apar-machining">
-                                    <div class="quick-actions-item">
-                                        <div class="avatar-item bg-info rounded-circle">
-                                            <i class="fas fa-building"></i>
-                                        </div>
-                                        <span class="text">Machining</span>
-                                    </div>
-                                </a>
-                                <a class="col-6 col-md-6 p-0" href="?page=apar-ace">
-                                    <div class="quick-actions-item">
-                                        <div class="avatar-item bg-success rounded-circle">
-                                            <i class="fas fa-building"></i>
-                                        </div>
-                                        <span class="text">ACE</span>
-                                    </div>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </li>
 
             <li class="nav-item topbar-user dropdown hidden-caret">
                 <a class="dropdown-toggle profile-pic" data-bs-toggle="dropdown" href="#" aria-expanded="false">
