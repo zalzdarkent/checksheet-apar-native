@@ -27,10 +27,11 @@ $sql = "SELECT
             area,
             status,
             type,
-            last_inspection_date
-        FROM [apar].[dbo].[hydrants] h   
+            last_inspection_date,
+            is_active
+FROM [apar].[dbo].[hydrants] h
         $where_clause
-        ORDER BY h.area ASC, h.code ASC";
+        ORDER BY h.is_active DESC, h.area ASC, h.code ASC";
 
 $result = sqlsrv_query($koneksi, $sql, $params);
 $hydrant_data = [];

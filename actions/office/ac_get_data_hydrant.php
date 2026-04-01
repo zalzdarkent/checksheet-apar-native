@@ -30,10 +30,11 @@ $sql = "SELECT
             location,
             type,
             status,
-            last_inspection_date as last_inspection
+            last_inspection_date as last_inspection,
+            is_active
         FROM [apar].[dbo].[hydrants] h
         WHERE h.area = 'Office' $where_search
-        ORDER BY h.code ASC
+        ORDER BY h.is_active DESC, h.code ASC
         OFFSET ? ROWS
         FETCH NEXT ? ROWS ONLY";
 

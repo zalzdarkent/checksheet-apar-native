@@ -298,8 +298,10 @@ include(__DIR__ . '/../../../actions/machining/ac_get_data_apar.php');
                 <ul class="dropdown-menu">
                     <li><a class="dropdown-item" href="#" id="print-qr-selected"><i class="fas fa-qrcode"></i> Print QR
                             Code</a></li>
-                    <li><a class="dropdown-item text-danger" href="#" id="delete-selected"><i class="fas fa-trash"></i>
-                            Delete Selected</a></li>
+                    <li><a class="dropdown-item text-success" href="#" id="active-selected"><i class="fas fa-check-circle"></i>
+                            Activate Selected</a></li>
+                    <li><a class="dropdown-item text-danger" href="#" id="inactive-selected"><i class="fas fa-power-off"></i>
+                            Inactivate Selected</a></li>
                 </ul>
             </div>
             <button class="btn btn-primary btn-round">
@@ -327,9 +329,14 @@ include(__DIR__ . '/../../../actions/machining/ac_get_data_apar.php');
         <?php else: ?>
             <?php foreach ($apar_data as $item): ?>
                 <?php $statusClass = ($item['status'] === 'OK' || $item['status'] === 'Good') ? 'status-ok' : 'status-abnormal'; ?>
-                <div class="apar-card" data-id="<?php echo $item['id']; ?>">
+                <div class="apar-card <?php echo $item['is_active'] == 0 ? 'inactive' : ''; ?>" data-id="<?php echo $item['id']; ?>">
                     <input type="checkbox" class="card-checkbox item-checkbox">
-                    <button class="delete-btn" title="Delete"><i class="fas fa-trash"></i></button>
+                    <button class="status-toggle-btn <?php echo $item['is_active'] == 0 ? 'is-inactive' : ''; ?>" 
+                            data-id="<?php echo $item['id']; ?>" 
+                            data-status="<?php echo $item['is_active']; ?>"
+                            title="<?php echo $item['is_active'] == 0 ? 'Activate' : 'Inactivate'; ?>">
+                        <i class="fas fa-power-off"></i>
+                    </button>
 
                     <div class="apar-qr-placeholder">
                         <img src="actions/ac_generate_qrcode.php?data=<?php echo $item['code']; ?>"
@@ -378,9 +385,35 @@ include(__DIR__ . '/../../../actions/machining/ac_get_data_apar.php');
         let searchTimeout;
 
         function toggleSelectedActions() {
-            const selectedCount = $('.item-checkbox:checked').length;
+            const selectedCheckboxes = $('.item-checkbox:checked');
+            const selectedCount = selectedCheckboxes.length;
+
             if (selectedCount > 0) {
                 $('#selected-actions-btn').fadeIn();
+
+                let hasActive = false;
+                let hasInactive = false;
+
+                selectedCheckboxes.each(function () {
+                    const card = $(this).closest('.apar-card');
+                    if (card.hasClass('inactive')) {
+                        hasInactive = true;
+                    } else {
+                        hasActive = true;
+                    }
+                });
+
+                if (hasActive && !hasInactive) {
+                    $('#active-selected').hide();
+                    $('#inactive-selected').show();
+                } else if (!hasActive && hasInactive) {
+                    $('#active-selected').show();
+                    $('#inactive-selected').hide();
+                } else {
+                    // Mixed
+                    $('#active-selected').show();
+                    $('#inactive-selected').show();
+                }
             } else {
                 $('#selected-actions-btn').fadeOut();
             }
@@ -399,7 +432,7 @@ include(__DIR__ . '/../../../actions/machining/ac_get_data_apar.php');
         });
 
         $('#apar-container').on('click', '.apar-card', function (e) {
-            if ($(e.target).closest('.item-checkbox, .delete-btn, .btn-action').length === 0) {
+            if ($(e.target).closest('.item-checkbox, .status-toggle-btn, .btn-action').length === 0) {
                 const checkbox = $(this).find('.item-checkbox');
                 checkbox.prop('checked', !checkbox.is(':checked')).trigger('change');
             }
@@ -430,6 +463,153 @@ include(__DIR__ . '/../../../actions/machining/ac_get_data_apar.php');
             window.open('print_qr.php?type=apar&ids=' + id, '_blank');
         });
 
+        // Status Toggle Handler
+        $('#apar-container').on('click', '.status-toggle-btn', function (e) {
+            e.stopPropagation();
+            const btn = $(this);
+            const id = btn.data('id');
+            const currentStatus = btn.data('status');
+            const newStatus = currentStatus == 1 ? 0 : 1;
+            const actionText = newStatus == 1 ? 'aktifkan' : 'nonaktifkan';
+            const actionTitle = newStatus == 1 ? 'Aktifkan Item?' : 'Nonaktifkan Item?';
+            const actionIcon = newStatus == 1 ? 'info' : 'warning';
+            const actionBtn = newStatus == 1 ? 'btn btn-success' : 'btn btn-warning';
+
+            swal({
+                title: actionTitle,
+                text: `Apakah Anda yakin ingin ${actionText} item ini?`,
+                icon: actionIcon,
+                buttons: {
+                    cancel: {
+                        visible: true,
+                        text: 'Batal',
+                        className: 'btn btn-danger'
+                    },
+                    confirm: {
+                        text: 'Ya, Lanjutkan!',
+                        className: actionBtn
+                    }
+                }
+            }).then((willUpdate) => {
+                if (willUpdate) {
+                    $.ajax({
+                        url: 'actions/ac_toggle_active.php',
+                        type: 'POST',
+                        data: { type: 'apar', ids: id, status: newStatus },
+                        dataType: 'json',
+                        success: function (response) {
+                            if (response.success) {
+                                const card = btn.closest('.apar-card');
+                                if (newStatus == 0) {
+                                    card.addClass('inactive');
+                                    btn.addClass('is-inactive').attr('title', 'Activate');
+                                    btn.data('status', 0);
+                                } else {
+                                    card.removeClass('inactive');
+                                    btn.removeClass('is-inactive').attr('title', 'Inactivate');
+                                    btn.data('status', 1);
+                                }
+                                $.notify({
+                                    icon: 'fas fa-check-circle',
+                                    title: 'Berhasil',
+                                    message: `Item berhasil di${actionText}`,
+                                }, {
+                                    type: 'success',
+                                    placement: { from: "top", align: "right" },
+                                    time: 1000,
+                                });
+                            } else {
+                                swal("Gagal!", response.message, "error");
+                            }
+                        }
+                    });
+                }
+            });
+        });
+
+        // Bulk Status Handler
+        $('#active-selected, #inactive-selected').on('click', function (e) {
+            e.preventDefault();
+            const isActivating = $(this).attr('id') === 'active-selected';
+
+            const selectedCheckboxes = $('.item-checkbox:checked');
+            let hasActive = false;
+            let hasInactive = false;
+
+            selectedCheckboxes.each(function () {
+                const card = $(this).closest('.apar-card');
+                if (card.hasClass('inactive')) {
+                    hasInactive = true;
+                } else {
+                    hasActive = true;
+                }
+            });
+
+            if (hasActive && hasInactive) {
+                $.notify({
+                    icon: 'fas fa-exclamation-triangle',
+                    title: 'Gagal',
+                    message: 'Pilih data dengan status yang sama untuk melakukan aksi massal (jangan dicampur).',
+                }, {
+                    type: 'danger',
+                    placement: { from: "top", align: "right" },
+                    time: 1000,
+                });
+                return;
+            }
+
+            const newStatus = isActivating ? 1 : 0;
+            const actionText = isActivating ? 'aktifkan' : 'nonaktifkan';
+            const actionBtn = isActivating ? 'btn btn-success' : 'btn btn-warning';
+            const actionIcon = isActivating ? 'info' : 'warning';
+
+            const selectedIds = selectedCheckboxes.map(function () {
+                return $(this).closest('.apar-card').data('id');
+            }).get();
+
+            swal({
+                title: `${isActivating ? 'Aktifkan' : 'Nonaktifkan'} Terpilih?`,
+                text: `Apakah Anda yakin ingin ${actionText} ${selectedIds.length} item terpilih?`,
+                icon: actionIcon,
+                buttons: {
+                    cancel: {
+                        visible: true,
+                        text: 'Batal',
+                        className: 'btn btn-danger'
+                    },
+                    confirm: {
+                        text: `Ya, ${isActivating ? 'Aktifkan' : 'Nonaktifkan'}!`,
+                        className: actionBtn
+                    }
+                }
+            }).then((willUpdate) => {
+                if (willUpdate) {
+                    $.ajax({
+                        url: 'actions/ac_toggle_active.php',
+                        type: 'POST',
+                        data: { type: 'apar', ids: selectedIds.join(','), status: newStatus },
+                        dataType: 'json',
+                        success: function (response) {
+                            if (response.success) {
+                                $.notify({
+                                    icon: 'fas fa-check-circle',
+                                    title: 'Berhasil',
+                                    message: `${selectedIds.length} item berhasil di${actionText}`,
+                                }, {
+                                    type: 'success',
+                                    placement: { from: "top", align: "right" },
+                                    time: 1000,
+                                });
+                                setTimeout(() => location.reload(), 1500);
+                            } else {
+                                swal("Gagal!", response.message, "error");
+                            }
+                        }
+                    });
+                }
+            });
+        });
+
         $('#search-input').on('input', function() {
             clearTimeout(searchTimeout);
             searchQuery = $(this).val();
@@ -443,10 +623,19 @@ include(__DIR__ . '/../../../actions/machining/ac_get_data_apar.php');
 
         function createCardHtml(item) {
             const statusClass = (item.status === 'OK' || item.status === 'Good') ? 'status-ok' : 'status-abnormal';
+            const inactiveClass = item.is_active == 0 ? 'inactive' : '';
+            const btnInactiveClass = item.is_active == 0 ? 'is-inactive' : '';
+            const btnTitle = item.is_active == 0 ? 'Activate' : 'Inactivate';
+
             return `
-                <div class="apar-card" data-id="${item.id}">
+                <div class="apar-card ${inactiveClass}" data-id="${item.id}">
                     <input type="checkbox" class="card-checkbox item-checkbox">
-                    <button class="delete-btn" title="Delete"><i class="fas fa-trash"></i></button>
+                    <button class="status-toggle-btn ${btnInactiveClass}" 
+                            data-id="${item.id}" 
+                            data-status="${item.is_active}"
+                            title="${btnTitle}">
+                        <i class="fas fa-power-off"></i>
+                    </button>
                     
                     <div class="apar-qr-placeholder">
                         <img src="actions/ac_generate_qrcode.php?data=${item.code}" alt="QR Code" class="qr-img">

@@ -176,7 +176,8 @@
                                     <th>Code</th>
                                     <th>Area</th>
                                     <th>Location</th>
-                                    <th>Status</th>
+                                    <th>Status Asset</th>
+                                    <th>Status Insp</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
@@ -207,7 +208,11 @@
                 data: function (d) {
                     d.area = $('#filter-area').val();
                     d.q = $('#filter-search').val();
-                    d.ajax = 1;
+                }
+            },
+            createdRow: function (row, data, dataIndex) {
+                if (data.is_active == 0) {
+                    $(row).addClass('inactive');
                 }
             },
             columns: [
@@ -221,10 +226,17 @@
                 { data: 'area' },
                 { data: 'location' },
                 {
-                    data: 'status',
-                    render: function (data) {
+                    render: function (data, type, row) {
                         const badgeClass = (data === 'OK' || data === 'Good') ? 'status-ok' : 'status-abnormal';
                         return `<span class="status-badge ${badgeClass}">${data}</span>`;
+                    }
+                },
+                {
+                    data: 'is_active',
+                    render: function (data) {
+                        const badgeClass = data == 1 ? 'badge-success' : 'badge-secondary';
+                        const text = data == 1 ? 'Active' : 'Inactive';
+                        return `<span class="badge ${badgeClass}">${text}</span>`;
                     }
                 },
                 {

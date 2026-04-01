@@ -31,10 +31,11 @@ $sql = "SELECT
             type,
             status,
             expired_date,
-            last_inspection_date as last_inspection
+            last_inspection_date as last_inspection,
+            is_active
         FROM [apar].[dbo].[apars] a
         WHERE a.area = 'Disa' $where_search
-        ORDER BY a.code ASC
+        ORDER BY a.is_active DESC, a.code ASC
         OFFSET ? ROWS
         FETCH NEXT ? ROWS ONLY";
 

@@ -1,0 +1,67 @@
+/* Custom Styles for APAR/Hydrant Management */
+
+.apar-card.inactive, .hydrant-card.inactive {
+    opacity: 0.65;
+    filter: grayscale(0.4);
+    position: relative;
+    border-color: #6c757d !important;
+}
+
+.apar-card.inactive::before, .hydrant-card.inactive::before {
+    content: 'INACTIVE';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-15deg);
+    background: rgba(220, 53, 69, 0.9);
+    color: white;
+    padding: 5px 15px;
+    font-weight: 800;
+    font-size: 1.2rem;
+    border-radius: 4px;
+    z-index: 10;
+    pointer-events: none;
+    letter-spacing: 2px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.status-toggle-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: #28a745;
+    color: white;
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 11;
+    transition: all 0.2s;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.status-toggle-btn.is-inactive {
+    background: #6c757d;
+}
+
+.status-toggle-btn:hover {
+    transform: scale(1.1);
+}
+
+.status-toggle-btn i {
+    font-size: 0.9rem;
+}
+
+/* DataTable override for inactive rows */
+table.dataTable tr.inactive {
+    background-color: rgba(0, 0, 0, 0.05) !important;
+    color: #888 !important;
+}
+
+table.dataTable tr.inactive .status-badge {
+    opacity: 0.5;
+}

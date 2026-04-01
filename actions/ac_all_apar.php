@@ -29,10 +29,11 @@ $sql = "SELECT
             expired_date,
             status,
             type,
-            last_inspection_date
+            last_inspection_date,
+            is_active
         FROM [apar].[dbo].[apars] a
         $where_clause
-        ORDER BY a.area ASC, a.code ASC";
+        ORDER BY a.is_active DESC, a.area ASC, a.code ASC";
 
 $result = sqlsrv_query($koneksi, $sql, $params);
 $apar_data = [];
