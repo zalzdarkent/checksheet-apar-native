@@ -1,5 +1,7 @@
 <?php
+$area = 'Machining';
 include(__DIR__ . '/../../../actions/machining/ac_get_data_apar.php');
+include(__DIR__ . '/../../../config/config.php');
 
 $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
 $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php", "", $_SERVER['PHP_SELF']);
@@ -307,7 +309,7 @@ $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php",
                             Inactivate Selected</a></li>
                 </ul>
             </div>
-            <button class="btn btn-primary btn-round">
+            <button class="btn btn-primary btn-round" id="btn-add-apar">
                 <i class="fas fa-plus"></i> Add
             </button>
         </div>
@@ -737,5 +739,18 @@ $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php",
         backToTop.on('click', function() {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         });
+
+        // Trigger Add Modal
+        $('#btn-add-apar').on('click', function() {
+            new bootstrap.Modal(document.getElementById('modal-add-apar')).show();
+            // Reset form and UI
+            $('#form-add-apar')[0].reset();
+            $('#add-apar-area').val('<?php echo $area; ?>').trigger('change');
+            if ('<?php echo $area; ?>' === 'Office') {
+                $('#add-apar-code').prop('readonly', false);
+            }
+        });
     });
 </script>
+
+<?php include(__DIR__ . '/../create.php'); ?>

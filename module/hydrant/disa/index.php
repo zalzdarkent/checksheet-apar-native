@@ -1,5 +1,7 @@
 <?php
+$area = 'Disa';
 include(__DIR__ . '/../../../actions/disa/ac_get_data_hydrant.php');
+include(__DIR__ . '/../../../config/config.php');
 
 $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
 $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php", "", $_SERVER['PHP_SELF']);
@@ -307,7 +309,7 @@ $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php",
                             Inactivate Selected</a></li>
                 </ul>
             </div>
-            <button class="btn btn-primary btn-round">
+            <button class="btn btn-primary btn-round" id="btn-add-hydrant">
                 <i class="fas fa-plus"></i> Add
             </button>
         </div>
@@ -737,5 +739,16 @@ $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php",
         backToTop.on('click', function() {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         });
+
+
+        // Open Add Hydrant Modal
+        $('#btn-add-hydrant').on('click', function() {
+            var myModal = new bootstrap.Modal(document.getElementById('modal-add-hydrant'));
+            $('#form-add-hydrant')[0].reset();
+            $('#add-hydrant-area').trigger('change');
+            myModal.show();
+        });
     });
 </script>
+
+<?php include(__DIR__ . '/../create.php'); ?>

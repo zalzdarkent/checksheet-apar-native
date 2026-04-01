@@ -1,6 +1,7 @@
 <?php
 $area = 'Ace';
 include(__DIR__ . '/../../../actions/ace/ac_get_data_apar.php');
+include(__DIR__ . '/../../../config/config.php');
 
 $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
 $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php", "", $_SERVER['PHP_SELF']);
@@ -292,7 +293,7 @@ $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php",
 
     <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
         <div>
-            <h3 class="fw-bold mb-3">apar Management - ACE</h3>
+            <h3 class="fw-bold mb-3">APAR Management - ACE</h3>
         </div>
         <div class="ms-md-auto py-2 py-md-0 d-flex gap-2">
             <div class="dropdown" id="selected-actions-btn">
@@ -308,7 +309,7 @@ $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php",
                             Inactivate Selected</a></li>
                 </ul>
             </div>
-            <button class="btn btn-primary btn-round">
+            <button class="btn btn-primary btn-round" id="btn-add-apar">
                 <i class="fas fa-plus"></i> Add
             </button>
         </div>
@@ -738,5 +739,16 @@ $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php",
         backToTop.on('click', function () {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         });
+
+
+        // Open Add Modal
+        $('#btn-add-apar').on('click', function() {
+            var myModal = new bootstrap.Modal(document.getElementById('modal-add-apar'));
+            $('#form-add-apar')[0].reset();
+            $('#add-apar-area').trigger('change');
+            myModal.show();
+        });
     });
 </script>
+
+<?php include(__DIR__ . '/../create.php'); ?>

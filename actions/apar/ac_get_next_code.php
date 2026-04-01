@@ -1,0 +1,58 @@
+<?php
+require_once __DIR__ . '/../../config/db_koneksi.php';
+
+header('Content-Type: application/json');
+
+$area = $_GET['area'] ?? '';
+$type = $_GET['type'] ?? 'apar'; // 'apar' or 'hydrant'
+
+if (empty($area)) {
+    echo json_encode(['success' => false, 'message' => 'Area required']);
+    exit;
+}
+
+$table = ($type === 'hydrant') ? '[apar].[dbo].[hydrants]' : '[apar].[dbo].[apars]';
+$prefix = "";
+
+switch ($area) {
+    case 'Disa': $prefix = "D-1-"; break;
+    case 'Machining': $prefix = "M-1-"; break;
+    case 'Ace': $prefix = "A-1-"; break;
+    default:
+        echo json_encode(['success' => false, 'message' => 'Invalid area']);
+        exit;
+}
+
+// Query for the highest number for this prefix
+$query = "SELECT MAX(code) as max_code FROM $table WHERE code LIKE ?";
+$params = array($prefix . '%');
+$stmt = sqlsrv_query($koneksi, $query, $params);
+
+if ($stmt === false) {
+    echo json_encode(['success' => false, 'message' => 'Database error']);
+    exit;
+}
+
+$row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
+$next_code = "";
+
+if ($row['max_code']) {
+    // Extract the numeric part (everything after the last dash)
+    $parts = explode('-', $row['max_code']);
+    $last_num = end($parts);
+    
+    // Check if it's numeric
+    if (is_numeric($last_num)) {
+        $next_num = intval($last_num) + 1;
+        // Pad with zeros (e.g., 002 -> 003)
+        $next_num_padded = str_pad($next_num, 3, "0", STR_PAD_LEFT);
+        $next_code = $prefix . $next_num_padded;
+    } else {
+        $next_code = $prefix . "001";
+    }
+} else {
+    $next_code = $prefix . "001";
+}
+
+echo json_encode(['success' => true, 'next_code' => $next_code]);
+?>
