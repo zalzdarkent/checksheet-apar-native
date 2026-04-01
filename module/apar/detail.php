@@ -1,6 +1,9 @@
 <?php
 include(__DIR__ . '/../../actions/ac_get_apar_detail.php');
 
+$protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
+$base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php", "", $_SERVER['PHP_SELF']);
+
 if (!$apar) {
     echo "<div class='page-inner'><div class='alert alert-danger'>APAR tidak ditemukan atau ID tidak valid.</div></div>";
     return;
@@ -140,7 +143,11 @@ $statusClass = ($apar['status'] === 'OK' || $apar['status'] === 'Good') ? 'statu
 
     <div class="detail-card">
         <div class="apar-large-icon">
-            <i class="fas fa-fire-extinguisher"></i>
+            <?php 
+                $qr_url = $base_url . "index.php?page=apar-detail&id=" . $apar['id'];
+            ?>
+            <img src="actions/ac_generate_qrcode.php?data=<?php echo urlencode($qr_url); ?>" 
+                 alt="QR Code" style="width: 150px; height: 150px; background: white; padding: 10px; border-radius: 10px;">
         </div>
         <div class="apar-large-code"><?php echo $apar['code']; ?></div>
         

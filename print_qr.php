@@ -14,6 +14,8 @@ $ids = array_map('intval', $ids_array);
 
 $table = ($type === 'hydrant') ? '[apar].[dbo].[hydrants]' : '[apar].[dbo].[apars]';
 $data = [];
+$protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
+$base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("print_qr.php", "", $_SERVER['PHP_SELF']);
 
 $placeholders = implode(',', array_fill(0, count($ids), '?'));
 // Select different columns based on type
@@ -223,7 +225,11 @@ if ($stmt) {
                 </div>
 
                 <div class="qr-image-wrapper">
-                    <img src="actions/ac_generate_qrcode.php?data=<?php echo urlencode($item['code']); ?>" alt="QR" class="qr-image">
+                    <?php 
+                        $detail_page = ($type === 'hydrant') ? 'hydrant-detail' : 'apar-detail';
+                        $qr_url = $base_url . "index.php?page=" . $detail_page . "&id=" . $item['id'];
+                    ?>
+                    <img src="actions/ac_generate_qrcode.php?data=<?php echo urlencode($qr_url); ?>" alt="QR" class="qr-image">
                 </div>
             </div>
         <?php endforeach; ?>

@@ -1,6 +1,9 @@
 <?php
 include(__DIR__ . '/../../actions/hydrant/ac_get_detail.php');
 
+$protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
+$base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php", "", $_SERVER['PHP_SELF']);
+
 if (!$hydrant) {
     echo "<div class='page-inner'><div class='alert alert-danger'>Hydrant tidak ditemukan atau ID tidak valid.</div></div>";
     return;
@@ -140,7 +143,11 @@ $statusClass = ($hydrant['status'] === 'OK' || $hydrant['status'] === 'Good') ? 
 
     <div class="detail-card">
         <div class="hydrant-large-icon">
-            <i class="fas fa-shield-alt"></i>
+            <?php 
+                $qr_url = $base_url . "index.php?page=hydrant-detail&id=" . $hydrant['id'];
+            ?>
+            <img src="actions/ac_generate_qrcode.php?data=<?php echo urlencode($qr_url); ?>" 
+                 alt="QR Code" style="width: 150px; height: 150px; background: white; padding: 10px; border-radius: 10px;">
         </div>
         <div class="hydrant-large-code"><?php echo $hydrant['code']; ?></div>
         

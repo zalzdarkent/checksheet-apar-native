@@ -5,7 +5,10 @@ if (session_status() === PHP_SESSION_NONE) {
 
 function check_auth() {
     if (!isset($_SESSION['user_id'])) {
-        header("Location: login.php");
+        $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
+        $current_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+        $encoded_url = urlencode($current_url);
+        header("Location: login.php?redirect_to=" . $encoded_url);
         exit;
     }
 }

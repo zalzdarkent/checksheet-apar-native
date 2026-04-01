@@ -1,6 +1,9 @@
 <?php
 $area = 'Ace';
 include(__DIR__ . '/../../../actions/ace/ac_get_data_apar.php');
+
+$protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
+$base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php", "", $_SERVER['PHP_SELF']);
 ?>
 
 <div class="page-inner">
@@ -340,7 +343,10 @@ include(__DIR__ . '/../../../actions/ace/ac_get_data_apar.php');
                     </button>
 
                     <div class="apar-qr-placeholder">
-                        <img src="actions/ac_generate_qrcode.php?data=<?php echo $item['code']; ?>"
+                        <?php 
+                            $qr_url = $base_url . "index.php?page=apar-detail&id=" . $item['id'];
+                        ?>
+                        <img src="actions/ac_generate_qrcode.php?data=<?php echo urlencode($qr_url); ?>"
                             alt="QR Code" class="qr-img">
                     </div>
 
@@ -639,7 +645,7 @@ include(__DIR__ . '/../../../actions/ace/ac_get_data_apar.php');
                     </button>
                     
                     <div class="apar-qr-placeholder">
-                        <img src="actions/ac_generate_qrcode.php?data=${item.code}" alt="QR Code" class="qr-img">
+                        <img src="actions/ac_generate_qrcode.php?data=${encodeURIComponent('<?php echo $base_url; ?>index.php?page=apar-detail&id=' + item.id)}" alt="QR Code" class="qr-img">
                     </div>
 
                     <div class="apar-info">

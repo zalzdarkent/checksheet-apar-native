@@ -201,6 +201,9 @@ if (isset($_SESSION['user_id'])) {
                 
                 <form action="actions/auth/ac_auth.php" method="POST">
                     <input type="hidden" name="action" value="login">
+                    <?php if (isset($_GET['redirect_to'])): ?>
+                        <input type="hidden" name="redirect_to" value="<?= htmlspecialchars($_GET['redirect_to']) ?>">
+                    <?php endif; ?>
                     
                     <div class="form-group form-group-default">
                         <label>NPK</label>

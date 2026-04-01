@@ -38,7 +38,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['user_photo'] = $user['photo'];
             
             $_SESSION['success'] = "Selamat datang, " . $user['name'] . "!";
-            header("Location: ../../index.php");
+            
+            if (!empty($_POST['redirect_to'])) {
+                header("Location: " . $_POST['redirect_to']);
+            } else {
+                header("Location: ../../index.php");
+            }
             exit;
         } else {
             $_SESSION['error'] = "NPK atau Password salah!";
