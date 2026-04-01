@@ -739,17 +739,6 @@ $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php",
         backToTop.on('click', function() {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         });
-
-        // Trigger Add Modal
-        $('#btn-add-apar').on('click', function() {
-            new bootstrap.Modal(document.getElementById('modal-add-apar')).show();
-            // Reset form and UI
-            $('#form-add-apar')[0].reset();
-            $('#add-apar-area').val('<?php echo $area; ?>').trigger('change');
-            if ('<?php echo $area; ?>' === 'Office') {
-                $('#add-apar-code').prop('readonly', false);
-            }
-        });
     });
 </script>
 

@@ -740,15 +740,6 @@ $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php",
         backToTop.on('click', function() {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         });
-
-
-        // Open Add Modal
-        $('#btn-add-apar').on('click', function() {
-            var myModal = new bootstrap.Modal(document.getElementById('modal-add-apar'));
-            $('#form-add-apar')[0].reset();
-            $('#add-apar-area').trigger('change');
-            myModal.show();
-        });
     });
 </script>
 

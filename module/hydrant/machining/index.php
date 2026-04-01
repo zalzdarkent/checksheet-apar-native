@@ -738,15 +738,6 @@ $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php",
         backToTop.on('click', function() {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         });
-
-
-        // Open Add Hydrant Modal
-        $('#btn-add-hydrant').on('click', function() {
-            var myModal = new bootstrap.Modal(document.getElementById('modal-add-hydrant'));
-            $('#form-add-hydrant')[0].reset();
-            $('#add-hydrant-area').trigger('change');
-            myModal.show();
-        });
     });
 </script>
 

@@ -54,6 +54,8 @@ include("components/fragments/head.php");
                 }
 
                 $file = "";
+                $area = null;
+                $type = null;
 
                 $routes = [
                     'dashboard' => 'module/md_dashboard.php',
@@ -75,6 +77,13 @@ include("components/fragments/head.php");
                     'report' => 'module/report/index.php'
                 ];
 
+                // Extract area dan type dari route (misal: 'apar-ace' => type='apar', area='Ace')
+                if (preg_match('/^(apar|hydrant)-(ace|disa|machining|office)$/', $page, $matches)) {
+                    $type = $matches[1];
+                    $areaMap = ['ace' => 'Ace', 'disa' => 'Disa', 'machining' => 'Machining', 'office' => 'Office'];
+                    $area = $areaMap[$matches[2]];
+                }
+
                 if (array_key_exists($page, $routes)) {
                     $file = $routes[$page];
                 } else {
@@ -83,6 +92,11 @@ include("components/fragments/head.php");
 
                 if (file_exists($file)) {
                     include($file);
+                    
+                    // Include modal handlers setelah include content module jika ada area/type
+                    if ($area && $type) {
+                        include('components/modal_handlers.php');
+                    }
                 } else {
                     echo "<h1>Halaman <b>" . htmlspecialchars($page) . "</b> tidak ditemukan ($file)</h1>";
                 }
