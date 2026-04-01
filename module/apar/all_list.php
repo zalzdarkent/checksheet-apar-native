@@ -249,6 +249,8 @@
                         return date.toLocaleDateString('id-ID', options);
                     }
                 },
+                {
+                    data: 'status',
                     render: function (data, type, row) {
                         const badgeClass = (data === 'OK' || data === 'Good') ? 'status-ok' : 'status-abnormal';
                         return `<span class="status-badge ${badgeClass}">${data}</span>`;
@@ -257,7 +259,7 @@
                 {
                     data: 'is_active',
                     render: function (data) {
-                        const badgeClass = data == 1 ? 'badge-success' : 'badge-secondary';
+                        const badgeClass = data == 1 ? 'badge-success' : 'badge-danger';
                         const text = data == 1 ? 'Active' : 'Inactive';
                         return `<span class="badge ${badgeClass}">${text}</span>`;
                     }
@@ -266,14 +268,10 @@
                     data: 'id',
                     orderable: false,
                     render: function (data) {
-                        return `
-                            <a href="?page=apar-detail&id=${data}" class="btn btn-info btn-xs">
-                                <i class="fas fa-eye"></i> View
-                            </a>
-                            <button class="btn btn-warning btn-xs btn-print-qr" data-id="${data}">
-                                <i class="fas fa-print"></i> Print
-                            </button>
-                        `;
+                        return `<div class="d-flex gap-1">
+                            <a href="?page=apar-detail&id=${data}" class="btn btn-info btn-xs"><i class="fas fa-eye"></i> View</a>
+                            <button class="btn btn-warning btn-xs btn-print-qr" data-id="${data}"><i class="fas fa-print"></i> Print</button>
+                        </div>`;
                     }
                 }
             ],
