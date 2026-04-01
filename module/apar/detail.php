@@ -105,12 +105,16 @@ $statusClass = ($apar['status'] === 'OK' || $apar['status'] === 'Good') ? 'statu
         }
 
         .section-title {
-            font-size: 1.2rem;
-            font-weight: 700;
+            font-size: 1.4rem;
+            font-weight: 800;
             margin: 40px 0 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            color: #fff;
+            padding: 15px 20px;
+            border-bottom: 3px solid #0088cc;
+            color: #000000;
+            background: rgba(0, 136, 204, 0.1);
+            border-radius: 8px 8px 0 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .empty-state {
@@ -120,25 +124,40 @@ $statusClass = ($apar['status'] === 'OK' || $apar['status'] === 'Good') ? 'statu
             padding: 20px;
         }
 
-        .history-list {
-            background: #1a2035;
-            border-radius: 12px;
-            overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .history-item {
-            padding: 15px 20px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        /* DataTable styling */
+        .table {
             color: #ddd;
+            background-color: transparent;
+            border-color: rgba(255, 255, 255, 0.05);
         }
 
-        .history-item:last-child { border-bottom: none; }
-        .history-date { font-weight: 600; color: #fff; }
-        .history-user { font-size: 0.85rem; color: #888; }
+        .table thead {
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .table thead th {
+            color: #fff;
+            font-weight: 700;
+            background-color: rgba(30, 32, 53, 1);
+            border-color: rgba(255, 255, 255, 0.05);
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+        }
+
+        .table tbody td {
+            border-color: rgba(255, 255, 255, 0.05);
+            vertical-align: middle;
+            padding: 12px 15px;
+        }
+
+        .table tbody tr:hover {
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+
+        .table .badge {
+            white-space: nowrap;
+        }
     </style>
 
     <div class="detail-card">
@@ -188,39 +207,123 @@ $statusClass = ($apar['status'] === 'OK' || $apar['status'] === 'Good') ? 'statu
     <?php if (empty($apar['history'])): ?>
         <div class="empty-state">Belum ada data pemeriksaan.</div>
     <?php else: ?>
-        <div class="history-list">
-            <?php foreach ($apar['history'] as $h): ?>
-                <div class="history-item">
-                    <div>
-                        <div class="history-date"><?php echo $h['inspection_date_fmt']; ?></div>
-                        <div class="history-user">Oleh: <?php echo $h['inspector_name'] ?: 'Unknown'; ?></div>
-                    </div>
-                    <div class="text-end">
-                        <span class="badge bg-success">Complete</span>
-                    </div>
-                </div>
-            <?php endforeach; ?>
-        </div>
+        <table class="table table-striped table-hover table-sm" id="table-history" style="width:100%">
+            <thead class="table-dark">
+                <tr>
+                    <th>Tanggal</th>
+                    <th>Oleh</th>
+                    <th>Status</th>
+                    <th>Catatan</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($apar['history'] as $h): ?>
+                    <tr>
+                        <td><?php echo $h['inspection_date_fmt']; ?></td>
+                        <td><?php echo $h['inspector_name'] ?: 'Unknown'; ?></td>
+                        <td><span class="badge bg-success">✓ OK</span></td>
+                        <td><?php echo $h['notes'] ?: '-'; ?></td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
     <?php endif; ?>
 
     <div class="section-title">Abnormal Case</div>
     <?php if (empty($apar['cases'])): ?>
         <div class="empty-state">Belum ada abnormal case.</div>
     <?php else: ?>
-        <div class="history-list">
-            <?php foreach ($apar['cases'] as $c): ?>
-                <div class="history-item">
-                    <div>
-                        <div class="history-date"><?php echo $c['abnormal_case']; ?></div>
-                        <div class="history-user">PIC: <?php echo $c['pic_id'] ?: '-'; ?> | Status: <?php echo $c['status']; ?></div>
-                    </div>
-                    <div class="text-end">
-                        <span class="badge <?php echo $c['status'] === 'Fixed' ? 'bg-success' : 'bg-danger'; ?>">
-                            <?php echo $c['status']; ?>
-                        </span>
-                    </div>
-                </div>
-            <?php endforeach; ?>
-        </div>
+        <table class="table table-striped table-hover table-sm" id="table-cases" style="width:100%">
+            <thead class="table-dark">
+                <tr>
+                    <th>Tanggal</th>
+                    <th>Abnormal Case</th>
+                    <th>Countermeasure</th>
+                    <th>Due Date</th>
+                    <th>PIC</th>
+                    <th>Status</th>
+                    <th>Verified</th>
+                    <th>Foto</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($apar['cases'] as $c): ?>
+                    <tr>
+                        <td><?php echo isset($c['created_at_fmt']) ? $c['created_at_fmt'] : '-'; ?></td>
+                        <td><?php echo $c['abnormal_case']; ?></td>
+                        <td><?php echo $c['countermeasure'] ?: '-'; ?></td>
+                        <td><?php echo isset($c['due_date_fmt']) ? $c['due_date_fmt'] : '-'; ?></td>
+                        <td><?php echo $c['pic_name'] ?: 'Unassigned'; ?></td>
+                        <td>
+                            <span class="badge <?php echo $c['status'] === 'Fixed' ? 'bg-success' : 'bg-danger'; ?>">
+                                <?php echo $c['status']; ?>
+                            </span>
+                        </td>
+                        <td>
+                            <?php if (isset($c['verified']) && $c['verified']): ?>
+                                <span class="badge bg-success">✓ Verified</span>
+                            <?php else: ?>
+                                <span class="text-muted">-</span>
+                            <?php endif; ?>
+                        </td>
+                        <td>
+                            <?php if (isset($c['foto']) && $c['foto']): ?>
+                                <a href="<?php echo $c['foto']; ?>" target="_blank" class="btn btn-sm btn-outline-info">View</a>
+                            <?php else: ?>
+                                <span class="text-muted">-</span>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
     <?php endif; ?>
 </div>
+
+<script>
+$(document).ready(function() {
+    // Initialize history table if exists
+    if ($('#table-history').length) {
+        $('#table-history').DataTable({
+            "paging": true,
+            "pageLength": 10,
+            "searching": true,
+            "ordering": true,
+            "autoWidth": false,
+            "responsive": true,
+            "language": {
+                "search": "Cari:",
+                "paginate": {
+                    "first": "Pertama",
+                    "last": "Terakhir",
+                    "next": "Selanjutnya",
+                    "previous": "Sebelumnya"
+                },
+                "info": "Menampilkan _START_ ke _END_ dari _TOTAL_ entri"
+            }
+        });
+    }
+    
+    // Initialize cases table if exists
+    if ($('#table-cases').length) {
+        $('#table-cases').DataTable({
+            "paging": true,
+            "pageLength": 10,
+            "searching": true,
+            "ordering": true,
+            "autoWidth": false,
+            "responsive": true,
+            "language": {
+                "search": "Cari:",
+                "paginate": {
+                    "first": "Pertama",
+                    "last": "Terakhir",
+                    "next": "Selanjutnya",
+                    "previous": "Sebelumnya"
+                },
+                "info": "Menampilkan _START_ ke _END_ dari _TOTAL_ entri"
+            }
+        });
+    }
+});
+</script>

@@ -20,11 +20,10 @@ if ($id <= 0) {
         }
 
         // 2. Get Inspection History (Join with users for inspector name)
-        // Note: For hydrants, we use hydrant_unit_id in bimonthly_inspections
-        $sql_history = "SELECT h.*, u.username as inspector_name 
-                        FROM [apar].[dbo].[bimonthly_inspections] h
+        $sql_history = "SELECT h.*, u.name as inspector_name 
+                        FROM [apar].[dbo].[bimonthly_hydrant_inspections] h
                         LEFT JOIN [apar].[dbo].[users] u ON h.user_id = u.id
-                        WHERE h.hydrant_unit_id = ? 
+                        WHERE h.hydrant_id = ? 
                         ORDER BY h.inspection_date DESC";
         $stmt_history = sqlsrv_query($koneksi, $sql_history, [$id]);
         $history = [];
@@ -39,10 +38,12 @@ if ($id <= 0) {
             }
         }
 
-        // 3. Get Abnormal Cases
-        $sql_cases = "SELECT * FROM [apar].[dbo].[hydrant_abnormal_cases] 
-                      WHERE hydrant_id = ? 
-                      ORDER BY created_at DESC";
+        // 3. Get Abnormal Cases with PIC name
+        $sql_cases = "SELECT c.*, u.name as pic_name 
+                      FROM [apar].[dbo].[hydrant_abnormal_cases] c
+                      LEFT JOIN [apar].[dbo].[users] u ON c.pic_id = u.id
+                      WHERE c.hydrant_id = ? 
+                      ORDER BY c.created_at DESC";
         $stmt_cases = sqlsrv_query($koneksi, $sql_cases, [$id]);
         $cases = [];
         if ($stmt_cases !== false) {
@@ -51,6 +52,16 @@ if ($id <= 0) {
                     $row['created_at_fmt'] = $row['created_at']->format('d M Y');
                 } else {
                     $row['created_at_fmt'] = '-';
+                }
+                // Format due_date if it's DateTime
+                if (isset($row['due_date'])) {
+                    if ($row['due_date'] instanceof DateTime) {
+                        $row['due_date_fmt'] = $row['due_date']->format('d M Y');
+                    } else {
+                        $row['due_date_fmt'] = $row['due_date'] ?: '-';
+                    }
+                } else {
+                    $row['due_date_fmt'] = '-';
                 }
                 $cases[] = $row;
             }
