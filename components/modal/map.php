@@ -23,17 +23,45 @@
                 <div class="tab-content border-top pt-3" id="globalMapTabsContent">
                     <!-- Map View Pane -->
                     <div class="tab-pane fade show active" id="global-map-view" role="tabpanel" aria-labelledby="global-map-tab">
+                        <!-- Legend/Note Section -->
+                        <div class="alert alert-light rounded mb-3 py-2 px-3" style="background: #f8f9fa;">
+                            <div class="d-flex align-items-center flex-wrap gap-3">
+                                <div style="font-size: 12px; color: #666;">
+                                    <strong style="color: #333;">Icon Legend:</strong>
+                                </div>
+                                <div class="d-flex align-items-center gap-2" style="font-size: 12px;">
+                                    <i class="fas fa-fire-extinguisher" style="font-size: 16px;"></i>
+                                    <span>APAR (Fire Extinguisher)</span>
+                                </div>
+                                <div class="d-flex align-items-center gap-2" style="font-size: 12px;">
+                                    <i class="fas fa-shield-alt" style="color:font-size: 16px;"></i>
+                                    <span>Hydrant (Water System)</span>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="d-flex justify-content-between align-items-center mb-3">
-                            <!-- Left: Filter Area -->
-                            <div class="d-flex align-items-center gap-2">
-                                <label for="filterArea" class="mb-0 fw-bold text-muted small">FILTER AREA:</label>
-                                <select id="filterArea" class="form-select form-select-sm" style="width: 140px; border-radius: 20px;">
-                                    <option value="all">Semua Area</option>
-                                    <option value="office">Office</option>
-                                    <option value="disa">DISA</option>
-                                    <option value="machining">Machining</option>
-                                    <option value="ace">ACE</option>
-                                </select>
+                            <!-- Left: Filters -->
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="d-flex align-items-center gap-2">
+                                    <label for="filterArea" class="mb-0 fw-bold text-muted small">AREA:</label>
+                                    <select id="filterArea" class="form-select form-select-sm" style="width: 120px; border-radius: 20px;">
+                                        <option value="all">Semua Area</option>
+                                        <option value="office">Office</option>
+                                        <option value="disa">DISA</option>
+                                        <option value="machining">Machining</option>
+                                        <option value="ace">ACE</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="d-flex align-items-center gap-2">
+                                    <label for="filterDevice" class="mb-0 fw-bold text-muted small">PERANGKAT:</label>
+                                    <select id="filterDevice" class="form-select form-select-sm" style="width: 130px; border-radius: 20px;">
+                                        <option value="all">Semua Perangkat</option>
+                                        <option value="apar">APAR Saja</option>
+                                        <option value="hydrant">Hydrant Saja</option>
+                                    </select>
+                                </div>
                             </div>
 
                             <!-- Center: Instruction Banner -->
@@ -283,12 +311,13 @@
                                  data-jenis="${item.jenis || '-'}" 
                                  data-lokasi="${item.lokasi || '-'}" 
                                  data-area="${item.area ? item.area.toLowerCase() : ''}"
+                                 data-device-type="${item.device_type}"
                                  data-keterangan="${item.device_type.toUpperCase()}">
                                 <i class="fas ${iconClass}" style="font-size: 10px;"></i>
                             </div>`;
                         container.append(markerHtml);
 
-                        // Populate DataTable
+                        // Populate DataTable with data attributes for filtering
                         globalDt.row.add([
                             item.kode || '-',
                             item.device_type.toUpperCase(),
@@ -297,11 +326,12 @@
                             item.area || '-',
                             statusBadge,
                             `<button class="btn btn-sm btn-primary" onclick="focusMarker('${item.kode}')"><i class="fas fa-search-location"></i></button>`
-                        ]);
+                        ]).node().setAttribute('data-area', item.area ? item.area.toLowerCase() : '');
+                        $(globalDt.row(globalDt.rows().count() - 1).node()).attr('data-device-type', item.device_type);
                     });
 
                     globalDt.draw();
-                    $('#filterArea').trigger('change');
+                    applyFilters();
                 },
                 error: function (err) {
                     console.error("Failed to load map data:", err);
@@ -580,23 +610,50 @@
             });
         });
 
-        // Handle area filtering
-        $('#filterArea').on('change', function () {
-            const area = $(this).val().toLowerCase();
+        // Combined filter function
+        function applyFilters() {
+            const area = $('#filterArea').val().toLowerCase();
+            const device = $('#filterDevice').val().toLowerCase();
             const markers = $('.map-container-global .map-marker');
 
-            if (area === 'all') {
-                markers.show();
-                if (globalDt) globalDt.column(4).search('').draw();
-            } else {
-                markers.hide();
-                markers.each(function () {
-                    if ($(this).attr('data-area') === area) {
-                        $(this).show();
-                    }
+            markers.hide();
+            markers.each(function () {
+                const markerArea = $(this).attr('data-area');
+                const markerDevice = $(this).attr('data-device-type');
+
+                const areaMatch = (area === 'all' || markerArea === area);
+                const deviceMatch = (device === 'all' || markerDevice === device);
+
+                if (areaMatch && deviceMatch) {
+                    $(this).show();
+                }
+            });
+
+            // Update DataTable with combined search
+            if (globalDt) {
+                $.fn.dataTable.ext.search.pop(); // Remove previous custom filter if exists
+                $.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
+                    const row = $('#global-list-table').DataTable().row(dataIndex).node();
+                    const rowArea = $(row).attr('data-area') || '';
+                    const rowDevice = $(row).attr('data-device-type') || '';
+
+                    const areaMatch = (area === 'all' || rowArea === area);
+                    const deviceMatch = (device === 'all' || rowDevice === device);
+
+                    return areaMatch && deviceMatch;
                 });
-                if (globalDt) globalDt.column(4).search(area, true, false).draw();
+                globalDt.draw();
             }
+        }
+
+        // Handle area filtering
+        $('#filterArea').on('change', function () {
+            applyFilters();
+        });
+
+        // Handle device type filtering
+        $('#filterDevice').on('change', function () {
+            applyFilters();
         });
 
         $('#global-list-tab').on('shown.bs.tab', function () {

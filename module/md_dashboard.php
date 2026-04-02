@@ -110,7 +110,9 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
         border: 1px solid #eee; border-radius: 6px; padding: 10px; margin-bottom: 8px;
         background: #fafafa; border-left: 3px solid var(--c-abnormal); position: relative;
     }
-    .case-item.verified { border-left-color: var(--c-ok); opacity: 0.7; }
+    .case-item.open { border-left-color: var(--c-abnormal); } /* Red - Open */
+    .case-item.closed { border-left-color: #007bff; } /* Blue - Closed */
+    .case-item.verified { border-left-color: var(--c-ok); opacity: 0.7; } /* Green - Verified */
     .case-item-title { font-size: 0.85rem; font-weight: 700; margin-bottom: 4px; display:flex; justify-content: space-between;}
     .case-item-desc { font-size: 0.75rem; color: #555; margin-bottom: 6px; line-height: 1.3;}
     .case-item-meta { font-size: 0.7rem; color: #888; display: flex; align-items: center; gap: 8px;}
@@ -132,6 +134,19 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
             $formatter = new IntlDateFormatter('id_ID', IntlDateFormatter::FULL, IntlDateFormatter::NONE);
             echo '<i class="fas fa-calendar-alt"></i> ' . $formatter->format(new DateTime());
             ?>
+        </div>
+    </div>
+
+    <!-- DATE FILTER SECTION -->
+    <div class="alert alert-light rounded mb-3 py-2 px-3" style="background: #f8f9fa;">
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+            <label class="mb-0 fw-bold text-muted small">Filter:</label>
+            <input type="date" id="filterStartDate" class="form-control form-control-sm" style="max-width: 130px;">
+            <span class="text-muted small">-</span>
+            <input type="date" id="filterEndDate" class="form-control form-control-sm" style="max-width: 130px;">
+            <button id="btnClearFilter" class="btn btn-sm btn-light border border-secondary ms-2" style="font-size: 0.75rem; padding: 4px 10px;">
+                <i class="fas fa-times"></i> Clear
+            </button>
         </div>
     </div>
 
@@ -192,7 +207,7 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
                     </div>
                     <hr class="my-1">
                     <div>
-                        <div class="apx-title"><i class="fas fa-water text-info"></i> Rasio Hydrant</div>
+                        <div class="apx-title"><i class="fas fa-shield-alt text-info"></i> Rasio Hydrant</div>
                         <div id="chartHydrant" style="min-height: 180px;"></div>
                     </div>
                 </div>
@@ -257,7 +272,12 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
                                         $user_role = strtolower($_SESSION['user_role'] ?? '');
                                         $can_edit = (empty($case['pic_id']) || $case['pic_id'] == $user_id || $user_role === 'admin');
                                         $isDisabled = ($case['status'] === 'Verified' || !$can_edit) ? 'disabled' : '';
-                                        $vClass = ($case['status'] === 'Verified') ? 'verified' : '';
+                                        
+                                        // Dynamic status class for border color
+                                        $statusClass = '';
+                                        if ($case['status'] === 'Verified') $statusClass = 'verified';
+                                        elseif ($case['status'] === 'Closed') $statusClass = 'closed';
+                                        elseif ($case['status'] === 'Open') $statusClass = 'open';
                                         
                                         // Show verified header once
                                         if ($case['status'] === 'Verified' && !$verifiedHeaderShown):
@@ -269,7 +289,7 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
                                         </div>
                                     </div>
                                     <?php endif; ?>
-                                    <div class="case-item <?= $vClass ?>">
+                                    <div class="case-item <?= $statusClass ?>" data-created="<?= $case['created_at'] instanceof DateTime ? $case['created_at']->format('Y-m-d') : date('Y-m-d') ?>">
                                         <div class="case-item-title">
                                             <span><i class="fas fa-fire-extinguisher text-danger"></i> <?= htmlspecialchars($case['code']) ?> - <?= htmlspecialchars($case['area']) ?></span>
                                             <?php
@@ -314,14 +334,19 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
                                 <?php if (empty($hydrantAbnormalCases)): ?>
                                     <div class="text-center text-muted mt-5"><i class="fas fa-check-circle" style="font-size:2rem; color:var(--c-ok); margin-bottom:5px;"></i><br>Zero issues.</div>
                                 <?php else: ?>
-                                    <?php 
+                                    <?php
                                     $verifiedHeaderShown = false;
-                                    foreach ($hydrantAbnormalCases as $case): 
+                                    foreach ($hydrantAbnormalCases as $case):
                                         $user_id = $_SESSION['user_id'] ?? null;
                                         $user_role = strtolower($_SESSION['user_role'] ?? '');
                                         $can_edit = (empty($case['pic_id']) || $case['pic_id'] == $user_id || $user_role === 'admin');
                                         $isDisabled = ($case['status'] === 'Verified' || !$can_edit) ? 'disabled' : '';
-                                        $vClass = ($case['status'] === 'Verified') ? 'verified' : '';
+                                        
+                                        // Dynamic status class for border color
+                                        $statusClass = '';
+                                        if ($case['status'] === 'Verified') $statusClass = 'verified';
+                                        elseif ($case['status'] === 'Closed') $statusClass = 'closed';
+                                        elseif ($case['status'] === 'Open') $statusClass = 'open';
                                         
                                         // Show verified header once
                                         if ($case['status'] === 'Verified' && !$verifiedHeaderShown):
@@ -333,7 +358,7 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
                                         </div>
                                     </div>
                                     <?php endif; ?>
-                                    <div class="case-item <?= $vClass ?>">
+                                    <div class="case-item <?= $statusClass ?>" data-created="<?= $case['created_at'] instanceof DateTime ? $case['created_at']->format('Y-m-d') : date('Y-m-d') ?>">
                                         <div class="case-item-title">
                                             <span><i class="fas fa-water text-info"></i> <?= htmlspecialchars($case['code']) ?> - <?= htmlspecialchars($case['area']) ?></span>
                                             <?php
@@ -472,6 +497,183 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
     $(document).ready(function() {
+        // ===== DATE FILTER LOGIC (AFFECTS KPI, CHARTS, MAP - NOT ACTION REQUIRED) =====
+        function applyDateFilter() {
+            const startDate = $('#filterStartDate').val();
+            const endDate = $('#filterEndDate').val();
+
+            // Call backend to get filtered data
+            $.ajax({
+                url: 'actions/dashboard/ac_get_filtered_dashboard.php',
+                type: 'GET',
+                data: {
+                    startDate: startDate,
+                    endDate: endDate
+                },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.error) {
+                        console.error("Filter error:", response.error);
+                        return;
+                    }
+
+                    // ===== UPDATE KPI CARDS =====
+                    const totalApar = parseInt(response.apar.total) || 0;
+                    const totalAparOK = parseInt(response.apar.ok) || 0;
+                    const totalAparProses = parseInt(response.apar.proses) || 0;
+                    const totalAparAbnormal = parseInt(response.apar.abnormal) || 0;
+
+                    const totalHydrant = parseInt(response.hydrant.total) || 0;
+                    const totalHydrantOK = parseInt(response.hydrant.ok) || 0;
+                    const totalHydrantProses = parseInt(response.hydrant.proses) || 0;
+                    const totalHydrantAbnormal = parseInt(response.hydrant.abnormal) || 0;
+
+                    // Debug log
+                    console.log('Filter Response:', { totalApar, totalAparOK, totalHydrant, totalHydrantOK });
+                    
+                    // Update stats breakdown - use eq() for more specific targeting
+                    $('.summary-card.total').find('h2').text(totalApar + totalHydrant);
+                    $('.summary-card.total').find('.breakdown').html(
+                        '<i class="fas fa-fire-extinguisher text-danger"></i> ' + totalApar + 
+                        ' | <i class="fas fa-water text-info"></i> ' + totalHydrant
+                    );
+                    
+                    $('.summary-card.ok').find('h2').text(totalAparOK + totalHydrantOK);
+                    $('.summary-card.ok').find('.breakdown').html(
+                        '<i class="fas fa-fire-extinguisher"></i> ' + totalAparOK + 
+                        ' | <i class="fas fa-water"></i> ' + totalHydrantOK
+                    );
+                    
+                    $('.summary-card.proses').find('h2').text(totalAparProses + totalHydrantProses);
+                    $('.summary-card.proses').find('.breakdown').html(
+                        '<i class="fas fa-fire-extinguisher"></i> ' + totalAparProses + 
+                        ' | <i class="fas fa-water"></i> ' + totalHydrantProses
+                    );
+                    
+                    $('.summary-card.abn').find('h2').text(totalAparAbnormal + totalHydrantAbnormal);
+                    $('.summary-card.abn').find('.breakdown').html(
+                        '<i class="fas fa-fire-extinguisher border-end pe-1"></i> ' + totalAparAbnormal + 
+                        ' | <i class="fas fa-water"></i> ' + totalHydrantAbnormal
+                    );
+
+                    // ===== UPDATE PIE CHARTS =====
+                    if (window.chartAPAR) {
+                        window.chartAPAR.updateSeries([
+                            totalAparProses,
+                            totalAparOK,
+                            totalAparAbnormal
+                        ]);
+                    }
+
+                    if (window.chartHydrant) {
+                        window.chartHydrant.updateSeries([
+                            totalHydrantProses,
+                            totalHydrantOK,
+                            totalHydrantAbnormal
+                        ]);
+                    }
+
+                    // ===== UPDATE MAP MARKERS =====
+                    $('.map-container-custom .map-marker').remove();
+
+                    response.markers.forEach(function(item) {
+                        var markerClass = '';
+                        if (item.status_badge === 'Proses') {
+                            markerClass = 'marker-proses';
+                        } else if (item.status_badge === 'OK') {
+                            markerClass = 'marker-ok';
+                        } else {
+                            markerClass = 'marker-abnormal';
+                        }
+
+                        var markerHtml = '<div class="map-marker ' + markerClass + '" ' +
+                            'style="left: ' + item.x_coordinate + '%; top: ' + item.y_coordinate + '%;" ' +
+                            'data-kode="' + (item.kode || '-') + '" ' +
+                            'data-status="' + item.status_badge + '" ' +
+                            'data-jenis="' + (item.jenis || '-') + '" ' +
+                            'data-area="' + (item.area || '-') + '" ' +
+                            'data-device-type="' + (item.device_type || '-') + '"' +
+                            '>' + (item.kode || '') + '</div>';
+                        $('.map-container-custom').append(markerHtml);
+                    });
+
+                    // Reattach tooltip events to new markers
+                    attachMarkerTooltipEvents();
+                },
+                error: function(xhr, status, error) {
+                    console.error("AJAX Error:", error);
+                }
+            });
+        }
+
+        function attachMarkerTooltipEvents() {
+            $('.map-marker').off('mouseenter mouseleave mousemove').on('mouseenter', function(e) {
+                var $tooltip = $('#marker-tooltip');
+                $('#tt-kode').text($(this).data('kode'));
+                $('#tt-jenis').text($(this).data('jenis'));
+                $('#tt-area').text($(this).data('area'));
+
+                var status = $(this).data('status');
+                var $statusBadge = $('#tt-status');
+                $statusBadge.removeClass('bg-warning bg-success bg-danger text-dark');
+                if(status === 'Proses') {
+                    $statusBadge.addClass('bg-warning text-dark').text('Proses');
+                } else if(status === 'OK') {
+                    $statusBadge.addClass('bg-success').text('OK');
+                } else {
+                    $statusBadge.addClass('bg-danger').text('Abnormal');
+                }
+                $tooltip.show();
+            }).on('mouseleave', function() {
+                $('#marker-tooltip').hide();
+            }).on('mousemove', function(e) {
+                var $tooltip = $('#marker-tooltip');
+                var containerOffset = $('.map-container-custom').offset();
+                if(!containerOffset) return;
+
+                var containerScrollTop = $('.map-container-custom').scrollTop() || 0;
+                var containerScrollLeft = $('.map-container-custom').scrollLeft() || 0;
+
+                var relX = e.pageX - containerOffset.left + containerScrollLeft;
+                var relY = e.pageY - containerOffset.top + containerScrollTop;
+
+                var tooltipWidth = $tooltip.outerWidth();
+                var tooltipHeight = $tooltip.outerHeight();
+                var containerWidth = $('.map-container-custom')[0].scrollWidth;
+                var containerHeight = $('.map-container-custom')[0].scrollHeight;
+
+                var leftPos = relX + 15;
+                var topPos = relY + 15;
+
+                if(leftPos + tooltipWidth > containerWidth) {
+                    leftPos = relX - tooltipWidth - 15;
+                }
+                if(topPos + tooltipHeight > containerHeight) {
+                    topPos = relY - tooltipHeight - 15;
+                }
+
+                $tooltip.css({
+                    left: leftPos + 'px',
+                    top: topPos + 'px'
+                });
+            });
+        }
+
+        $('#filterStartDate, #filterEndDate').on('change', function() {
+            applyDateFilter();
+        });
+
+        $('#btnClearFilter').on('click', function() {
+            $('#filterStartDate').val('');
+            $('#filterEndDate').val('');
+            // Clear filter - reset to show all data
+            applyDateFilter();
+        });
+
+        // ===== AUTO-LOAD DATA ON PAGE FIRST LOAD =====
+        // Panggil applyDateFilter() saat page load untuk memastikan KPI cards ter-update dari backend
+        applyDateFilter();
+
         // Edit Button Click
         $('.btn-edit-case').on('click', function() {
             $('#edit_case_id').val($(this).data('id'));
@@ -774,8 +976,8 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
         cursor: 'pointer'
     };
 
-    var chartAPAR = new ApexCharts(document.querySelector("#chartAPAR"), APAR_options);
-    chartAPAR.render();
+    window.chartAPAR = new ApexCharts(document.querySelector("#chartAPAR"), APAR_options);
+    window.chartAPAR.render();
 
     var Hydrant_options = {
         series: [totalHydrantProses, totalHydrantOK, totalHydrantAbnormal],
@@ -794,8 +996,8 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
         cursor: 'pointer'
     };
 
-    var chartHydrant = new ApexCharts(document.querySelector("#chartHydrant"), Hydrant_options);
-    chartHydrant.render();
+    window.chartHydrant = new ApexCharts(document.querySelector("#chartHydrant"), Hydrant_options);
+    window.chartHydrant.render();
 </script>
 
 <!-- Javascript logic datatables -->

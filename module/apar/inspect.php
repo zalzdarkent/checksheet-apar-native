@@ -57,6 +57,10 @@ $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php",
                 <h5 class="mb-0">Tanggal & Foto Pemeriksaan</h5>
             </div>
             <div class="card-body">
+                <div class="alert alert-info d-flex align-items-center mb-3" role="alert">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <span><strong>Perhatian:</strong> 3 item pemeriksaan pertama (Exp. Date, Pressure, Weight CO2) <strong>WAJIB</strong> memiliki foto/bukti.</span>
+                </div>
                 <div class="row">
                     <div class="col-md-6">
                         <label class="form-label fw-semibold">Tanggal Pemeriksaan</label>
@@ -90,6 +94,7 @@ $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php",
                         </thead>
                         <tbody>
                             <?php
+                            $required_photo_items = ['exp_date', 'pressure', 'weight_co2'];
                             $items = [
                                 ['key' => 'exp_date', 'name' => 'Exp. Date (Maksimal 4 Tahun)', 'has_notes' => true],
                                 ['key' => 'pressure', 'name' => 'Pressure (Zona Hijau)', 'has_notes' => false],
@@ -109,10 +114,18 @@ $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php",
                             ];
                             
                             foreach ($items as $idx => $item):
+                                $is_required = in_array($item['key'], $required_photo_items);
+                                $row_class = $is_required ? 'required-photo-item' : '';
+                                $bg_class = $is_required ? 'bg-warning-light' : '';
                             ?>
-                            <tr>
+                            <tr class="<?php echo $row_class; ?>" style="<?php echo $is_required ? 'background-color: #fff8e1;' : ''; ?>">
                                 <td class="text-center align-middle"><?php echo $idx + 1; ?></td>
-                                <td class="align-middle"><?php echo $item['name']; ?></td>
+                                <td class="align-middle">
+                                    <?php echo $item['name']; ?>
+                                    <?php if ($is_required): ?>
+                                        <span class="badge bg-danger ms-2">📸 WAJIB FOTO</span>
+                                    <?php endif; ?>
+                                </td>
                                 <td class="text-center align-middle">
                                     <div class="btn-group btn-group-sm w-100" role="group">
                                         <input type="radio" class="btn-check" name="<?php echo $item['key']; ?>_ok" id="<?php echo $item['key']; ?>_ok" value="1">
@@ -123,7 +136,8 @@ $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php",
                                     </div>
                                 </td>
                                 <td>
-                                    <input type="file" name="<?php echo $item['key']; ?>_foto" accept="image/*" class="form-control form-control-sm">
+                                    <input type="file" name="<?php echo $item['key']; ?>_foto" accept="image/*" class="form-control form-control-sm photo-input" data-item="<?php echo $item['key']; ?>">
+                                    <small class="text-muted photo-status"></small>
                                 </td>
                                 <td>
                                     <?php if ($item['key'] === 'exp_date'): ?>
@@ -170,8 +184,67 @@ $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php",
 </div>
 
 <script>
+// Required photo items
+const requiredPhotoItems = ['exp_date', 'pressure', 'weight_co2'];
+
+// Real-time photo upload feedback
+document.querySelectorAll('.photo-input').forEach(input => {
+    input.addEventListener('change', function() {
+        const item = this.getAttribute('data-item');
+        const status = this.parentElement.querySelector('.photo-status');
+        
+        if (this.files && this.files.length > 0) {
+            this.classList.add('is-valid');
+            this.classList.remove('is-invalid');
+            status.textContent = '✓ Foto terupload';
+            status.style.color = '#28a745';
+            
+            // Highlight the required item row with green background
+            if (requiredPhotoItems.includes(item)) {
+                this.closest('tr').style.backgroundColor = '#d4edda';
+            }
+        } else {
+            this.classList.remove('is-valid');
+            status.textContent = '';
+            
+            if (requiredPhotoItems.includes(item)) {
+                this.closest('tr').style.backgroundColor = '#fff8e1';
+            }
+        }
+    });
+});
+
+// Form submission with photo validation
 document.getElementById('form-inspection').addEventListener('submit', function(e) {
     e.preventDefault();
+    
+    // Validate required photos
+    const missingPhotos = [];
+    requiredPhotoItems.forEach(item => {
+        const fileInput = document.querySelector(`input[name="${item}_foto"]`);
+        if (!fileInput.files || fileInput.files.length === 0) {
+            missingPhotos.push(item);
+        }
+    });
+    
+    if (missingPhotos.length > 0) {
+        const itemNames = {
+            'exp_date': 'Exp. Date',
+            'pressure': 'Pressure',
+            'weight_co2': 'Weight CO2'
+        };
+        
+        const missingList = missingPhotos.map(item => itemNames[item] || item).join(', ');
+        alert(`⚠️ WAJIB mengupload foto untuk:\n${missingList}\n\nSilakan upload foto sebelum menyimpan inspeksi.`);
+        
+        // Highlight missing photo rows
+        missingPhotos.forEach(item => {
+            const row = document.querySelector(`input[name="${item}_foto"]`).closest('tr');
+            row.style.borderLeft = '4px solid #dc3545';
+        });
+        
+        return;
+    }
     
     const formData = new FormData(this);
     formData.append('type', 'apar');
@@ -187,6 +260,10 @@ document.getElementById('form-inspection').addEventListener('submit', function(e
     })
     .then(response => response.json())
     .then(data => {
+        console.log('Server Response:', data);
+        if (data.debug) {
+            console.log('DEBUG INFO:', data.debug);
+        }
         if (data.status === 'success') {
             alert('Inspeksi berhasil disimpan!');
             window.location.href = data.redirect;
