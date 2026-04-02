@@ -109,11 +109,12 @@ function get_apar_abnormal_cases()
             a.code,
             a.location,
             a.area,
-            u.name as pic_name
+            aac.pic_id,
+            u.name as pic_name,
+            u.photo as pic_photo
             FROM [apar].[dbo].[apar_abnormal_cases] aac
             LEFT JOIN [apar].[dbo].[apars] a ON aac.apar_id = a.id
             LEFT JOIN [apar].[dbo].[users] u ON aac.pic_id = u.id
-            WHERE aac.status != 'Verified'
             ORDER BY aac.created_at DESC";
 
     $result = sqlsrv_query($koneksi, $sql);
@@ -233,7 +234,9 @@ function get_hydrant_abnormal_cases()
             h.code,
             h.location,
             h.area,
-            u.name as pic_name
+            hac.pic_id,
+            u.name as pic_name,
+            u.photo as pic_photo
             FROM [apar].[dbo].[hydrant_abnormal_cases] hac
             LEFT JOIN [apar].[dbo].[hydrants] h ON hac.hydrant_id = h.id
             LEFT JOIN [apar].[dbo].[users] u ON hac.pic_id = u.id

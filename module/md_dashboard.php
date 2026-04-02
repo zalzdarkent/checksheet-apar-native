@@ -1,6 +1,14 @@
 <?php
 include("actions/dashboard/ac_dashboard.php");
 
+$usersPIC = [];
+$resUsers = sqlsrv_query($koneksi, "SELECT id, name FROM [apar].[dbo].[users] WHERE is_active = 1 ORDER BY name ASC");
+if ($resUsers !== false) {
+    while ($u = sqlsrv_fetch_array($resUsers, SQLSRV_FETCH_ASSOC)) {
+        $usersPIC[] = $u;
+    }
+}
+
 // apar
 $totalApar = get_total_apar();
 $totalAparOK = get_total_apar_ok();
@@ -348,10 +356,19 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
                                     <th>Action</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody id="apar-tbody">
                                 <?php if (!empty($aparAbnormalCases)): ?>
                                     <?php $no = 1; ?>
-                                    <?php foreach ($aparAbnormalCases as $case): ?>
+                                    <?php foreach ($aparAbnormalCases as $case): 
+                                        $user_id = $_SESSION['user_id'] ?? null;
+                                        $user_role = strtolower($_SESSION['user_role'] ?? '');
+                                        
+                                        $is_pic = ($case['pic_id'] == $user_id);
+                                        $is_admin = ($user_role === 'admin');
+                                        $can_edit = (empty($case['pic_id']) || $is_pic || $is_admin);
+                                        
+                                        $isDisabled = ($case['status'] === 'Verified' || !$can_edit) ? 'disabled' : '';
+                                    ?>
                                         <tr>
                                             <td><?php echo $no++; ?></td>
                                             <td><?php echo htmlspecialchars($case['area'] ?? ''); ?></td>
@@ -360,7 +377,16 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
                                             <td><?php echo htmlspecialchars($case['abnormal_case'] ?? ''); ?></td>
                                             <td><?php echo htmlspecialchars($case['countermeasure'] ?? '-'); ?></td>
                                             <td><?php echo $case['due_date'] ? $case['due_date']->format('d/m/Y') : '-'; ?></td>
-                                            <td><?php echo htmlspecialchars($case['pic_name'] ?? '-'); ?></td>
+                                            <td>
+                                                <?php if (!empty($case['pic_name'])): ?>
+                                                    <div class="d-flex align-items-center">
+                                                        <img src="storage/users/<?php echo htmlspecialchars($case['pic_photo'] ?: 'default.png'); ?>" alt="PIC" class="avatar-img rounded-circle me-2" style="width: 25px; height: 25px;">
+                                                        <span><?php echo htmlspecialchars($case['pic_name']); ?></span>
+                                                    </div>
+                                                <?php else: ?>
+                                                    <span class="text-muted">-</span>
+                                                <?php endif; ?>
+                                            </td>
                                             <td>
                                                 <?php
                                                 $status = $case['status'];
@@ -368,8 +394,10 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
                                                     echo '<span class="badge bg-danger">Open</span>';
                                                 } elseif ($status === 'Closed') {
                                                     echo '<span class="badge bg-info">Closed</span>';
+                                                } elseif ($status === 'Verified') {
+                                                    echo '<span class="badge bg-success">Verified</span>';
                                                 } else {
-                                                    echo '<span class="badge bg-warning">' . htmlspecialchars($status) . '</span>';
+                                                    echo '<span class="badge bg-warning text-dark">' . htmlspecialchars($status) . '</span>';
                                                 }
                                                 ?>
                                             </td>
@@ -382,18 +410,34 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
                                                     <span class="text-muted">-</span>
                                                 <?php endif; ?>
                                             </td>
-                                            <td>
-                                                <a href="#" class="btn btn-sm btn-warning" title="Edit">
+                                            <td style="white-space: nowrap;">
+                                                <button class="btn btn-sm btn-warning mb-1 btn-edit-case" title="Edit" 
+                                                    data-id="<?php echo $case['id']; ?>" data-type="apar"
+                                                    data-abcase="<?php echo htmlspecialchars($case['abnormal_case'] ?? ''); ?>"
+                                                    data-counter="<?php echo htmlspecialchars($case['countermeasure'] ?? ''); ?>"
+                                                    data-due="<?php echo $case['due_date'] ? $case['due_date']->format('Y-m-d') : ''; ?>"
+                                                    data-pic="<?php echo htmlspecialchars($case['pic_id'] ?? ''); ?>"
+                                                    <?php echo $isDisabled; ?>>
                                                     <i class="fas fa-edit"></i>
-                                                </a>
-                                                <a href="#" class="btn btn-sm btn-success" title="Mark Verified">
+                                                </button>
+                                                <button class="btn btn-sm btn-primary mb-1 btn-update-status" title="Update Status"
+                                                    data-id="<?php echo $case['id']; ?>" data-type="apar"
+                                                    data-status="<?php echo htmlspecialchars($case['status'] ?? ''); ?>"
+                                                    data-abcase="<?php echo htmlspecialchars($case['abnormal_case'] ?? ''); ?>"
+                                                    <?php echo $isDisabled; ?>>
+                                                    <i class="fas fa-sync-alt"></i>
+                                                </button>
+                                                <?php if ($status === 'Closed' && $is_admin): ?>
+                                                <button class="btn btn-sm btn-success mb-1 btn-verify-case" title="Mark Verified"
+                                                    data-id="<?php echo $case['id']; ?>" data-type="apar">
                                                     <i class="fas fa-check"></i>
-                                                </a>
+                                                </button>
+                                                <?php endif; ?>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
                                 <?php endif; ?>
-                            </tbody>
+</tbody>
                         </table>
                     </div>
                 </div>
@@ -417,10 +461,19 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
                                     <th>Action</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody id="hydrant-tbody">
                                 <?php if (!empty($hydrantAbnormalCases)): ?>
                                     <?php $no = 1; ?>
-                                    <?php foreach ($hydrantAbnormalCases as $case): ?>
+                                    <?php foreach ($hydrantAbnormalCases as $case): 
+                                        $user_id = $_SESSION['user_id'] ?? null;
+                                        $user_role = strtolower($_SESSION['user_role'] ?? '');
+                                        
+                                        $is_pic = ($case['pic_id'] == $user_id);
+                                        $is_admin = ($user_role === 'admin');
+                                        $can_edit = (empty($case['pic_id']) || $is_pic || $is_admin);
+                                        
+                                        $isDisabled = ($case['status'] === 'Verified' || !$can_edit) ? 'disabled' : '';
+                                    ?>
                                         <tr>
                                             <td><?php echo $no++; ?></td>
                                             <td><?php echo htmlspecialchars($case['area'] ?? ''); ?></td>
@@ -429,7 +482,16 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
                                             <td><?php echo htmlspecialchars($case['abnormal_case'] ?? ''); ?></td>
                                             <td><?php echo htmlspecialchars($case['countermeasure'] ?? '-'); ?></td>
                                             <td><?php echo $case['due_date'] ? $case['due_date']->format('d/m/Y') : '-'; ?></td>
-                                            <td><?php echo htmlspecialchars($case['pic_name'] ?? '-'); ?></td>
+                                            <td>
+                                                <?php if (!empty($case['pic_name'])): ?>
+                                                    <div class="d-flex align-items-center">
+                                                        <img src="storage/users/<?php echo htmlspecialchars($case['pic_photo'] ?: 'default.png'); ?>" alt="PIC" class="avatar-img rounded-circle me-2" style="width: 25px; height: 25px;">
+                                                        <span><?php echo htmlspecialchars($case['pic_name']); ?></span>
+                                                    </div>
+                                                <?php else: ?>
+                                                    <span class="text-muted">-</span>
+                                                <?php endif; ?>
+                                            </td>
                                             <td>
                                                 <?php
                                                 $status = $case['status'];
@@ -437,8 +499,10 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
                                                     echo '<span class="badge bg-danger">Open</span>';
                                                 } elseif ($status === 'Closed') {
                                                     echo '<span class="badge bg-info">Closed</span>';
+                                                } elseif ($status === 'Verified') {
+                                                    echo '<span class="badge bg-success">Verified</span>';
                                                 } else {
-                                                    echo '<span class="badge bg-warning">' . htmlspecialchars($status) . '</span>';
+                                                    echo '<span class="badge bg-warning text-dark">' . htmlspecialchars($status) . '</span>';
                                                 }
                                                 ?>
                                             </td>
@@ -451,18 +515,34 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
                                                     <span class="text-muted">-</span>
                                                 <?php endif; ?>
                                             </td>
-                                            <td>
-                                                <a href="#" class="btn btn-sm btn-warning" title="Edit">
+                                            <td style="white-space: nowrap;">
+                                                <button class="btn btn-sm btn-warning mb-1 btn-edit-case" title="Edit" 
+                                                    data-id="<?php echo $case['id']; ?>" data-type="hydrant"
+                                                    data-abcase="<?php echo htmlspecialchars($case['abnormal_case'] ?? ''); ?>"
+                                                    data-counter="<?php echo htmlspecialchars($case['countermeasure'] ?? ''); ?>"
+                                                    data-due="<?php echo $case['due_date'] ? $case['due_date']->format('Y-m-d') : ''; ?>"
+                                                    data-pic="<?php echo htmlspecialchars($case['pic_id'] ?? ''); ?>"
+                                                    <?php echo $isDisabled; ?>>
                                                     <i class="fas fa-edit"></i>
-                                                </a>
-                                                <a href="#" class="btn btn-sm btn-success" title="Mark Verified">
+                                                </button>
+                                                <button class="btn btn-sm btn-primary mb-1 btn-update-status" title="Update Status"
+                                                    data-id="<?php echo $case['id']; ?>" data-type="hydrant"
+                                                    data-status="<?php echo htmlspecialchars($case['status'] ?? ''); ?>"
+                                                    data-abcase="<?php echo htmlspecialchars($case['abnormal_case'] ?? ''); ?>"
+                                                    <?php echo $isDisabled; ?>>
+                                                    <i class="fas fa-sync-alt"></i>
+                                                </button>
+                                                <?php if ($status === 'Closed' && $is_admin): ?>
+                                                <button class="btn btn-sm btn-success mb-1 btn-verify-case" title="Mark Verified"
+                                                    data-id="<?php echo $case['id']; ?>" data-type="hydrant">
                                                     <i class="fas fa-check"></i>
-                                                </a>
+                                                </button>
+                                                <?php endif; ?>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
                                 <?php endif; ?>
-                            </tbody>
+</tbody>
                         </table>
                     </div>
                 </div>
@@ -542,6 +622,249 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
         </div>
     </div>
     <!-- End Chart Detail Modal -->
+
+    <!-- Modal Edit Case -->
+    <div class="modal fade" id="editCaseModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="formEditCase">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold">Edit Abnormal Case</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="action" value="update_detail">
+                        <input type="hidden" name="id" id="edit_case_id">
+                        <input type="hidden" name="type" id="edit_case_type">
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Abnormal Case / Masalah</label>
+                            <textarea class="form-control" name="abnormal_case" id="edit_abnormal_case" rows="2" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Countermeasure / Tindakan</label>
+                            <textarea class="form-control" name="countermeasure" id="edit_countermeasure" rows="2"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Due Date</label>
+                            <input type="date" class="form-control" name="due_date" id="edit_due_date">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">PIC (Person in Charge)</label>
+                            <select class="form-select" name="pic_id" id="edit_pic_id">
+                                <option value="">-- No PIC Assigned --</option>
+                                <?php foreach ($usersPIC as $u): ?>
+                                    <option value="<?php echo $u['id']; ?>"><?php echo htmlspecialchars($u['name']); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                            <small class="text-muted">Hanya Admin dan PIC terpilih yang bisa mengupdate kasus ini kedepannya.</small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary" id="btnSaveEdit">Simpan Perubahan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Update Status -->
+    <div class="modal fade" id="updateStatusModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="formUpdateStatus" enctype="multipart/form-data">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold">Update Status Kasus</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="action" value="update_status">
+                        <input type="hidden" name="id" id="status_case_id">
+                        <input type="hidden" name="type" id="status_case_type">
+                        <input type="hidden" id="status_abnormal_text">
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Update Status</label>
+                            <select class="form-select" name="status" id="status_select" required>
+                                <option value="Open">Open</option>
+                                <option value="On Progress">On Progress</option>
+                                <option value="Closed">Closed</option>
+                            </select>
+                        </div>
+                        
+                        <div id="repairPhotoDiv" class="mb-3" style="display:none;">
+                            <label class="form-label">Foto Bukti Perbaikan <span class="text-danger">*</span></label>
+                            <input type="file" class="form-control" name="repair_photo" id="repair_photo" accept="image/*">
+                            <small class="text-muted">Wajib diupload saat menutup kasus.</small>
+                        </div>
+
+                        <div id="newExpiredDiv" class="mb-3" style="display:none;">
+                            <label class="form-label">New Expired Date <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" name="new_expired_date" id="new_expired_date">
+                            <small class="text-muted">Kasus terkait expired, wajib input tanggal kedaluwarsa baru (akan mengupdate data master unit).</small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary" id="btnSaveStatus">Update Status</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+    $(document).ready(function() {
+        // Edit Button Click
+        $('.btn-edit-case').on('click', function() {
+            $('#edit_case_id').val($(this).data('id'));
+            $('#edit_case_type').val($(this).data('type'));
+            $('#edit_abnormal_case').val($(this).data('abcase'));
+            $('#edit_countermeasure').val($(this).data('counter'));
+            $('#edit_due_date').val($(this).data('due'));
+            $('#edit_pic_id').val($(this).data('pic'));
+            
+            var modal = new bootstrap.Modal(document.getElementById('editCaseModal'));
+            modal.show();
+        });
+
+        // Status Button Click
+        $('.btn-update-status').on('click', function() {
+            var currStatus = $(this).data('status');
+            var abcase = $(this).data('abcase');
+            
+            if(currStatus === 'Verified') {
+                Swal.fire('Locked', 'Kasus yang sudah Verified tidak bisa diubah statusnya.', 'warning');
+                return;
+            }
+
+            $('#status_case_id').val($(this).data('id'));
+            $('#status_case_type').val($(this).data('type'));
+            $('#status_select').val(currStatus);
+            $('#status_abnormal_text').val(abcase);
+            
+            $('#status_select').trigger('change');
+            
+            var modal = new bootstrap.Modal(document.getElementById('updateStatusModal'));
+            modal.show();
+        });
+
+        // Logic dynamic req field depending on status
+        $('#status_select').on('change', function() {
+            var st = $(this).val();
+            var abcase = $('#status_abnormal_text').val() || '';
+            
+            if (st === 'Closed') {
+                $('#repairPhotoDiv').show();
+                $('#repair_photo').attr('required', true);
+                
+                if (abcase.toUpperCase().indexOf('EXPIRED') !== -1) {
+                    $('#newExpiredDiv').show();
+                    $('#new_expired_date').attr('required', true);
+                } else {
+                    $('#newExpiredDiv').hide();
+                    $('#new_expired_date').removeAttr('required');
+                }
+            } else {
+                $('#repairPhotoDiv').hide();
+                $('#repair_photo').removeAttr('required');
+                
+                $('#newExpiredDiv').hide();
+                $('#new_expired_date').removeAttr('required');
+            }
+        });
+
+        // Submit Edit Form
+        $('#formEditCase').on('submit', function(e) {
+            e.preventDefault();
+            $('#btnSaveEdit').prop('disabled', true).text('Menyimpan...');
+            $.ajax({
+                url: 'actions/dashboard/ac_abnormal.php',
+                type: 'POST',
+                data: $(this).serialize(),
+                success: function(resp) {
+                    var res = JSON.parse(resp);
+                    if(res.status == 'success') {
+                        Swal.fire('Sukses', res.message, 'success').then(() => window.location.reload());
+                    } else {
+                        Swal.fire('Gagal', res.message, 'error');
+                        $('#btnSaveEdit').prop('disabled', false).text('Simpan Perubahan');
+                    }
+                },
+                error: function() {
+                    Swal.fire('Error', 'Terjadi kesalahan sistem', 'error');
+                    $('#btnSaveEdit').prop('disabled', false).text('Simpan Perubahan');
+                }
+            });
+        });
+
+        // Submit Status Form
+        $('#formUpdateStatus').on('submit', function(e) {
+            e.preventDefault();
+            $('#btnSaveStatus').prop('disabled', true).text('Mengupdate...');
+            
+            var formData = new FormData(this);
+            $.ajax({
+                url: 'actions/dashboard/ac_abnormal.php',
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function(resp) {
+                    var res = JSON.parse(resp);
+                    if(res.status == 'success') {
+                        Swal.fire('Sukses', res.message, 'success').then(() => window.location.reload());
+                    } else {
+                        Swal.fire('Gagal', res.message, 'error');
+                        $('#btnSaveStatus').prop('disabled', false).text('Update Status');
+                    }
+                },
+                error: function() {
+                    Swal.fire('Error', 'Terjadi kesalahan sistem', 'error');
+                    $('#btnSaveStatus').prop('disabled', false).text('Update Status');
+                }
+            });
+        });
+
+        // Verify Button
+        $('.btn-verify-case').on('click', function() {
+            var caseId = $(this).data('id');
+            var caseType = $(this).data('type');
+            
+            Swal.fire({
+                title: 'Konfirmasi Verifikasi',
+                text: 'Apakah Anda yakin ingin memverifikasi kasus ini? Setelah diverifikasi, data tidak bisa diubah lagi.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#28a745',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, Verifikasi!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: 'actions/dashboard/ac_abnormal.php',
+                        type: 'POST',
+                        data: {
+                            action: 'verify_case',
+                            id: caseId,
+                            type: caseType
+                        },
+                        success: function(resp) {
+                            var res = JSON.parse(resp);
+                            if(res.status == 'success') {
+                                Swal.fire('Terverifikasi!', res.message, 'success').then(() => window.location.reload());
+                            } else {
+                                Swal.fire('Gagal', res.message, 'error');
+                            }
+                        }
+                    });
+                }
+            });
+        });
+    });
+    </script>
 
 </div>
 
