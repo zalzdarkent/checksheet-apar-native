@@ -9,8 +9,20 @@ $monthTitle = "All Time";
 if ($month !== 'all') {
     $monthNum = intval($month);
     $year = date('Y');
-    $monthNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 
-                   'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    $monthNames = [
+        'Januari',
+        'Februari',
+        'Maret',
+        'April',
+        'Mei',
+        'Juni',
+        'Juli',
+        'Agustus',
+        'September',
+        'Oktober',
+        'November',
+        'Desember'
+    ];
     $monthTitle = ($monthNum >= 1 && $monthNum <= 12) ? $monthNames[$monthNum - 1] . " " . $year : "All Time";
     $dateFilter = "AND MONTH(bi.inspection_date) = $monthNum AND YEAR(bi.inspection_date) = $year";
 }
@@ -60,10 +72,11 @@ if ($stmt !== false && $row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
 }
 
 // Function to get inspections data
-function getInspections($type, $dateFilter) {
+function getInspections($type, $dateFilter)
+{
     global $koneksi;
     $data = array();
-    
+
     try {
         if ($type === 'apar') {
             $query = "SELECT TOP 5
@@ -116,32 +129,51 @@ function getInspections($type, $dateFilter) {
                       WHERE 1=1 $dateFilter
                       ORDER BY bi.inspection_date DESC";
         }
-        
+
         $stmt = sqlsrv_query($koneksi, $query);
-        
+
         if ($stmt === false) {
             error_log("Query Error for $type: " . print_r(sqlsrv_errors(), true));
             return array();
         }
-        
+
         while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
             if ($type === 'apar') {
                 $params = array(
-                    $row['exp_date_ok'], $row['pressure_ok'], $row['weight_co2_ok'],
-                    $row['tube_ok'], $row['hose_ok'], $row['bracket_ok'], $row['wi_ok'],
-                    $row['form_kejadian_ok'], $row['sign_box_ok'], $row['sign_triangle_ok'],
-                    $row['marking_tiger_ok'], $row['marking_beam_ok'], $row['sr_apar_ok'],
-                    $row['kocok_apar_ok'], $row['label_ok']
+                    $row['exp_date_ok'],
+                    $row['pressure_ok'],
+                    $row['weight_co2_ok'],
+                    $row['tube_ok'],
+                    $row['hose_ok'],
+                    $row['bracket_ok'],
+                    $row['wi_ok'],
+                    $row['form_kejadian_ok'],
+                    $row['sign_box_ok'],
+                    $row['sign_triangle_ok'],
+                    $row['marking_tiger_ok'],
+                    $row['marking_beam_ok'],
+                    $row['sr_apar_ok'],
+                    $row['kocok_apar_ok'],
+                    $row['label_ok']
                 );
             } else {
                 $params = array(
-                    $row['body_hydrant_ok'], $row['selang_ok'], $row['couple_join_ok'],
-                    $row['nozzle_ok'], $row['check_sheet_ok'], $row['valve_kran_ok'], $row['lampu_ok'],
-                    $row['cover_lampu_ok'], $row['box_display_ok'], $row['konsul_hydrant_ok'],
-                    $row['jr_ok'], $row['marking_ok'], $row['label_ok']
+                    $row['body_hydrant_ok'],
+                    $row['selang_ok'],
+                    $row['couple_join_ok'],
+                    $row['nozzle_ok'],
+                    $row['check_sheet_ok'],
+                    $row['valve_kran_ok'],
+                    $row['lampu_ok'],
+                    $row['cover_lampu_ok'],
+                    $row['box_display_ok'],
+                    $row['konsul_hydrant_ok'],
+                    $row['jr_ok'],
+                    $row['marking_ok'],
+                    $row['label_ok']
                 );
             }
-            
+
             $all_ok = true;
             foreach ($params as $param) {
                 if ($param != 1) {
@@ -149,9 +181,9 @@ function getInspections($type, $dateFilter) {
                     break;
                 }
             }
-            
+
             $status = $all_ok ? 'OK' : 'Abnormal';
-            
+
             // Format date - handle DateTime object properly
             $formatted_date = '-';
             if ($row['inspection_date'] !== null) {
@@ -171,13 +203,13 @@ function getInspections($type, $dateFilter) {
                     }
                 }
             }
-            
+
             $data[] = array(
-                'id' => (int)$row['id'],
+                'id' => (int) $row['id'],
                 'inspection_date' => $formatted_date,
-                'code' => (string)$row['code'],
-                'area' => (string)$row['area'],
-                'location' => (string)$row['location'],
+                'code' => (string) $row['code'],
+                'area' => (string) $row['area'],
+                'location' => (string) $row['location'],
                 'status' => $status
             );
         }
@@ -185,7 +217,7 @@ function getInspections($type, $dateFilter) {
         // Return empty array if error
         error_log("Exception in getInspections($type): " . $e->getMessage());
     }
-    
+
     return $data;
 }
 
@@ -232,11 +264,25 @@ $hydrantData = getInspections('hydrant', $dateFilter);
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
         }
 
-        .border-left-primary { border-left-color: #007bff !important; }
-        .border-left-warning { border-left-color: #ffc107 !important; }
-        .border-left-success { border-left-color: #28a745 !important; }
-        .border-left-danger { border-left-color: #dc3545 !important; }
-        .border-left-info { border-left-color: #17a2b8 !important; }
+        .border-left-primary {
+            border-left-color: #007bff !important;
+        }
+
+        .border-left-warning {
+            border-left-color: #ffc107 !important;
+        }
+
+        .border-left-success {
+            border-left-color: #28a745 !important;
+        }
+
+        .border-left-danger {
+            border-left-color: #dc3545 !important;
+        }
+
+        .border-left-info {
+            border-left-color: #17a2b8 !important;
+        }
 
         .status-card-custom h3 {
             font-size: 2.2rem;
@@ -309,7 +355,8 @@ $hydrantData = getInspections('hydrant', $dateFilter);
             margin-bottom: 0;
         }
 
-        .table-slim td, .table-slim th {
+        .table-slim td,
+        .table-slim th {
             padding: 6px 10px;
             vertical-align: middle;
         }
@@ -374,8 +421,13 @@ $hydrantData = getInspections('hydrant', $dateFilter);
             color: #fff;
         }
 
-        .breadcrumb-item a { color: #3498db; }
-        .breadcrumb-item.active { color: #666; }
+        .breadcrumb-item a {
+            color: #3498db;
+        }
+
+        .breadcrumb-item.active {
+            color: #666;
+        }
     </style>
 
     <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
@@ -452,7 +504,7 @@ $hydrantData = getInspections('hydrant', $dateFilter);
                         <p class="text-muted">Total Hydrant</p>
                         <h3 id="total-hydrant"><?php echo $total_hydrant; ?></h3>
                     </div>
-                    <i class="fas fa-water fa-2x" style="color: #ffc107; opacity: 0.3;"></i>
+                    <i class="fas fa-shield-alt fa-2x" style="color: #ffc107; opacity: 0.3;"></i>
                 </div>
                 <small class="text-muted">Unit aktif</small>
             </div>
@@ -512,12 +564,14 @@ $hydrantData = getInspections('hydrant', $dateFilter);
                     <!-- Nav Tabs -->
                     <ul class="nav nav-tabs" role="tablist">
                         <li class="nav-item">
-                            <button class="nav-link active" id="apar-tab" data-bs-toggle="tab" data-bs-target="#apar-content" type="button" role="tab">
+                            <button class="nav-link active" id="apar-tab" data-bs-toggle="tab"
+                                data-bs-target="#apar-content" type="button" role="tab">
                                 <i class="fas fa-fire-extinguisher"></i> APAR Inspections
                             </button>
                         </li>
                         <li class="nav-item">
-                            <button class="nav-link" id="hydrant-tab" data-bs-toggle="tab" data-bs-target="#hydrant-content" type="button" role="tab">
+                            <button class="nav-link" id="hydrant-tab" data-bs-toggle="tab"
+                                data-bs-target="#hydrant-content" type="button" role="tab">
                                 <i class="fas fa-water"></i> Hydrant Inspections
                             </button>
                         </li>
@@ -540,26 +594,28 @@ $hydrantData = getInspections('hydrant', $dateFilter);
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <?php 
+                                        <?php
                                         if (!empty($aparData)):
                                             foreach ($aparData as $index => $row):
                                                 $badgeClass = $row['status'] === 'OK' ? 'status-ok' : 'status-abnormal';
-                                        ?>
-                                        <tr>
-                                            <td><?php echo $index + 1; ?></td>
-                                            <td><?php echo htmlspecialchars($row['inspection_date']); ?></td>
-                                            <td><?php echo htmlspecialchars($row['code']); ?></td>
-                                            <td><?php echo htmlspecialchars($row['area']); ?></td>
-                                            <td><?php echo htmlspecialchars($row['location']); ?></td>
-                                            <td><span class="status-badge <?php echo $badgeClass; ?>"><?php echo $row['status']; ?></span></td>
-                                        </tr>
-                                        <?php
+                                                ?>
+                                                <tr>
+                                                    <td><?php echo $index + 1; ?></td>
+                                                    <td><?php echo htmlspecialchars($row['inspection_date']); ?></td>
+                                                    <td><?php echo htmlspecialchars($row['code']); ?></td>
+                                                    <td><?php echo htmlspecialchars($row['area']); ?></td>
+                                                    <td><?php echo htmlspecialchars($row['location']); ?></td>
+                                                    <td><span
+                                                            class="status-badge <?php echo $badgeClass; ?>"><?php echo $row['status']; ?></span>
+                                                    </td>
+                                                </tr>
+                                                <?php
                                             endforeach;
                                         else:
-                                        ?>
-                                        <tr>
-                                            <td colspan="6" class="text-center text-muted">Tidak ada data inspeksi</td>
-                                        </tr>
+                                            ?>
+                                            <tr>
+                                                <td colspan="6" class="text-center text-muted">Tidak ada data inspeksi</td>
+                                            </tr>
                                         <?php endif; ?>
                                     </tbody>
                                 </table>
@@ -581,26 +637,28 @@ $hydrantData = getInspections('hydrant', $dateFilter);
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <?php 
+                                        <?php
                                         if (!empty($hydrantData)):
                                             foreach ($hydrantData as $index => $row):
                                                 $badgeClass = $row['status'] === 'OK' ? 'status-ok' : 'status-abnormal';
-                                        ?>
-                                        <tr>
-                                            <td><?php echo $index + 1; ?></td>
-                                            <td><?php echo htmlspecialchars($row['inspection_date']); ?></td>
-                                            <td><?php echo htmlspecialchars($row['code']); ?></td>
-                                            <td><?php echo htmlspecialchars($row['area']); ?></td>
-                                            <td><?php echo htmlspecialchars($row['location']); ?></td>
-                                            <td><span class="status-badge <?php echo $badgeClass; ?>"><?php echo $row['status']; ?></span></td>
-                                        </tr>
-                                        <?php
+                                                ?>
+                                                <tr>
+                                                    <td><?php echo $index + 1; ?></td>
+                                                    <td><?php echo htmlspecialchars($row['inspection_date']); ?></td>
+                                                    <td><?php echo htmlspecialchars($row['code']); ?></td>
+                                                    <td><?php echo htmlspecialchars($row['area']); ?></td>
+                                                    <td><?php echo htmlspecialchars($row['location']); ?></td>
+                                                    <td><span
+                                                            class="status-badge <?php echo $badgeClass; ?>"><?php echo $row['status']; ?></span>
+                                                    </td>
+                                                </tr>
+                                                <?php
                                             endforeach;
                                         else:
-                                        ?>
-                                        <tr>
-                                            <td colspan="6" class="text-center text-muted">Tidak ada data inspeksi</td>
-                                        </tr>
+                                            ?>
+                                            <tr>
+                                                <td colspan="6" class="text-center text-muted">Tidak ada data inspeksi</td>
+                                            </tr>
                                         <?php endif; ?>
                                     </tbody>
                                 </table>
@@ -614,102 +672,102 @@ $hydrantData = getInspections('hydrant', $dateFilter);
 </div>
 
 <script>
-$(document).ready(function() {
-    let aparTable = null;
-    let hydrantTable = null;
+    $(document).ready(function () {
+        let aparTable = null;
+        let hydrantTable = null;
 
-    // Initialize DataTables on existing HTML tables
-    function initializeDataTables() {
-        aparTable = $('#table-apar').DataTable({
-            pageLength: 10,
-            responsive: true,
-            searching: true,
-            info: true,
-            paging: true,
-            ordering: true,
-            language: {
-                emptyTable: "Tidak ada data inspeksi",
-                search: "Search:",
-                lengthMenu: "Show _MENU_ entries",
-                info: "Showing _START_ to _END_ of _TOTAL_ entries",
-                paginate: {
-                    first: "First",
-                    last: "Last",
-                    next: "Next",
-                    previous: "Previous"
-                }
-            },
-            columnDefs: [
-                { orderable: false, targets: 0 },
-                { orderable: false, targets: 5 }
-            ]
-        });
+        // Initialize DataTables on existing HTML tables
+        function initializeDataTables() {
+            aparTable = $('#table-apar').DataTable({
+                pageLength: 10,
+                responsive: true,
+                searching: true,
+                info: true,
+                paging: true,
+                ordering: true,
+                language: {
+                    emptyTable: "Tidak ada data inspeksi",
+                    search: "Search:",
+                    lengthMenu: "Show _MENU_ entries",
+                    info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                    paginate: {
+                        first: "First",
+                        last: "Last",
+                        next: "Next",
+                        previous: "Previous"
+                    }
+                },
+                columnDefs: [
+                    { orderable: false, targets: 0 },
+                    { orderable: false, targets: 5 }
+                ]
+            });
 
-        hydrantTable = $('#table-hydrant').DataTable({
-            pageLength: 10,
-            responsive: true,
-            searching: true,
-            info: true,
-            paging: true,
-            ordering: true,
-            language: {
-                emptyTable: "Tidak ada data inspeksi",
-                search: "Search:",
-                lengthMenu: "Show _MENU_ entries",
-                info: "Showing _START_ to _END_ of _TOTAL_ entries",
-                paginate: {
-                    first: "First",
-                    last: "Last",
-                    next: "Next",
-                    previous: "Previous"
-                }
-            },
-            columnDefs: [
-                { orderable: false, targets: 0 },
-                { orderable: false, targets: 5 }
-            ]
-        });
-    }
-
-    // Apply Filter - Reload page with month parameter
-    $('#btn-apply-filter').on('click', function() {
-        const month = $('#month-filter').val();
-        const currentUrl = new URL(window.location);
-        currentUrl.searchParams.set('month', month);
-        window.location.href = currentUrl.toString();
-    });
-
-    // Export Functions - Bimonthly Format & Detail Data
-    function exportReport(type, format) {
-        if (format === 'excel') {
-            window.location.href = '../../actions/report/ac_export_excel_new.php?type=' + type;
-        } else if (format === 'pdf') {
-            window.location.href = '../../actions/report/ac_export_pdf.php?type=' + type;
+            hydrantTable = $('#table-hydrant').DataTable({
+                pageLength: 10,
+                responsive: true,
+                searching: true,
+                info: true,
+                paging: true,
+                ordering: true,
+                language: {
+                    emptyTable: "Tidak ada data inspeksi",
+                    search: "Search:",
+                    lengthMenu: "Show _MENU_ entries",
+                    info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                    paginate: {
+                        first: "First",
+                        last: "Last",
+                        next: "Next",
+                        previous: "Previous"
+                    }
+                },
+                columnDefs: [
+                    { orderable: false, targets: 0 },
+                    { orderable: false, targets: 5 }
+                ]
+            });
         }
-    }
 
-    $('.btn-apar-excel').on('click', function() {
-        exportReport('apar', 'excel');
+        // Apply Filter - Reload page with month parameter
+        $('#btn-apply-filter').on('click', function () {
+            const month = $('#month-filter').val();
+            const currentUrl = new URL(window.location);
+            currentUrl.searchParams.set('month', month);
+            window.location.href = currentUrl.toString();
+        });
+
+        // Export Functions - Bimonthly Format & Detail Data
+        function exportReport(type, format) {
+            if (format === 'excel') {
+                window.location.href = '../../actions/report/ac_export_excel_new.php?type=' + type;
+            } else if (format === 'pdf') {
+                window.location.href = '../../actions/report/ac_export_pdf.php?type=' + type;
+            }
+        }
+
+        $('.btn-apar-excel').on('click', function () {
+            exportReport('apar', 'excel');
+        });
+
+        $('.btn-apar-pdf').on('click', function () {
+            exportReport('apar', 'pdf');
+        });
+
+        $('.btn-hydrant-excel').on('click', function () {
+            exportReport('hydrant', 'excel');
+        });
+
+        $('.btn-hydrant-pdf').on('click', function () {
+            exportReport('hydrant', 'pdf');
+        });
+
+        // Set current filter value
+        const urlParams = new URLSearchParams(window.location.search);
+        const monthParam = urlParams.get('month') || 'all';
+        $('#month-filter').val(monthParam);
+
+        // Initialize DataTables
+        initializeDataTables();
     });
-
-    $('.btn-apar-pdf').on('click', function() {
-        exportReport('apar', 'pdf');
-    });
-
-    $('.btn-hydrant-excel').on('click', function() {
-        exportReport('hydrant', 'excel');
-    });
-
-    $('.btn-hydrant-pdf').on('click', function() {
-        exportReport('hydrant', 'pdf');
-    });
-
-    // Set current filter value
-    const urlParams = new URLSearchParams(window.location.search);
-    const monthParam = urlParams.get('month') || 'all';
-    $('#month-filter').val(monthParam);
-
-    // Initialize DataTables
-    initializeDataTables();
-});
 </script>
