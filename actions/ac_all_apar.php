@@ -40,7 +40,14 @@ $apar_data = [];
 
 if ($result !== false) {
     while ($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)) {
+        $is_expired = false;
+        
         if ($row['expired_date'] instanceof DateTime) {
+            $today = new DateTime();
+            $today->setTime(0, 0, 0);
+            $expDate = clone $row['expired_date'];
+            $expDate->setTime(0, 0, 0);
+            $is_expired = $expDate <= $today;
             $row['expired_date'] = $row['expired_date']->format('Y-m-d H:i:s');
         } else {
             $row['expired_date'] = '-';
@@ -55,6 +62,12 @@ if ($result !== false) {
         // Clean values
         $row['type'] = $row['type'] ?: 'N/A';
         $row['weight'] = $row['weight'] ?: '-';
+        $row['is_expired'] = $is_expired;
+        
+        // If expired, override status to 'Expired'
+        if ($is_expired) {
+            $row['status'] = 'Expired';
+        }
         
         $apar_data[] = $row;
     }

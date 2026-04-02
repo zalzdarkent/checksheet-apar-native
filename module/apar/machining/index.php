@@ -289,6 +289,70 @@ $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php",
             transform: scale(1.1);
             color: #fff;
         }
+
+        /* Expired APAR Animation */
+        .apar-card.expired {
+            border: 2px solid #e74c3c;
+            box-shadow: 0 0 20px rgba(231, 76, 60, 0.6);
+        }
+
+        .apar-card.expired .apar-code {
+            animation: blink-red 1s infinite;
+            color: #e74c3c;
+        }
+
+        @keyframes blink-red {
+            0%, 49%, 100% {
+                color: #e74c3c;
+                text-shadow: 0 0 10px rgba(231, 76, 60, 0.8);
+            }
+            50%, 99% {
+                color: #fff;
+                text-shadow: 0 0 5px rgba(231, 76, 60, 0.4);
+            }
+        }
+
+        .apar-card.expired .status-badge {
+            animation: pulse-red 1.5s infinite;
+        }
+
+        @keyframes pulse-red {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7);
+            }
+            50% {
+                box-shadow: 0 0 0 8px rgba(231, 76, 60, 0);
+            }
+        }
+
+        /* Expired Indicator Badge */
+        .expired-indicator {
+            position: absolute;
+            top: 50px;
+            right: 10px;
+            background: #e74c3c;
+            color: #fff;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 2px 8px rgba(231, 76, 60, 0.6);
+            animation: pulse-badge 2s infinite;
+        }
+
+        @keyframes pulse-badge {
+            0%, 100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.8;
+                transform: scale(1.05);
+            }
+        }
     </style>
 
     <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
@@ -334,7 +398,8 @@ $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php",
         <?php else: ?>
             <?php foreach ($apar_data as $item): ?>
                 <?php $statusClass = ($item['status'] === 'OK' || $item['status'] === 'Good') ? 'status-ok' : 'status-abnormal'; ?>
-                <div class="apar-card <?php echo $item['is_active'] == 0 ? 'inactive' : ''; ?>" data-id="<?php echo $item['id']; ?>">
+                <?php $expiredClass = (isset($item['is_expired']) && $item['is_expired']) ? 'expired' : ''; ?>
+                <div class="apar-card <?php echo $item['is_active'] == 0 ? 'inactive' : ''; ?> <?php echo $expiredClass; ?>" data-id="<?php echo $item['id']; ?>" data-expired="<?php echo (isset($item['is_expired']) && $item['is_expired']) ? '1' : '0'; ?>">
                     <input type="checkbox" class="card-checkbox item-checkbox">
                     <button class="status-toggle-btn <?php echo $item['is_active'] == 0 ? 'is-inactive' : ''; ?>" 
                             data-id="<?php echo $item['id']; ?>" 
@@ -342,6 +407,12 @@ $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php",
                             title="<?php echo $item['is_active'] == 0 ? 'Activate' : 'Inactivate'; ?>">
                         <i class="fas fa-power-off"></i>
                     </button>
+                    <?php if (isset($item['is_expired']) && $item['is_expired']): ?>
+                        <div class="expired-indicator">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <span>EXPIRED</span>
+                        </div>
+                    <?php endif; ?>
 
                     <div class="apar-qr-placeholder">
                         <?php 
@@ -632,11 +703,12 @@ $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php",
         function createCardHtml(item) {
             const statusClass = (item.status === 'OK' || item.status === 'Good') ? 'status-ok' : 'status-abnormal';
             const inactiveClass = item.is_active == 0 ? 'inactive' : '';
+            const expiredClass = (item.is_expired) ? 'expired' : '';
             const btnInactiveClass = item.is_active == 0 ? 'is-inactive' : '';
             const btnTitle = item.is_active == 0 ? 'Activate' : 'Inactivate';
 
             return `
-                <div class="apar-card ${inactiveClass}" data-id="${item.id}">
+                <div class="apar-card ${inactiveClass} ${expiredClass}" data-id="${item.id}" data-expired="${item.is_expired ? '1' : '0'}">
                     <input type="checkbox" class="card-checkbox item-checkbox">
                     <button class="status-toggle-btn ${btnInactiveClass}" 
                             data-id="${item.id}" 
@@ -644,6 +716,7 @@ $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php",
                             title="${btnTitle}">
                         <i class="fas fa-power-off"></i>
                     </button>
+                    ${item.is_expired ? `<div class="expired-indicator"><i class="fas fa-exclamation-circle"></i><span>EXPIRED</span></div>` : ''}
                     
                     <div class="apar-qr-placeholder">
                         <img src="actions/ac_generate_qrcode.php?data=${encodeURIComponent('<?php echo $base_url; ?>index.php?page=apar-detail&id=' + item.id)}" alt="QR Code" class="qr-img">

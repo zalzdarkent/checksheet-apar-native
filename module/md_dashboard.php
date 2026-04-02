@@ -250,13 +250,25 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
                                 <?php if (empty($aparAbnormalCases)): ?>
                                     <div class="text-center text-muted mt-5"><i class="fas fa-check-circle" style="font-size:2rem; color:var(--c-ok); margin-bottom:5px;"></i><br>Zero issues.</div>
                                 <?php else: ?>
-                                    <?php foreach ($aparAbnormalCases as $case): 
+                                    <?php 
+                                    $verifiedHeaderShown = false;
+                                    foreach ($aparAbnormalCases as $case): 
                                         $user_id = $_SESSION['user_id'] ?? null;
                                         $user_role = strtolower($_SESSION['user_role'] ?? '');
                                         $can_edit = (empty($case['pic_id']) || $case['pic_id'] == $user_id || $user_role === 'admin');
                                         $isDisabled = ($case['status'] === 'Verified' || !$can_edit) ? 'disabled' : '';
                                         $vClass = ($case['status'] === 'Verified') ? 'verified' : '';
+                                        
+                                        // Show verified header once
+                                        if ($case['status'] === 'Verified' && !$verifiedHeaderShown):
+                                            $verifiedHeaderShown = true;
                                     ?>
+                                    <div style="border-top: 2px solid #ddd; margin: 15px 0; padding-top: 15px;">
+                                        <div style="text-align: center; color: #888; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">
+                                            <i class="fas fa-archive"></i> Verified Cases (Archive)
+                                        </div>
+                                    </div>
+                                    <?php endif; ?>
                                     <div class="case-item <?= $vClass ?>">
                                         <div class="case-item-title">
                                             <span><i class="fas fa-fire-extinguisher text-danger"></i> <?= htmlspecialchars($case['code']) ?> - <?= htmlspecialchars($case['area']) ?></span>
@@ -302,13 +314,25 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
                                 <?php if (empty($hydrantAbnormalCases)): ?>
                                     <div class="text-center text-muted mt-5"><i class="fas fa-check-circle" style="font-size:2rem; color:var(--c-ok); margin-bottom:5px;"></i><br>Zero issues.</div>
                                 <?php else: ?>
-                                    <?php foreach ($hydrantAbnormalCases as $case): 
+                                    <?php 
+                                    $verifiedHeaderShown = false;
+                                    foreach ($hydrantAbnormalCases as $case): 
                                         $user_id = $_SESSION['user_id'] ?? null;
                                         $user_role = strtolower($_SESSION['user_role'] ?? '');
                                         $can_edit = (empty($case['pic_id']) || $case['pic_id'] == $user_id || $user_role === 'admin');
                                         $isDisabled = ($case['status'] === 'Verified' || !$can_edit) ? 'disabled' : '';
                                         $vClass = ($case['status'] === 'Verified') ? 'verified' : '';
+                                        
+                                        // Show verified header once
+                                        if ($case['status'] === 'Verified' && !$verifiedHeaderShown):
+                                            $verifiedHeaderShown = true;
                                     ?>
+                                    <div style="border-top: 2px solid #ddd; margin: 15px 0; padding-top: 15px;">
+                                        <div style="text-align: center; color: #888; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">
+                                            <i class="fas fa-archive"></i> Verified Cases (Archive)
+                                        </div>
+                                    </div>
+                                    <?php endif; ?>
                                     <div class="case-item <?= $vClass ?>">
                                         <div class="case-item-title">
                                             <span><i class="fas fa-water text-info"></i> <?= htmlspecialchars($case['code']) ?> - <?= htmlspecialchars($case['area']) ?></span>

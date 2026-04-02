@@ -96,7 +96,6 @@ $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php",
                                 <th style="width: 25%">Item Pemeriksaan</th>
                                 <th style="width: 15%" class="text-center">Hasil</th>
                                 <th style="width: 20%">Foto/Evidence</th>
-                                <th style="width: 35%">Keterangan</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -133,9 +132,6 @@ $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php",
                                 </td>
                                 <td>
                                     <input type="file" name="<?php echo $item['key']; ?>_foto" accept="image/*" class="form-control form-control-sm">
-                                </td>
-                                <td>
-                                    <!-- Hydrant tidak punya kolom keterangan -->
                                 </td>
                             </tr>
                             <?php endforeach; ?>

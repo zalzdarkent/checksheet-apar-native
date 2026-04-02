@@ -173,7 +173,7 @@
                                     <th>Code</th>
                                     <th>Area</th>
                                     <th>Location</th>
-                                    <th>Status Asset</th>
+                                    <th>Status</th>
                                     <th>Status Insp</th>
                                     <th>Action</th>
                                 </tr>
@@ -223,8 +223,9 @@
                 { data: 'area' },
                 { data: 'location' },
                 {
+                    data: 'status',
                     render: function (data, type, row) {
-                        const badgeClass = (data === 'OK' || data === 'Good') ? 'status-ok' : 'status-abnormal';
+                        const badgeClass = (data === 'Good') ? 'status-ok' : 'status-abnormal';
                         return `<span class="status-badge ${badgeClass}">${data}</span>`;
                     }
                 },

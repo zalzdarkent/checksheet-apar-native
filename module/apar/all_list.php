@@ -175,7 +175,7 @@
                                     <th>Location</th>
                                     <th>Weight</th>
                                     <th>Exp Date</th>
-                                    <th>Status Asset</th>
+                                    <th>Status</th>
                                     <th>Status Insp</th>
                                     <th>Action</th>
                                 </tr>
@@ -232,11 +232,14 @@
                 },
                 {
                     data: 'expired_date',
-                    render: function (data) {
+                    render: function (data, type, row) {
                         if (!data) return '-';
 
-                        const date = new Date(data);
+                        if (row.is_expired) {
+                            return `<span class="badge bg-danger"><i class="fas fa-exclamation-circle"></i> EXPIRED</span>`;
+                        }
 
+                        const date = new Date(data);
                         const options = {
                             day: 'numeric',
                             month: 'long',
@@ -249,7 +252,14 @@
                 {
                     data: 'status',
                     render: function (data, type, row) {
-                        const badgeClass = (data === 'OK' || data === 'Good') ? 'status-ok' : 'status-abnormal';
+                        let badgeClass = 'status-ok';
+                        if (data === 'Expired') {
+                            badgeClass = 'status-abnormal';
+                        } else if (data === 'OK' || data === 'Good') {
+                            badgeClass = 'status-ok';
+                        } else {
+                            badgeClass = 'status-abnormal';
+                        }
                         return `<span class="status-badge ${badgeClass}">${data}</span>`;
                     }
                 },

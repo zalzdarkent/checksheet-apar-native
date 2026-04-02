@@ -12,6 +12,10 @@ if (!$apar) {
 $statusClass = ($apar['status'] === 'OK' || $apar['status'] === 'Good') ? 'status-ok' : 'status-abnormal';
 ?>
 
+<!-- Bootstrap Notify Library -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-notify/0.2.0/css/bootstrap-notify.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-notify/0.2.0/js/bootstrap-notify.min.js"></script>
+
 <div class="page-inner">
     <div class="d-flex align-items-center justify-content-between mb-4">
         <h3 class="fw-bold text-info mb-0">APAR Detail</h3>
@@ -74,6 +78,24 @@ $statusClass = ($apar['status'] === 'OK' || $apar['status'] === 'Good') ? 'statu
 
         .status-ok { background: #27ae60; color: #fff; }
         .status-abnormal { background: #e74c3c; color: #fff; }
+        
+        .expired-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 0.95rem;
+            background: #e74c3c;
+            color: #fff;
+            margin-left: 10px;
+            box-shadow: 0 3px 8px rgba(231, 76, 60, 0.4);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
 
         .info-grid {
             display: grid;
@@ -170,7 +192,11 @@ $statusClass = ($apar['status'] === 'OK' || $apar['status'] === 'Good') ? 'statu
         </div>
         <div class="apar-large-code"><?php echo $apar['code']; ?></div>
         
-        <a href="?page=apar-inspect&id=<?php echo $apar['id']; ?>" class="btn btn-inspeksi">
+        <a href="?page=apar-inspect&id=<?php echo $apar['id']; ?>" 
+           class="btn btn-inspeksi btn-mulai-inspeksi" 
+           id="btn-mulai-inspeksi"
+           data-expired="<?php echo (isset($apar['is_expired']) && $apar['is_expired']) ? '1' : '0'; ?>"
+           <?php echo (isset($apar['is_expired']) && $apar['is_expired']) ? 'style="opacity: 0.5; cursor: not-allowed; pointer-events: none;"' : ''; ?>>
             <i class="fas fa-clipboard-check"></i> Mulai Inspeksi
         </a>
         <a href="print_qr.php?type=apar&ids=<?php echo $apar['id']; ?>" target="_blank" class="btn btn-inspeksi bg-warning text-dark border-0">
@@ -325,5 +351,55 @@ $(document).ready(function() {
             }
         });
     }
+    
+    // Handle expired APAR notification
+    var ekspiredBtn = $('#btn-mulai-inspeksi');
+    if (ekspiredBtn.data('expired') == '1') {
+        $.notify({
+            icon: 'fas fa-exclamation-circle',
+            title: '<strong>⚠️ APAR Expired</strong>',
+            message: 'APAR ini sudah kedaluwarsa (expired). Harus segera diganti atau ditangani sebelum bisa diinspeksi.',
+            type: 'danger'
+        }, {
+            element: 'body',
+            position: null,
+            allow_dismiss: true,
+            placement: {
+                from: "top",
+                align: "center"
+            },
+            offset: 20,
+            spacing: 10,
+            z_index: 9999,
+            delay: 0,
+            timer: 0,
+            url_target: '_blank'
+        });
+    }
+    
+    // Prevent click if expired
+    ekspiredBtn.on('click', function(e) {
+        if ($(this).data('expired') == '1') {
+            e.preventDefault();
+            $.notify({
+                icon: 'fas fa-ban',
+                title: '<strong>❌ Action Blocked</strong>',
+                message: 'Inspeksi tidak bisa dimulai karena APAR sudah expired. Silakan hubungi admin untuk penggantian unit.',
+                type: 'danger'
+            }, {
+                element: 'body',
+                position: null,
+                placement: {
+                    from: "top",
+                    align: "center"
+                },
+                offset: 20,
+                spacing: 10,
+                z_index: 9999,
+                delay: 3000
+            });
+            return false;
+        }
+    });
 });
 </script>

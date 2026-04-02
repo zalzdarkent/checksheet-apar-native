@@ -49,6 +49,22 @@ if ($result !== false) {
         } else {
             $row['last_inspection'] = '-';
         }
+        
+        // Detect if expired
+        $is_expired = false;
+        if ($row['expired_date'] instanceof DateTime) {
+            $today = new DateTime();
+            $today->setTime(0, 0, 0);
+            $expDate = clone $row['expired_date'];
+            $expDate->setTime(0, 0, 0);
+            $is_expired = $expDate <= $today;
+        }
+        
+        if ($is_expired) {
+            $row['status'] = 'Expired';
+        }
+        $row['is_expired'] = $is_expired;
+        
         $apar_data[] = $row;
     }
 }

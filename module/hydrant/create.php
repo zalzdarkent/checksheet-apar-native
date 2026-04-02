@@ -52,7 +52,7 @@
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">Status</label>
                             <select name="status" class="form-select" required>
-                                <option value="OK">Good</option>
+                                <option value="Good">Good</option>
                                 <option value="Abnormal">Abnormal</option>
                             </select>
                         </div>

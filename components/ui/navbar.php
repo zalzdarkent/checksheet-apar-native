@@ -14,7 +14,7 @@
                     </form>
                 </ul>
             </li>
-            <li class="nav-item topbar-icon dropdown hidden-caret">
+            <!-- <li class="nav-item topbar-icon dropdown hidden-caret">
                 <ul class="dropdown-menu messages-notif-box animated fadeIn" aria-labelledby="messageDropdown">
                     <li>
                         <div class="dropdown-title d-flex justify-content-between align-items-center">
@@ -43,14 +43,14 @@
                         </a>
                     </li>
                 </ul>
-            </li>
+            </li> -->
             <li class="nav-item">
                 <button class="btn btn-info btn-sm btn-round px-3 me-2 d-none d-md-flex align-items-center"
                     data-bs-toggle="modal" data-bs-target="#globalMapViewModal">
                     <i class="fas fa-map-marked-alt me-2"></i> Lihat Map
                 </button>
             </li>
-            <li class="nav-item topbar-icon dropdown hidden-caret">
+            <!-- <li class="nav-item topbar-icon dropdown hidden-caret">
                 <a class="nav-link dropdown-toggle" href="#" id="notifDropdown" role="button" data-bs-toggle="dropdown"
                     aria-haspopup="true" aria-expanded="false">
                     <i class="fa fa-bell"></i>
@@ -114,7 +114,7 @@
                         </a>
                     </li>
                 </ul>
-            </li>
+            </li> -->
 
             <li class="nav-item topbar-user dropdown hidden-caret">
                 <a class="dropdown-toggle profile-pic" data-bs-toggle="dropdown" href="#" aria-expanded="false">

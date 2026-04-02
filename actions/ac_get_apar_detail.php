@@ -76,6 +76,22 @@ if ($id <= 0) {
 
         $apar['history'] = $history;
         $apar['cases'] = $cases;
+        
+        // Check if APAR is expired and update status accordingly
+        if ($apar['expired_date'] instanceof DateTime) {
+            $today = new DateTime();
+            $today->setTime(0, 0, 0);
+            $expDate = clone $apar['expired_date'];
+            $expDate->setTime(0, 0, 0);
+            if ($expDate <= $today) {
+                $apar['status'] = 'Expired';
+                $apar['is_expired'] = true;
+            } else {
+                $apar['is_expired'] = false;
+            }
+        } else {
+            $apar['is_expired'] = false;
+        }
     }
 }
 
