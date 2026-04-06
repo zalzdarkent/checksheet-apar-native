@@ -120,6 +120,14 @@ try {
             throw new Exception('Insert failed: ' . print_r(sqlsrv_errors(), true));
         }
         
+        // Get last insertion ID
+        $id_stmt = sqlsrv_query($koneksi, "SELECT SCOPE_IDENTITY() AS last_id");
+        $last_inspection_id = null;
+        if ($id_stmt) {
+            $id_row = sqlsrv_fetch_array($id_stmt, SQLSRV_FETCH_ASSOC);
+            $last_inspection_id = $id_row['last_id'] ?? null;
+        }
+        
         sqlsrv_query($koneksi, "UPDATE [apar].[dbo].[apars] SET last_inspection_date = ? WHERE id = ?", [$inspection_date, $equipment_id]);
         
         // Auto-detect abnormal items and update status
@@ -167,9 +175,9 @@ try {
             
             // Create abnormal case record
             $abnormal_case_text = implode(', ', $abnormal_items);
-            $abnormal_sql = "INSERT INTO [apar].[dbo].[abnormal_cases] (apar_id, abnormal_case, created_at, status, user_id) VALUES (?, ?, GETDATE(), 'Open', ?)";
-            $result = sqlsrv_query($koneksi, $abnormal_sql, [$equipment_id, $abnormal_case_text, $user_id]);
-            error_log("DEBUG: INSERT abnormal_cases result=" . ($result ? 'SUCCESS' : 'FAILED'));
+            $abnormal_sql = "INSERT INTO [apar].[dbo].[apar_abnormal_cases] (apar_id, inspection_id, abnormal_case, countermeasure, created_at, status) VALUES (?, ?, ?, '-', GETDATE(), 'Open')";
+            $result = sqlsrv_query($koneksi, $abnormal_sql, [$equipment_id, $last_inspection_id, $abnormal_case_text]);
+            error_log("DEBUG: INSERT apar_abnormal_cases result=" . ($result ? 'SUCCESS' : 'FAILED'));
             $debug_info['case_created'] = ($result ? true : false);
             if (!$result) {
                 error_log("DEBUG: SQL Error: " . print_r(sqlsrv_errors(), true));
@@ -213,6 +221,14 @@ try {
         if ($stmt === false) {
             throw new Exception('Insert failed: ' . print_r(sqlsrv_errors(), true));
         }
+
+        // Get last insertion ID
+        $id_stmt = sqlsrv_query($koneksi, "SELECT SCOPE_IDENTITY() AS last_id");
+        $last_inspection_id = null;
+        if ($id_stmt) {
+            $id_row = sqlsrv_fetch_array($id_stmt, SQLSRV_FETCH_ASSOC);
+            $last_inspection_id = $id_row['last_id'] ?? null;
+        }
         
         sqlsrv_query($koneksi, "UPDATE [apar].[dbo].[hydrants] SET last_inspection_date = ? WHERE id = ?", [$inspection_date, $equipment_id]);
         
@@ -255,9 +271,9 @@ try {
             
             // Create abnormal case record
             $abnormal_case_text = implode(', ', $abnormal_items);
-            $abnormal_sql = "INSERT INTO [apar].[dbo].[abnormal_cases] (hydrant_id, abnormal_case, created_at, status, user_id) VALUES (?, ?, GETDATE(), 'Open', ?)";
-            $result = sqlsrv_query($koneksi, $abnormal_sql, [$equipment_id, $abnormal_case_text, $user_id]);
-            error_log("DEBUG: INSERT abnormal_cases (hydrant) result=" . ($result ? 'SUCCESS' : 'FAILED'));
+            $abnormal_sql = "INSERT INTO [apar].[dbo].[hydrant_abnormal_cases] (hydrant_id, inspection_id, abnormal_case, countermeasure, created_at, status) VALUES (?, ?, ?, '-', GETDATE(), 'Open')";
+            $result = sqlsrv_query($koneksi, $abnormal_sql, [$equipment_id, $last_inspection_id, $abnormal_case_text]);
+            error_log("DEBUG: INSERT hydrant_abnormal_cases result=" . ($result ? 'SUCCESS' : 'FAILED'));
             $debug_info['case_created'] = ($result ? true : false);
             if (!$result) {
                 error_log("DEBUG: SQL Error: " . print_r(sqlsrv_errors(), true));

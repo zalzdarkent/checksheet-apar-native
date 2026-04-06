@@ -554,6 +554,7 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
                             'data-status="' + item.status_badge + '" ' +
                             'data-jenis="' + (item.jenis || '-') + '" ' +
                             'data-area="' + (item.area || '-') + '" ' +
+                            'data-keterangan="' + (item.issue || '') + '" ' +
                             'data-device-type="' + (item.device_type || '-') + '"' +
                             '>' + (item.kode || '') + '</div>';
                         $('.map-container-custom').append(markerHtml);
@@ -574,6 +575,7 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
                 $('#tt-kode').text($(this).data('kode'));
                 $('#tt-jenis').text($(this).data('jenis'));
                 $('#tt-area').text($(this).data('area'));
+                $('#tt-keterangan').text($(this).data('keterangan') || '-');
 
                 var status = $(this).data('status');
                 var $statusBadge = $('#tt-status');

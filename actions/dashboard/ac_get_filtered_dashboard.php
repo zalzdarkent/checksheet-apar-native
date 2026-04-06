@@ -24,7 +24,7 @@ try {
             SUM(CASE WHEN a.status = 'On Inspection' THEN 1 ELSE 0 END) as proses,
             SUM(CASE WHEN a.status = 'Abnormal' OR a.status = 'Expired' OR a.status = 'NG' THEN 1 ELSE 0 END) as abnormal
         FROM [apar].[dbo].[apars] a
-        INNER JOIN [apar].[dbo].[abnormal_cases] ac ON a.id = ac.apar_id
+        INNER JOIN [apar].[dbo].[apar_abnormal_cases] ac ON a.id = ac.apar_id
         WHERE CAST(ac.created_at AS DATE) >= CAST('" . $startDate . "' AS DATE)
         AND CAST(ac.created_at AS DATE) <= CAST('" . $endDate . "' AS DATE)";
         
@@ -45,7 +45,7 @@ try {
             SUM(CASE WHEN h.status = 'On Inspection' THEN 1 ELSE 0 END) as proses,
             SUM(CASE WHEN h.status = 'Abnormal' OR h.status = 'Expired' OR h.status = 'NG' THEN 1 ELSE 0 END) as abnormal
         FROM [apar].[dbo].[hydrants] h
-        INNER JOIN [apar].[dbo].[abnormal_cases] ac ON h.id = ac.hydrant_id
+        INNER JOIN [apar].[dbo].[hydrant_abnormal_cases] ac ON h.id = ac.hydrant_id
         WHERE CAST(ac.created_at AS DATE) >= CAST('" . $startDate . "' AS DATE)
         AND CAST(ac.created_at AS DATE) <= CAST('" . $endDate . "' AS DATE)";
         
@@ -62,12 +62,12 @@ try {
         // MARKERS with date filter
         $sqlMarkers = "SELECT DISTINCT
             a.id, a.code, a.status, 'APAR' as jenis, 'apar' as device_type,
-            a.x_coordinate, a.y_coordinate,
+            a.x_coordinate, a.y_coordinate, a.area, ac.abnormal_case as issue,
             CASE WHEN a.status = 'OK' THEN 'OK'
                  WHEN a.status = 'On Inspection' THEN 'Proses'
                  ELSE 'Abnormal' END as status_badge
         FROM [apar].[dbo].[apars] a
-        INNER JOIN [apar].[dbo].[abnormal_cases] ac ON a.id = ac.apar_id
+        INNER JOIN [apar].[dbo].[apar_abnormal_cases] ac ON a.id = ac.apar_id
         WHERE a.x_coordinate IS NOT NULL AND a.y_coordinate IS NOT NULL
         AND CAST(ac.created_at AS DATE) >= CAST('" . $startDate . "' AS DATE)
         AND CAST(ac.created_at AS DATE) <= CAST('" . $endDate . "' AS DATE)
@@ -76,12 +76,12 @@ try {
         
         SELECT DISTINCT
             h.id, h.code, h.status, 'Hydrant' as jenis, 'hydrant' as device_type,
-            h.x_coordinate, h.y_coordinate,
+            h.x_coordinate, h.y_coordinate, h.area, ac.abnormal_case as issue,
             CASE WHEN h.status = 'Good' THEN 'OK'
                  WHEN h.status = 'On Inspection' THEN 'Proses'
                  ELSE 'Abnormal' END as status_badge
         FROM [apar].[dbo].[hydrants] h
-        INNER JOIN [apar].[dbo].[abnormal_cases] ac ON h.id = ac.hydrant_id
+        INNER JOIN [apar].[dbo].[hydrant_abnormal_cases] ac ON h.id = ac.hydrant_id
         WHERE h.x_coordinate IS NOT NULL AND h.y_coordinate IS NOT NULL
         AND CAST(ac.created_at AS DATE) >= CAST('" . $startDate . "' AS DATE)
         AND CAST(ac.created_at AS DATE) <= CAST('" . $endDate . "' AS DATE)";
@@ -138,7 +138,8 @@ try {
         // MARKERS (all)
         $sqlMarkers = "SELECT 
             a.id, a.code, a.status, 'APAR' as jenis, 'apar' as device_type,
-            a.x_coordinate, a.y_coordinate,
+            a.x_coordinate, a.y_coordinate, a.area,
+            (SELECT TOP 1 abnormal_case FROM [apar].[dbo].[apar_abnormal_cases] WHERE apar_id = a.id AND status <> 'Verified' ORDER BY created_at DESC) as issue,
             CASE WHEN a.status = 'OK' THEN 'OK'
                  WHEN a.status = 'On Inspection' THEN 'Proses'
                  ELSE 'Abnormal' END as status_badge
@@ -149,7 +150,8 @@ try {
         
         SELECT 
             h.id, h.code, h.status, 'Hydrant' as jenis, 'hydrant' as device_type,
-            h.x_coordinate, h.y_coordinate,
+            h.x_coordinate, h.y_coordinate, h.area,
+            (SELECT TOP 1 abnormal_case FROM [apar].[dbo].[hydrant_abnormal_cases] WHERE hydrant_id = h.id AND status <> 'Verified' ORDER BY created_at DESC) as issue,
             CASE WHEN h.status = 'Good' THEN 'OK'
                  WHEN h.status = 'On Inspection' THEN 'Proses'
                  ELSE 'Abnormal' END as status_badge
@@ -165,6 +167,8 @@ try {
                 'kode' => $row['code'],
                 'status_badge' => $row['status_badge'],
                 'jenis' => $row['jenis'],
+                'area' => $row['area'] ?? '-',
+                'issue' => $row['issue'] ?? '',
                 'device_type' => $row['device_type'],
                 'x_coordinate' => $row['x_coordinate'],
                 'y_coordinate' => $row['y_coordinate']

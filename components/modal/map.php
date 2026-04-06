@@ -310,9 +310,9 @@
                                  data-status="${item.status_badge}" 
                                  data-jenis="${item.jenis || '-'}" 
                                  data-lokasi="${item.lokasi || '-'}" 
-                                 data-area="${item.area ? item.area.toLowerCase() : ''}"
+                                 data-area="${item.area || '-'}"
                                  data-device-type="${item.device_type}"
-                                 data-keterangan="${item.device_type.toUpperCase()}">
+                                 data-keterangan="${item.issue || '-'}">
                                 <i class="fas ${iconClass}" style="font-size: 10px;"></i>
                             </div>`;
                         container.append(markerHtml);
