@@ -158,9 +158,6 @@ $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php",
                     <button type="submit" name="action" value="submit" class="btn btn-primary btn-lg flex-grow-1">
                         <i class="fas fa-check-circle me-2"></i> Simpan Inspeksi
                     </button>
-                    <button type="submit" name="action" value="draft" class="btn btn-warning btn-lg flex-grow-1">
-                        <i class="fas fa-save me-2"></i> Simpan Sebagai Draft
-                    </button>
                     <button type="button" class="btn btn-secondary btn-lg" onclick="history.back()">
                         <i class="fas fa-times me-2"></i> Batal
                     </button>

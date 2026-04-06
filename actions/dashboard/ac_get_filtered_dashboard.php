@@ -22,7 +22,7 @@ try {
             COUNT(DISTINCT a.id) as total,
             SUM(CASE WHEN a.status = 'OK' THEN 1 ELSE 0 END) as ok,
             SUM(CASE WHEN a.status = 'On Inspection' THEN 1 ELSE 0 END) as proses,
-            SUM(CASE WHEN a.status = 'Abnormal' OR a.status = 'Expired' THEN 1 ELSE 0 END) as abnormal
+            SUM(CASE WHEN a.status = 'Abnormal' OR a.status = 'Expired' OR a.status = 'NG' THEN 1 ELSE 0 END) as abnormal
         FROM [apar].[dbo].[apars] a
         INNER JOIN [apar].[dbo].[abnormal_cases] ac ON a.id = ac.apar_id
         WHERE CAST(ac.created_at AS DATE) >= CAST('" . $startDate . "' AS DATE)
@@ -43,7 +43,7 @@ try {
             COUNT(DISTINCT h.id) as total,
             SUM(CASE WHEN h.status = 'Good' THEN 1 ELSE 0 END) as ok,
             SUM(CASE WHEN h.status = 'On Inspection' THEN 1 ELSE 0 END) as proses,
-            SUM(CASE WHEN h.status = 'Abnormal' OR h.status = 'Expired' THEN 1 ELSE 0 END) as abnormal
+            SUM(CASE WHEN h.status = 'Abnormal' OR h.status = 'Expired' OR h.status = 'NG' THEN 1 ELSE 0 END) as abnormal
         FROM [apar].[dbo].[hydrants] h
         INNER JOIN [apar].[dbo].[abnormal_cases] ac ON h.id = ac.hydrant_id
         WHERE CAST(ac.created_at AS DATE) >= CAST('" . $startDate . "' AS DATE)
@@ -94,7 +94,7 @@ try {
             COUNT(a.id) as total,
             SUM(CASE WHEN a.status = 'OK' THEN 1 ELSE 0 END) as ok,
             SUM(CASE WHEN a.status = 'On Inspection' THEN 1 ELSE 0 END) as proses,
-            SUM(CASE WHEN a.status = 'Abnormal' OR a.status = 'Expired' THEN 1 ELSE 0 END) as abnormal
+            SUM(CASE WHEN a.status = 'Abnormal' OR a.status = 'Expired' OR a.status = 'NG' THEN 1 ELSE 0 END) as abnormal
         FROM [apar].[dbo].[apars] a";
         
         $resApar = sqlsrv_query($koneksi, $sqlApar);
@@ -117,7 +117,7 @@ try {
             COUNT(h.id) as total,
             SUM(CASE WHEN h.status = 'Good' THEN 1 ELSE 0 END) as ok,
             SUM(CASE WHEN h.status = 'On Inspection' THEN 1 ELSE 0 END) as proses,
-            SUM(CASE WHEN h.status = 'Abnormal' OR h.status = 'Expired' THEN 1 ELSE 0 END) as abnormal
+            SUM(CASE WHEN h.status = 'Abnormal' OR h.status = 'Expired' OR h.status = 'NG' THEN 1 ELSE 0 END) as abnormal
         FROM [apar].[dbo].[hydrants] h";
         
         $resHydrant = sqlsrv_query($koneksi, $sqlHydrant);

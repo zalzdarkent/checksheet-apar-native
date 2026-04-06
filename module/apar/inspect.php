@@ -171,9 +171,6 @@ $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php",
                     <button type="submit" name="action" value="submit" class="btn btn-primary btn-lg flex-grow-1">
                         <i class="fas fa-check-circle me-2"></i> Simpan Inspeksi
                     </button>
-                    <button type="submit" name="action" value="draft" class="btn btn-warning btn-lg flex-grow-1">
-                        <i class="fas fa-save me-2"></i> Simpan Sebagai Draft
-                    </button>
                     <button type="button" class="btn btn-secondary btn-lg" onclick="history.back()">
                         <i class="fas fa-times me-2"></i> Batal
                     </button>
@@ -246,6 +243,21 @@ document.getElementById('form-inspection').addEventListener('submit', function(e
         return;
     }
     
+    // Validate that all items have a selection (OK or Abnormal)
+    const allItems = ['exp_date', 'pressure', 'weight_co2', 'tube', 'hose', 'bracket', 'wi', 'form_kejadian', 'sign_box', 'sign_triangle', 'marking_tiger', 'marking_beam', 'sr_apar', 'kocok_apar', 'label'];
+    const missingSelection = [];
+    allItems.forEach(item => {
+        const checked = document.querySelector(`input[name="${item}_ok"]:checked`);
+        if (!checked) {
+            missingSelection.push(item);
+        }
+    });
+    
+    if (missingSelection.length > 0) {
+        alert(`⚠️ Harap pilih "OK" atau "Abnormal" untuk SEMUA item pemeriksaan!\n\nItem yang belum dipilih: ${missingSelection.length} item`);
+        return;
+    }
+    
     const formData = new FormData(this);
     formData.append('type', 'apar');
     formData.append('equipment_id', '<?php echo $apar['id']; ?>');
@@ -264,11 +276,16 @@ document.getElementById('form-inspection').addEventListener('submit', function(e
         if (data.debug) {
             console.log('DEBUG INFO:', data.debug);
         }
+        if (data.error_trace) {
+            console.error('Server Error Trace:', data.error_trace);
+        }
         if (data.status === 'success') {
             alert('Inspeksi berhasil disimpan!');
             window.location.href = data.redirect;
         } else {
-            alert('Error: ' + data.message);
+            const errorMsg = data.message || 'Unknown error';
+            alert('❌ Error: ' + errorMsg);
+            console.error('Full error data:', data);
             submitBtn.disabled = false;
             submitBtn.innerHTML = '<i class="fas fa-check-circle me-2"></i> Simpan Inspeksi';
         }

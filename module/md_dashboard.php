@@ -153,7 +153,7 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
     <!-- ROW 1: COMPACT SUMMARY CARDS -->
     <div class="row g-2 mb-3">
         <!-- Total -->
-        <div class="col-6 col-md-3">
+        <div class="col-6 col-md-4">
             <div class="summary-card total">
                 <div class="flex-grow-1">
                     <span class="stat-title">Total Unit</span>
@@ -163,7 +163,7 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
             </div>
         </div>
         <!-- OK -->
-        <div class="col-6 col-md-3">
+        <div class="col-6 col-md-4">
             <div class="summary-card ok">
                 <div class="flex-grow-1">
                     <span class="stat-title text-success">Aman (OK)</span>
@@ -172,18 +172,8 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
                 </div>
             </div>
         </div>
-        <!-- PROSES -->
-        <div class="col-6 col-md-3">
-            <div class="summary-card proses">
-                <div class="flex-grow-1">
-                    <span class="stat-title text-warning">Sedang Inspeksi</span>
-                    <h2 class="text-warning"><?php echo ($totalAparProses + $totalHydrantProses); ?></h2>
-                    <div class="breakdown"><i class="fas fa-fire-extinguisher"></i> <?php echo $totalAparProses; ?> | <i class="fas fa-water"></i> <?php echo $totalHydrantProses; ?></div>
-                </div>
-            </div>
-        </div>
         <!-- ABNORMAL -->
-        <div class="col-6 col-md-3">
+        <div class="col-6 col-md-4">
             <div class="summary-card abn">
                 <div class="flex-grow-1">
                     <span class="stat-title text-danger">Abnormal / Temuan</span>
@@ -266,7 +256,6 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
                                     <div class="text-center text-muted mt-5"><i class="fas fa-check-circle" style="font-size:2rem; color:var(--c-ok); margin-bottom:5px;"></i><br>Zero issues.</div>
                                 <?php else: ?>
                                     <?php 
-                                    $verifiedHeaderShown = false;
                                     foreach ($aparAbnormalCases as $case): 
                                         $user_id = $_SESSION['user_id'] ?? null;
                                         $user_role = strtolower($_SESSION['user_role'] ?? '');
@@ -278,17 +267,7 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
                                         if ($case['status'] === 'Verified') $statusClass = 'verified';
                                         elseif ($case['status'] === 'Closed') $statusClass = 'closed';
                                         elseif ($case['status'] === 'Open') $statusClass = 'open';
-                                        
-                                        // Show verified header once
-                                        if ($case['status'] === 'Verified' && !$verifiedHeaderShown):
-                                            $verifiedHeaderShown = true;
                                     ?>
-                                    <div style="border-top: 2px solid #ddd; margin: 15px 0; padding-top: 15px;">
-                                        <div style="text-align: center; color: #888; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">
-                                            <i class="fas fa-archive"></i> Verified Cases (Archive)
-                                        </div>
-                                    </div>
-                                    <?php endif; ?>
                                     <div class="case-item <?= $statusClass ?>" data-created="<?= $case['created_at'] instanceof DateTime ? $case['created_at']->format('Y-m-d') : date('Y-m-d') ?>">
                                         <div class="case-item-title">
                                             <span><i class="fas fa-fire-extinguisher text-danger"></i> <?= htmlspecialchars($case['code']) ?> - <?= htmlspecialchars($case['area']) ?></span>
@@ -335,7 +314,6 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
                                     <div class="text-center text-muted mt-5"><i class="fas fa-check-circle" style="font-size:2rem; color:var(--c-ok); margin-bottom:5px;"></i><br>Zero issues.</div>
                                 <?php else: ?>
                                     <?php
-                                    $verifiedHeaderShown = false;
                                     foreach ($hydrantAbnormalCases as $case):
                                         $user_id = $_SESSION['user_id'] ?? null;
                                         $user_role = strtolower($_SESSION['user_role'] ?? '');
@@ -347,17 +325,7 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
                                         if ($case['status'] === 'Verified') $statusClass = 'verified';
                                         elseif ($case['status'] === 'Closed') $statusClass = 'closed';
                                         elseif ($case['status'] === 'Open') $statusClass = 'open';
-                                        
-                                        // Show verified header once
-                                        if ($case['status'] === 'Verified' && !$verifiedHeaderShown):
-                                            $verifiedHeaderShown = true;
                                     ?>
-                                    <div style="border-top: 2px solid #ddd; margin: 15px 0; padding-top: 15px;">
-                                        <div style="text-align: center; color: #888; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">
-                                            <i class="fas fa-archive"></i> Verified Cases (Archive)
-                                        </div>
-                                    </div>
-                                    <?php endif; ?>
                                     <div class="case-item <?= $statusClass ?>" data-created="<?= $case['created_at'] instanceof DateTime ? $case['created_at']->format('Y-m-d') : date('Y-m-d') ?>">
                                         <div class="case-item-title">
                                             <span><i class="fas fa-water text-info"></i> <?= htmlspecialchars($case['code']) ?> - <?= htmlspecialchars($case['area']) ?></span>
@@ -542,12 +510,6 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
                     $('.summary-card.ok').find('.breakdown').html(
                         '<i class="fas fa-fire-extinguisher"></i> ' + totalAparOK + 
                         ' | <i class="fas fa-water"></i> ' + totalHydrantOK
-                    );
-                    
-                    $('.summary-card.proses').find('h2').text(totalAparProses + totalHydrantProses);
-                    $('.summary-card.proses').find('.breakdown').html(
-                        '<i class="fas fa-fire-extinguisher"></i> ' + totalAparProses + 
-                        ' | <i class="fas fa-water"></i> ' + totalHydrantProses
                     );
                     
                     $('.summary-card.abn').find('h2').text(totalAparAbnormal + totalHydrantAbnormal);
@@ -1054,7 +1016,5 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
             }
         });
 
-        // Initialize Map with all markers
-        fetchChartDetail('all', -1);
     });
 </script>

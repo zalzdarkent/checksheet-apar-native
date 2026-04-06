@@ -27,6 +27,9 @@ if ($id <= 0) {
                         ORDER BY h.inspection_date DESC";
         $stmt_history = sqlsrv_query($koneksi, $sql_history, [$id]);
         $history = [];
+        
+        $items = ['body_hydrant', 'selang', 'couple_join', 'nozzle', 'check_sheet', 'valve_kran', 'lampu', 'cover_lampu', 'box_display', 'konsul_hydrant', 'jr', 'marking', 'label'];
+
         if ($stmt_history !== false) {
             while ($row = sqlsrv_fetch_array($stmt_history, SQLSRV_FETCH_ASSOC)) {
                 if ($row['inspection_date'] instanceof DateTime) {
@@ -34,6 +37,16 @@ if ($id <= 0) {
                 } else {
                     $row['inspection_date_fmt'] = '-';
                 }
+
+                $is_ng = false;
+                foreach ($items as $item) {
+                     if (isset($row[$item . '_ok']) && $row[$item . '_ok'] === 0) {
+                         $is_ng = true;
+                         break;
+                     }
+                }
+                $row['insp_status'] = $is_ng ? 'NG' : 'OK';
+
                 $history[] = $row;
             }
         }

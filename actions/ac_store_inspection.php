@@ -1,7 +1,38 @@
 <?php
+// Start output buffering to catch all output
+ob_start();
+
 include(__DIR__ . '/../config/db_koneksi.php');
 
 header('Content-Type: application/json');
+
+// Error handler untuk convert semua errors ke JSON
+set_error_handler(function($errno, $errstr, $errfile, $errline) {
+    // Clear any buffered output
+    ob_end_clean();
+    error_log("PHP ERROR [$errno]: $errstr in $errfile:$errline");
+    http_response_code(500);
+    echo json_encode([
+        'status' => 'error', 
+        'message' => 'Server Error: ' . $errstr,
+        'error_file' => $errfile,
+        'error_line' => $errline
+    ]);
+    exit;
+});
+
+// Exception handler
+set_exception_handler(function($e) {
+    ob_end_clean();
+    error_log("EXCEPTION: " . $e->getMessage() . " at " . $e->getFile() . ":" . $e->getLine());
+    http_response_code(500);
+    echo json_encode([
+        'status' => 'error',
+        'message' => 'Exception: ' . $e->getMessage(),
+        'error_trace' => $e->getTraceAsString()
+    ]);
+    exit;
+});
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     echo json_encode(['status' => 'error', 'message' => 'Invalid request method']);
@@ -40,6 +71,10 @@ try {
     }
     
     $debug_info = [];
+    
+    // Log all POST data for debugging
+    error_log("DEBUG: POST data received:");
+    error_log(print_r($_POST, true));
 
     if ($type === 'apar') {
         $table = 'bimonthly_apar_inspections';
@@ -110,19 +145,22 @@ try {
         
         foreach ($items as $item) {
             $ok_value = (int)($_POST[$item . '_ok'] ?? 1);
-            error_log("DEBUG: Item=" . $item . " | POST[" . $item . "_ok]=" . ($_POST[$item . '_ok'] ?? 'NULL') . " | ok_value=" . $ok_value);
+            $post_val = $_POST[$item . '_ok'] ?? 'NULL';
+            error_log("DEBUG: Item=" . $item . " | POST_VALUE=" . $post_val . " | ok_value=" . $ok_value);
             if ($ok_value === 0) {
                 $abnormal_items[] = $item_labels[$item] ?? $item;
             }
         }
         
         $debug_info['abnormal_items_found'] = $abnormal_items;
+        $debug_info['post_keys'] = array_keys($_POST);
         error_log("DEBUG: Total abnormal items found: " . count($abnormal_items));
+        error_log("DEBUG: All POST keys: " . implode(", ", array_keys($_POST)));
         
         if (!empty($abnormal_items)) {
             error_log("DEBUG: Abnormal items: " . implode(", ", $abnormal_items));
-            // Update device status to Abnormal
-            $update_sql = "UPDATE [apar].[dbo].[apars] SET status = 'Abnormal' WHERE id = ?";
+            // Update device status to NG
+            $update_sql = "UPDATE [apar].[dbo].[apars] SET status = 'NG' WHERE id = ?";
             $result = sqlsrv_query($koneksi, $update_sql, [$equipment_id]);
             error_log("DEBUG: UPDATE apars result=" . ($result ? 'SUCCESS' : 'FAILED'));
             $debug_info['status_updated'] = ($result ? true : false);
@@ -209,8 +247,8 @@ try {
         
         if (!empty($abnormal_items)) {
             error_log("DEBUG: Hydrant Abnormal items: " . implode(", ", $abnormal_items));
-            // Update device status to Abnormal
-            $update_sql = "UPDATE [apar].[dbo].[hydrants] SET status = 'Abnormal' WHERE id = ?";
+            // Update device status to NG
+            $update_sql = "UPDATE [apar].[dbo].[hydrants] SET status = 'NG' WHERE id = ?";
             $result = sqlsrv_query($koneksi, $update_sql, [$equipment_id]);
             error_log("DEBUG: UPDATE hydrants result=" . ($result ? 'SUCCESS' : 'FAILED'));
             $debug_info['status_updated'] = ($result ? true : false);
@@ -228,17 +266,26 @@ try {
         }
     }
     
+    // Clear buffer and send clean JSON response
+    ob_end_clean();
     echo json_encode([
         'status' => 'success',
         'message' => 'Inspection saved successfully',
         'redirect' => '?page=' . $type . '-detail&id=' . $equipment_id,
         'debug' => $debug_info
     ]);
+    exit;
     
 } catch (Exception $e) {
+    ob_end_clean();
+    error_log("EXCEPTION: " . $e->getMessage());
+    error_log("TRACE: " . $e->getTraceAsString());
+    http_response_code(500);
     echo json_encode([
         'status' => 'error',
-        'message' => $e->getMessage()
+        'message' => $e->getMessage(),
+        'error_trace' => $e->getTraceAsString()
     ]);
+    exit;
 }
 ?>

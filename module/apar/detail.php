@@ -247,7 +247,13 @@ $statusClass = ($apar['status'] === 'OK' || $apar['status'] === 'Good') ? 'statu
                     <tr>
                         <td><?php echo $h['inspection_date_fmt']; ?></td>
                         <td><?php echo $h['inspector_name'] ?: 'Unknown'; ?></td>
-                        <td><span class="badge bg-success">✓ OK</span></td>
+                        <td>
+                            <?php if (isset($h['insp_status']) && $h['insp_status'] === 'NG'): ?>
+                                <span class="badge bg-danger">✗ NG</span>
+                            <?php else: ?>
+                                <span class="badge bg-success">✓ OK</span>
+                            <?php endif; ?>
+                        </td>
                         <td><?php echo $h['notes'] ?: '-'; ?></td>
                     </tr>
                 <?php endforeach; ?>
