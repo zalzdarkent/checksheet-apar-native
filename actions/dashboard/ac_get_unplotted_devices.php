@@ -11,7 +11,7 @@ $res_apar = sqlsrv_query($koneksi, $sql_apar);
 if ($res_apar !== false) {
     while ($row = sqlsrv_fetch_array($res_apar, SQLSRV_FETCH_ASSOC)) {
         $row['device_type'] = 'apar';
-        $unplotted[] = $row;
+        $unplotted[] = $row;    
     }
 }
 

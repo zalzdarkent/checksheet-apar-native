@@ -443,16 +443,6 @@ $hydrantData = getInspections('hydrant', $dateFilter);
                 </ol>
             </nav>
         </div>
-        <div class="ms-md-auto py-2 py-md-0">
-            <?php
-            $formatter = new IntlDateFormatter(
-                'id_ID',
-                IntlDateFormatter::FULL,
-                IntlDateFormatter::NONE
-            );
-            echo '<i class="fas fa-calendar-alt"></i> ' . $formatter->format(new DateTime());
-            ?>
-        </div>
     </div>
 
     <!-- Month Filter Section -->

@@ -129,12 +129,6 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
 <div class="page-inner">
     <div class="d-flex align-items-center justify-content-between mb-2">
         <h4 class="fw-bold mb-0 text-dark">Safety & Environment Center</h4>
-        <div class="text-muted" style="font-size:0.85rem;">
-            <?php
-            $formatter = new IntlDateFormatter('id_ID', IntlDateFormatter::FULL, IntlDateFormatter::NONE);
-            echo '<i class="fas fa-calendar-alt"></i> ' . $formatter->format(new DateTime());
-            ?>
-        </div>
     </div>
 
     <!-- DATE FILTER SECTION -->

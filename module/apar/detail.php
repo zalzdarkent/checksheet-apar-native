@@ -287,20 +287,25 @@ $statusClass = ($apar['status'] === 'OK' || $apar['status'] === 'Good') ? 'statu
                         <td><?php echo isset($c['due_date_fmt']) ? $c['due_date_fmt'] : '-'; ?></td>
                         <td><?php echo $c['pic_name'] ?: 'Unassigned'; ?></td>
                         <td>
-                            <span class="badge <?php echo $c['status'] === 'Fixed' ? 'bg-success' : 'bg-danger'; ?>">
+                            <span class="badge 
+                                <?php 
+                                    echo $c['status'] === 'Open' ? 'bg-danger' : 
+                                        ($c['status'] === 'On Progress' ? 'bg-warning' : 
+                                        ($c['status'] === 'Verified' ? 'bg-success' : 'bg-secondary')); 
+                                ?>">
                                 <?php echo $c['status']; ?>
                             </span>
                         </td>
                         <td>
-                            <?php if (isset($c['verified']) && $c['verified']): ?>
-                                <span class="badge bg-success">✓ Verified</span>
+                            <?php if (isset($c['verified_by_name']) && $c['verified_by_name']): ?>
+                                <span> <?php echo $c['verified_by_name']; ?></span>
                             <?php else: ?>
                                 <span class="text-muted">-</span>
                             <?php endif; ?>
                         </td>
                         <td>
-                            <?php if (isset($c['foto']) && $c['foto']): ?>
-                                <a href="<?php echo $c['foto']; ?>" target="_blank" class="btn btn-sm btn-outline-info">View</a>
+                            <?php if (isset($c['repair_photo']) && $c['repair_photo']): ?>
+                                <a href="storage/<?php echo $c['repair_photo']; ?>" target="_blank" class="btn btn-sm btn-outline-info">View</a>
                             <?php else: ?>
                                 <span class="text-muted">-</span>
                             <?php endif; ?>

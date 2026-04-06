@@ -101,19 +101,19 @@ $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php",
                         <tbody>
                             <?php
                             $items = [
-                                ['key' => 'body_hydrant', 'name' => '1. Body Hydrant'],
-                                ['key' => 'selang', 'name' => '2. Selang'],
-                                ['key' => 'couple_join', 'name' => '3. Couple Join'],
-                                ['key' => 'nozzle', 'name' => '4. Nozzle'],
-                                ['key' => 'check_sheet', 'name' => '5. Check Sheet'],
-                                ['key' => 'valve_kran', 'name' => '6. Valve/Kran'],
-                                ['key' => 'lampu', 'name' => '7. Lampu'],
-                                ['key' => 'cover_lampu', 'name' => '8. Cover Lampu'],
-                                ['key' => 'box_display', 'name' => '9. Box Display'],
-                                ['key' => 'konsul_hydrant', 'name' => '10. Konsul Hydrant'],
-                                ['key' => 'jr', 'name' => '11. JR'],
-                                ['key' => 'marking', 'name' => '12. Marking'],
-                                ['key' => 'label', 'name' => '13. Label'],
+                                ['key' => 'body_hydrant', 'name' => 'Body Hydrant'],
+                                ['key' => 'selang', 'name' => 'Selang'],
+                                ['key' => 'couple_join', 'name' => 'Couple Join'],
+                                ['key' => 'nozzle', 'name' => 'Nozzle'],
+                                ['key' => 'check_sheet', 'name' => 'Check Sheet'],
+                                ['key' => 'valve_kran', 'name' => 'Valve/Kran'],
+                                ['key' => 'lampu', 'name' => 'Lampu'],
+                                ['key' => 'cover_lampu', 'name' => 'Cover Lampu'],
+                                ['key' => 'box_display', 'name' => 'Box Display'],
+                                ['key' => 'konsul_hydrant', 'name' => 'Konsul Hydrant'],
+                                ['key' => 'jr', 'name' => 'JR'],
+                                ['key' => 'marking', 'name' => 'Marking'],
+                                ['key' => 'label', 'name' => 'Label'],
                             ];
                             
                             foreach ($items as $idx => $item):

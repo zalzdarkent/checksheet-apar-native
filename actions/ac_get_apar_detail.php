@@ -58,9 +58,10 @@ if ($id <= 0) {
         }
 
         // 3. Get Abnormal Cases with PIC name
-        $sql_cases = "SELECT c.*, u.name as pic_name 
+        $sql_cases = "SELECT c.*, u.name as pic_name, v.name as verified_by_name
                       FROM [apar].[dbo].[apar_abnormal_cases] c
                       LEFT JOIN [apar].[dbo].[users] u ON c.pic_id = u.id
+                      LEFT JOIN [apar].[dbo].[users] v ON c.verified_by = v.id
                       WHERE c.apar_id = ? 
                       ORDER BY c.created_at DESC";
         $stmt_cases = sqlsrv_query($koneksi, $sql_cases, [$id]);

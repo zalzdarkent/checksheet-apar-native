@@ -1,5 +1,15 @@
 <nav class="navbar navbar-header navbar-header-transparent navbar-expand-lg border-bottom">
     <div class="container-fluid">
+        <!-- Live Clock Display -->
+        <div class="d-none d-lg-flex flex-column justify-content-center me-4 mt-1">
+            <div class="text-muted fw-bold mb-1" style="font-size: 0.85rem;">
+                <i class="fas fa-calendar-alt me-1"></i><span id="liveDateDisplay"></span>
+            </div>
+            <div class="text-primary fw-bolder" style="font-size: 1.6rem; line-height: 1; margin-top: -3px;">
+                <i class="far fa-clock me-1" style="font-size: 1.2rem;"></i><span id="liveTimeDisplay"></span>
+            </div>
+        </div>
+
         <ul class="navbar-nav topbar-nav ms-md-auto align-items-center">
             <li class="nav-item topbar-icon dropdown hidden-caret d-flex d-lg-none">
                 <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button"
@@ -154,3 +164,33 @@
         </ul>
     </div>
 </nav>
+
+<script>
+    function updateClockDisplay() {
+        const now = new Date();
+        const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+        const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+        
+        const dayName = days[now.getDay()];
+        const day = String(now.getDate()).padStart(2, '0');
+        const monthName = months[now.getMonth()];
+        const year = now.getFullYear();
+        
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        
+        const dateElem = document.getElementById('liveDateDisplay');
+        const timeElem = document.getElementById('liveTimeDisplay');
+        
+        if(dateElem) {
+            dateElem.textContent = `${dayName}, ${day} ${monthName} ${year}`;
+        }
+        if(timeElem) {
+            timeElem.textContent = `${hours}:${minutes}:${seconds}`;
+        }
+    }
+    
+    updateClockDisplay();
+    setInterval(updateClockDisplay, 1000);
+</script>

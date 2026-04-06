@@ -45,7 +45,7 @@ $statusClass = ($hydrant['status'] === 'OK' || $hydrant['status'] === 'Good') ? 
         }
 
         .btn-inspeksi {
-            background: #e67e22;
+            background: #0088cc;
             color: #fff;
             padding: 12px 40px;
             border-radius: 8px;
@@ -53,13 +53,13 @@ $statusClass = ($hydrant['status'] === 'OK' || $hydrant['status'] === 'Good') ? 
             border: none;
             margin-bottom: 25px;
             transition: all 0.3s;
-            box-shadow: 0 4px 15px rgba(230, 126, 34, 0.3);
+            box-shadow: 0 4px 15px rgba(0, 136, 204, 0.3);
         }
 
         .btn-inspeksi:hover {
-            background: #d35400;
+            background: #005a87;
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(230, 126, 34, 0.4);
+            box-shadow: 0 6px 20px rgba(0, 136, 204, 0.4);
             color: #fff;
         }
 
@@ -109,9 +109,9 @@ $statusClass = ($hydrant['status'] === 'OK' || $hydrant['status'] === 'Good') ? 
             font-weight: 800;
             margin: 40px 0 20px;
             padding: 15px 20px;
-            border-bottom: 3px solid #e67e22;
-            color: #fff;
-            background: rgba(230, 126, 34, 0.1);
+            border-bottom: 3px solid #0088cc;
+            color: #000000;
+            background: rgba(0, 136, 204, 0.1);
             border-radius: 8px 8px 0 0;
             text-transform: uppercase;
             letter-spacing: 1px;
@@ -261,20 +261,25 @@ $statusClass = ($hydrant['status'] === 'OK' || $hydrant['status'] === 'Good') ? 
                         <td><?php echo isset($c['due_date_fmt']) ? $c['due_date_fmt'] : '-'; ?></td>
                         <td><?php echo $c['pic_name'] ?: 'Unassigned'; ?></td>
                         <td>
-                            <span class="badge <?php echo $c['status'] === 'Fixed' ? 'bg-success' : 'bg-danger'; ?>">
+                            <span class="badge 
+                                <?php 
+                                    echo $c['status'] === 'Open' ? 'bg-danger' : 
+                                        ($c['status'] === 'On Progress' ? 'bg-warning' : 
+                                        ($c['status'] === 'Verified' ? 'bg-success' : 'bg-secondary')); 
+                                ?>">
                                 <?php echo $c['status']; ?>
                             </span>
                         </td>
                         <td>
-                            <?php if (isset($c['verified']) && $c['verified']): ?>
-                                <span class="badge bg-success">✓ Verified</span>
+                            <?php if (isset($c['verified_by_name']) && $c['verified_by_name']): ?>
+                                <span class="badge bg-success">✓ <?php echo $c['verified_by_name']; ?></span>
                             <?php else: ?>
                                 <span class="text-muted">-</span>
                             <?php endif; ?>
                         </td>
                         <td>
-                            <?php if (isset($c['foto']) && $c['foto']): ?>
-                                <a href="<?php echo $c['foto']; ?>" target="_blank" class="btn btn-sm btn-outline-info">View</a>
+                            <?php if (isset($c['repair_photo']) && $c['repair_photo']): ?>
+                                <a href="storage/<?php echo $c['repair_photo']; ?>" target="_blank" class="btn btn-sm btn-outline-info">View</a>
                             <?php else: ?>
                                 <span class="text-muted">-</span>
                             <?php endif; ?>

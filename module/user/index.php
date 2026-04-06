@@ -18,17 +18,7 @@ $getAllUsers = get_all_users();
                     </li>
                 </ol>
             </nav>
-        </div>
-        <div class="ms-md-auto py-2 py-md-0">
-            <?php
-            $formatter = new IntlDateFormatter(
-                'id_ID',
-                IntlDateFormatter::FULL,
-                IntlDateFormatter::NONE
-            );
-            echo '<i class="fas fa-calendar-alt"></i> ' . $formatter->format(new DateTime());
-            ?>
-        </div>
+    </div>
     </div>
     <div class="row">
         <div class="col-md-12">
