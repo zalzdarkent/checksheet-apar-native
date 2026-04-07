@@ -175,7 +175,7 @@ function get_total_hydrant_ok()
 
     $sql = "SELECT COUNT(*) AS total_hydrant_ok
             FROM [apar].[dbo].[hydrants] h
-            WHERE h.status = 'Good'
+            WHERE h.status = 'OK'
             AND EXISTS (
                 SELECT 1 
                 FROM [apar].[dbo].[bimonthly_inspections] bi
@@ -200,7 +200,7 @@ function get_total_hydrant_abnormal()
 
     $sql = "SELECT COUNT(*) AS total_hydrant_abnormal
             FROM [apar].[dbo].[hydrants] h
-            WHERE h.status <> 'Good'
+            WHERE h.status <> 'OK'
             AND EXISTS (
                 SELECT 1 
                 FROM [apar].[dbo].[bimonthly_inspections] bi

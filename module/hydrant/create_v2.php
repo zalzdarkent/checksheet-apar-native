@@ -62,7 +62,7 @@ $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php",
                                         </div>
                                         <div class="col-md-6">
                                             <label class="form-label fw-bold">Jenis Hydrant</label>
-                                            <select name="type" class="form-select" required>
+                                            <select name="type" id="input-type" class="form-select" required>
                                                 <option value="">-- Pilih Jenis --</option>
                                                 <option value="Indoor">Indoor</option>
                                                 <option value="Outdoor">Outdoor</option>
@@ -137,38 +137,45 @@ $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php",
                                     <tbody>
                                         <?php
                                         $items = [
-                                            ['key' => 'body_hydrant', 'name' => 'Body Hydrant', 'req' => false],
-                                            ['key' => 'selang', 'name' => 'Selang', 'req' => false],
-                                            ['key' => 'couple_join', 'name' => 'Couple Join', 'req' => false],
-                                            ['key' => 'nozzle', 'name' => 'Nozzle', 'req' => false],
-                                            ['key' => 'check_sheet', 'name' => 'Check Sheet', 'req' => false],
-                                            ['key' => 'valve_kran', 'name' => 'Valve Kran', 'req' => false],
-                                            ['key' => 'lampu', 'name' => 'Lampu', 'req' => false],
-                                            ['key' => 'cover_lampu', 'name' => 'Cover Lampu', 'req' => false],
-                                            ['key' => 'kunci_pilar_hydrant', 'name' => 'Kunci Pilar Hydrant', 'req' => false],
-                                            ['key' => 'pilar_hydrant', 'name' => 'Pilar Hydrant', 'req' => false],
-                                            ['key' => 'marking', 'name' => 'Marking', 'req' => false],
-                                            ['key' => 'sign_larangan', 'name' => 'Sign Larangan', 'req' => false],
-                                            ['key' => 'nomor_hydrant', 'name' => 'Nomor Hydrant', 'req' => false],
-                                            ['key' => 'wi_hydrant', 'name' => 'WI Hydrant', 'req' => false],
+                                            ['key' => 'body_hydrant', 'name' => 'Body Hydrant', 'type' => 'both'],
+                                            ['key' => 'selang', 'name' => 'Selang', 'type' => 'both'],
+                                            ['key' => 'couple_join', 'name' => 'Couple Join', 'type' => 'both'],
+                                            ['key' => 'nozzle', 'name' => 'Nozzle', 'type' => 'both'],
+                                            ['key' => 'check_sheet', 'name' => 'Check Sheet', 'type' => 'both'],
+                                            ['key' => 'valve_kran', 'name' => 'Valve Kran', 'type' => 'indoor'],
+                                            ['key' => 'lampu', 'name' => 'Lampu', 'type' => 'indoor'],
+                                            ['key' => 'cover_lampu', 'name' => 'Cover Lampu', 'type' => 'indoor'],
+                                            ['key' => 'kunci_pilar_hydrant', 'name' => 'Kunci Pilar Hydrant', 'type' => 'outdoor'],
+                                            ['key' => 'pilar_hydrant', 'name' => 'Pilar Hydrant', 'type' => 'outdoor'],
+                                            ['key' => 'marking', 'name' => 'Marking', 'type' => 'both'],
+                                            ['key' => 'sign_larangan', 'name' => 'Sign Larangan', 'type' => 'both'],
+                                            ['key' => 'nomor_hydrant', 'name' => 'Nomor Hydrant', 'type' => 'both'],
+                                            ['key' => 'wi_hydrant', 'name' => 'WI Hydrant', 'type' => 'both'],
                                         ];
                                         foreach($items as $i => $item): ?>
-                                            <tr>
+                                            <tr class="inspection-row" data-type="<?= $item['type'] ?>">
                                                 <td class="text-center"><?= $i+1 ?></td>
                                                 <td>
                                                     <?= $item['name'] ?>
-                                                    <?= $item['req'] ? '<span class="text-danger">*</span>' : '' ?>
-                                                </td>
-                                                <td>
-                                                    <div class="btn-group btn-group-sm w-100" role="group">
-                                                        <input type="radio" class="btn-check" name="<?= $item['key'] ?>_ok" id="<?= $item['key'] ?>_ok" value="1" checked>
-                                                        <label class="btn btn-outline-success" for="<?= $item['key'] ?>_ok">OK</label>
-                                                        <input type="radio" class="btn-check" name="<?= $item['key'] ?>_ok" id="<?= $item['key'] ?>_abnormal" value="0">
-                                                        <label class="btn btn-outline-danger" for="<?= $item['key'] ?>_abnormal">NG</label>
+                                                    <span class="row-required text-danger">*</span>
+                                                    <div class="row-badge mt-1">
+                                                        <?php if($item['type'] === 'indoor'): ?>
+                                                            <span class="badge bg-secondary" style="font-size: 0.7em;">Khusus Indoor</span>
+                                                        <?php elseif($item['type'] === 'outdoor'): ?>
+                                                            <span class="badge bg-secondary" style="font-size: 0.7em;">Khusus Outdoor</span>
+                                                        <?php endif; ?>
                                                     </div>
                                                 </td>
                                                 <td>
-                                                    <input type="file" name="<?= $item['key'] ?>_foto" class="form-control form-control-sm" accept="image/*" <?= $item['req'] ? 'required' : '' ?>>
+                                                    <div class="btn-group btn-group-sm w-100" role="group">
+                                                        <input type="radio" class="btn-check" name="<?= $item['key'] ?>_ok" id="<?= $item['key'] ?>_ok_<?= $i ?>" value="1" checked>
+                                                        <label class="btn btn-outline-success" for="<?= $item['key'] ?>_ok_<?= $i ?>">OK</label>
+                                                        <input type="radio" class="btn-check" name="<?= $item['key'] ?>_ok" id="<?= $item['key'] ?>_abnormal_<?= $i ?>" value="0">
+                                                        <label class="btn btn-outline-danger" for="<?= $item['key'] ?>_abnormal_<?= $i ?>">Abnormal</label>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <input type="file" name="<?= $item['key'] ?>_foto" class="form-control form-control-sm inspection-file" accept="image/*" required>
                                                 </td>
                                             </tr>
                                         <?php endforeach; ?>
@@ -284,7 +291,7 @@ $(document).ready(function() {
             $('#input-code').val('').prop('readonly', false).attr('placeholder', 'Masukkan kode manual...');
         } else if (area) {
             $('#input-code').val('Generating...').prop('readonly', true);
-            $.get('actions/hydrant/ac_get_next_code.php', { area: area }, function(res) {
+            $.get('actions/apar/ac_get_next_code.php', { area: area, type: 'hydrant' }, function(res) {
                 if (res.success) $('#input-code').val(res.next_code);
             });
         } else {
@@ -330,6 +337,25 @@ $(document).ready(function() {
             swal("Incomplete", "Mohon isi semua data dan tentukan lokasi di peta.", "warning");
             return;
         }
+
+        // Toggle Inspection Items based on Hydrant Type
+        const hType = $('#input-type').val().toLowerCase(); // indoor or outdoor
+        $('.inspection-row').each(function() {
+            const rowType = $(this).data('type');
+            const isRelevant = (rowType === 'both' || rowType === hType);
+            
+            if (isRelevant) {
+                $(this).removeClass('opacity-50 bg-light').find('input').prop('disabled', false);
+                $(this).find('.row-badge').hide();
+                $(this).find('.row-required').show();
+                $(this).find('.inspection-file').prop('required', true);
+            } else {
+                $(this).addClass('opacity-50 bg-light').find('input').prop('disabled', true);
+                $(this).find('.row-badge').show();
+                $(this).find('.row-required').hide();
+                $(this).find('.inspection-file').prop('required', false);
+            }
+        });
 
         $('#step-1-content').hide();
         $('#step-2-content').fadeIn();

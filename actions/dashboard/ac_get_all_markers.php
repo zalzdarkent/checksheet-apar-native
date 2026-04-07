@@ -30,7 +30,7 @@ $sql_hydrant = "
     SELECT h.code as kode, h.type as jenis, h.location as lokasi, h.area, h.x_coordinate, h.y_coordinate,
     (SELECT TOP 1 abnormal_case FROM [apar].[dbo].[hydrant_abnormal_cases] WHERE hydrant_id = h.id AND status <> 'Verified' ORDER BY created_at DESC) as issue,
     CASE 
-        WHEN h.status = 'Good' THEN 'OK'
+        WHEN h.status = 'OK' THEN 'OK'
         WHEN h.status = 'On Inspection' THEN 'Proses'
         ELSE 'Abnormal'
     END as status_badge

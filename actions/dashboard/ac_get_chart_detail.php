@@ -79,7 +79,7 @@ if ($jenis_perangkat === 'hydrant' || $jenis_perangkat === 'all') {
     $q_ok = "SELECT h.code as kode, h.type as jenis, h.location as lokasi, h.area, 'OK' as status_badge, 
             'Sudah diinspeksi' as keterangan, NULL as foto, h.x_coordinate, h.y_coordinate
             FROM [apar].[dbo].[hydrants] h
-            WHERE h.status = 'Good'
+            WHERE h.status = 'OK'
             AND EXISTS (
                 SELECT 1 FROM [apar].[dbo].[bimonthly_inspections] bi
                 WHERE bi.hydrant_unit_id = h.id
@@ -91,7 +91,7 @@ if ($jenis_perangkat === 'hydrant' || $jenis_perangkat === 'all') {
             COALESCE(hac.abnormal_case, 'Rusak / Temuan') as keterangan, hac.repair_photo as foto, h.x_coordinate, h.y_coordinate
             FROM [apar].[dbo].[hydrants] h
             LEFT JOIN [apar].[dbo].[hydrant_abnormal_cases] hac ON h.id = hac.hydrant_id AND hac.status != 'Verified'
-            WHERE h.status <> 'Good'
+            WHERE h.status <> 'OK'
             AND EXISTS (
                 SELECT 1 FROM [apar].[dbo].[bimonthly_inspections] bi
                 WHERE bi.hydrant_id = h.id

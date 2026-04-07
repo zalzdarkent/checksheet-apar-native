@@ -41,7 +41,7 @@ try {
         // HYDRANT STATS with date filter
         $sqlHydrant = "SELECT 
             COUNT(DISTINCT h.id) as total,
-            SUM(CASE WHEN h.status = 'Good' THEN 1 ELSE 0 END) as ok,
+            SUM(CASE WHEN h.status = 'OK' THEN 1 ELSE 0 END) as ok,
             SUM(CASE WHEN h.status = 'On Inspection' THEN 1 ELSE 0 END) as proses,
             SUM(CASE WHEN h.status = 'Abnormal' OR h.status = 'Expired' OR h.status = 'NG' THEN 1 ELSE 0 END) as abnormal
         FROM [apar].[dbo].[hydrants] h
@@ -77,7 +77,7 @@ try {
         SELECT DISTINCT
             h.id, h.code, h.status, 'Hydrant' as jenis, 'hydrant' as device_type,
             h.x_coordinate, h.y_coordinate, h.area, ac.abnormal_case as issue,
-            CASE WHEN h.status = 'Good' THEN 'OK'
+            CASE WHEN h.status = 'OK' THEN 'OK'
                  WHEN h.status = 'On Inspection' THEN 'Proses'
                  ELSE 'Abnormal' END as status_badge
         FROM [apar].[dbo].[hydrants] h
@@ -115,7 +115,7 @@ try {
         // HYDRANT STATS (all)
         $sqlHydrant = "SELECT 
             COUNT(h.id) as total,
-            SUM(CASE WHEN h.status = 'Good' THEN 1 ELSE 0 END) as ok,
+            SUM(CASE WHEN h.status = 'OK' THEN 1 ELSE 0 END) as ok,
             SUM(CASE WHEN h.status = 'On Inspection' THEN 1 ELSE 0 END) as proses,
             SUM(CASE WHEN h.status = 'Abnormal' OR h.status = 'Expired' OR h.status = 'NG' THEN 1 ELSE 0 END) as abnormal
         FROM [apar].[dbo].[hydrants] h";
@@ -152,7 +152,7 @@ try {
             h.id, h.code, h.status, 'Hydrant' as jenis, 'hydrant' as device_type,
             h.x_coordinate, h.y_coordinate, h.area,
             (SELECT TOP 1 abnormal_case FROM [apar].[dbo].[hydrant_abnormal_cases] WHERE hydrant_id = h.id AND status <> 'Verified' ORDER BY created_at DESC) as issue,
-            CASE WHEN h.status = 'Good' THEN 'OK'
+            CASE WHEN h.status = 'OK' THEN 'OK'
                  WHEN h.status = 'On Inspection' THEN 'Proses'
                  ELSE 'Abnormal' END as status_badge
         FROM [apar].[dbo].[hydrants] h
