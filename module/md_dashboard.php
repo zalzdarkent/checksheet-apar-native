@@ -41,14 +41,14 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
     }
 
     /* Layout tweaks */
-    .page-inner { padding: 1rem 1.5rem !important; }
-    .card { margin-bottom: 0 !important; } /* override bootstrap margin */
+    .page-inner { padding: 1.5rem !important; }
+    .card { margin-bottom: 1rem !important; } 
     
     /* Summary Cards compact */
     .summary-card {
         border-radius: 8px;
         background: #fff;
-        padding: 10px 15px;
+        padding: 12px 15px;
         display: flex;
         align-items: center;
         border-left: 5px solid;
@@ -59,21 +59,41 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
     .summary-card.proses { border-color: var(--c-proses); }
     .summary-card.abn { border-color: var(--c-abnormal); }
     
-    .summary-card h2 { margin: 0; font-size: 1.5rem; font-weight: 800; line-height: 1; }
-    .summary-card span.stat-title { font-size: 0.75rem; text-transform: uppercase; font-weight: 700; display: block; color: #555; margin-bottom: 2px;}
-    .summary-card .breakdown { font-size: 0.7rem; color: #888; }
+    .summary-card h2 { margin: 0; font-size: 1.4rem; font-weight: 800; line-height: 1; }
+    .summary-card span.stat-title { font-size: 0.7rem; text-transform: uppercase; font-weight: 700; display: block; color: #555; margin-bottom: 1px;}
+    .summary-card .breakdown { font-size: 0.65rem; color: #888; }
     
     /* Map Container */
     .map-container-custom {
         position: relative;
         width: 100%;
-        overflow: auto;
+        overflow: hidden;
         border-radius: 6px;
-        height: 480px;
-        background: #e9ecef;
+        height: 380px;
+        background: #fff;
         text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #eee;
     }
-    .map-container-custom img { width: 100%; height: auto; display: block; }
+    .map-container-custom img { 
+        width: 100%; 
+        height: 100%; 
+        object-fit: fill; 
+        display: block; 
+    }
+    
+    .table-dashboard { font-size: 0.85rem; }
+    .table-dashboard th { background: #f8f9fa; font-weight: 700; white-space: nowrap; padding: 10px 8px !important; }
+    .table-dashboard td { vertical-align: middle; padding: 8px !important; }
+    
+    /* Responsive adjustments untuk mobile */
+    @media (max-width: 768px) {
+        .col-md-5, .col-md-7 { flex: 0 0 100% !important; max-width: 100% !important; }
+        .map-container-custom { height: 300px; }
+        #chartAPAR, #chartHydrant { height: 100px !important; }
+    }
     
     .map-marker {
         position: absolute; width: 22px; height: 22px;
@@ -123,7 +143,7 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
     
     .nav-compact .nav-link { font-size:0.8rem; padding: 6px 12px; }
     
-    .apx-title { font-size:0.85rem; font-weight:700; margin-top:10px; text-align:center;}
+    .apx-title { font-size:0.8rem; font-weight:700; margin-top:0px; margin-bottom:8px; text-align:center;}
 </style>
 
 <div class="page-inner">
@@ -132,7 +152,7 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
     </div>
 
     <!-- DATE FILTER SECTION -->
-    <div class="alert alert-light rounded mb-3 py-2 px-3" style="background: #f8f9fa;">
+    <div class="alert alert-light rounded mb-2 py-2 px-3" style="background: #f8f9fa;">
         <div class="d-flex align-items-center gap-2 flex-wrap">
             <label class="mb-0 fw-bold text-muted small">Filter:</label>
             <input type="date" id="filterStartDate" class="form-control form-control-sm" style="max-width: 130px;">
@@ -145,7 +165,7 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
     </div>
 
     <!-- ROW 1: COMPACT SUMMARY CARDS -->
-    <div class="row g-2 mb-3">
+    <div class="row g-1 mb-2">
         <!-- Total -->
         <div class="col-6 col-md-4">
             <div class="summary-card total">
@@ -178,30 +198,30 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
         </div>
     </div>
 
-    <!-- ROW 2: CORE CONTROL CENTER (No scroll layout) -->
-    <div class="row g-2">
+    <!-- ROW 2: CORE CONTROL CENTER (Optimized Layout) -->
+    <div class="row g-1">
         
-        <!-- LEFT: GRAPHS (col-md-2) -->
-        <div class="col-md-2">
-            <div class="card card-round h-100 shadow-sm">
-                <div class="card-body p-2 d-flex flex-column justify-content-around">
+        <!-- LEFT: GRAPHS (col-md-5 untuk proporsi lebih baik) -->
+        <div class="col-md-5">
+            <div class="card card-round shadow-sm">
+                <div class="card-body p-2 d-flex flex-column">
                     <div>
                         <div class="apx-title"><i class="fas fa-fire-extinguisher text-danger"></i> Rasio APAR</div>
-                        <div id="chartAPAR" style="min-height: 180px;"></div>
+                        <div id="chartAPAR" style="height: 120px;"></div>
                     </div>
                     <hr class="my-1">
                     <div>
                         <div class="apx-title"><i class="fas fa-shield-alt text-info"></i> Rasio Hydrant</div>
-                        <div id="chartHydrant" style="min-height: 180px;"></div>
+                        <div id="chartHydrant" style="height: 120px;"></div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- CENTER: MAP (col-md-6) -->
-        <div class="col-md-6">
-            <div class="card card-round h-100 shadow-sm">
-                <div class="card-header bg-white p-2 border-0 d-flex justify-content-between align-items-center">
+        <!-- RIGHT: MAP (col-md-7 untuk lebih lebar) -->
+        <div class="col-md-7">
+            <div class="card card-round shadow-sm">
+                <div class="card-header bg-white p-2 border-0 d-flex justify-content-between align-items-center" style="min-height: auto;">
                     <div class="fw-bold" style="font-size:0.85rem;"><i class="fas fa-map-marked-alt text-primary"></i> Live Factory Map</div>
                 </div>
                 <div class="card-body p-2 pt-0">
@@ -223,144 +243,153 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
                 </div>
             </div>
         </div>
+    </div> <!-- End Row 2 -->
 
-        <!-- RIGHT: ACTION LIST (col-md-4) -->
-        <div class="col-md-4">
-            <div class="card card-round h-100 shadow-sm">
-                <div class="card-header bg-white p-2 border-0 pb-0">
-                    <div class="d-flex justify-content-between align-items-center mb-1">
-                        <div class="fw-bold text-danger" style="font-size:0.85rem;"><i class="fas fa-exclamation-triangle"></i> Action Required</div>
+    <!-- ROW 3: FULL ACTION TABLE -->
+    <div class="row g-2 mt-2 pb-5">
+        <div class="col-md-12">
+            <div class="card card-round shadow-sm">
+                <div class="card-header bg-white p-2 border-0" style="padding-bottom: 0 !important;">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div class="fw-bold text-danger" style="font-size:1rem;"><i class="fas fa-exclamation-triangle"></i> Action Required / Temuan Abnormal</div>
                     </div>
-                    <ul class="nav nav-tabs nav-compact border-0" role="tablist">
+                    <ul class="nav nav-tabs border-0" id="actionTabs" role="tablist">
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link active fw-bold text-danger" id="apar-tab" data-bs-toggle="tab" data-bs-target="#apar-cases" type="button" role="tab">APAR (<?= count($aparAbnormalCases) ?>)</button>
+                            <button class="nav-link active fw-bold text-danger px-4" id="apar-tab-btn" data-bs-toggle="tab" data-bs-target="#apar-cases-tab" type="button" role="tab">APAR (<?= count($aparAbnormalCases) ?>)</button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link fw-bold text-info" id="hydrant-tab" data-bs-toggle="tab" data-bs-target="#hydrant-cases" type="button" role="tab">Hydrant (<?= count($hydrantAbnormalCases) ?>)</button>
+                            <button class="nav-link fw-bold text-info px-4" id="hydrant-tab-btn" data-bs-toggle="tab" data-bs-target="#hydrant-cases-tab" type="button" role="tab">Hydrant (<?= count($hydrantAbnormalCases) ?>)</button>
                         </li>
                     </ul>
                 </div>
-                <div class="card-body p-2 bg-light">
-                    <div class="tab-content h-100">
+                <div class="card-body p-3">
+                    <div class="tab-content">
                         
                         <!-- APAR CASES TAB -->
-                        <div class="tab-pane fade show active h-100" id="apar-cases" role="tabpanel">
-                            <div class="compact-list">
-                                <?php if (empty($aparAbnormalCases)): ?>
-                                    <div class="text-center text-muted mt-5"><i class="fas fa-check-circle" style="font-size:2rem; color:var(--c-ok); margin-bottom:5px;"></i><br>Zero issues.</div>
-                                <?php else: ?>
-                                    <?php 
-                                    foreach ($aparAbnormalCases as $case): 
-                                        $user_id = $_SESSION['user_id'] ?? null;
-                                        $user_role = strtolower($_SESSION['user_role'] ?? '');
-                                        $can_edit = (empty($case['pic_id']) || $case['pic_id'] == $user_id || $user_role === 'admin');
-                                        $isDisabled = ($case['status'] === 'Verified' || !$can_edit) ? 'disabled' : '';
-                                        
-                                        // Dynamic status class for border color
-                                        $statusClass = '';
-                                        if ($case['status'] === 'Verified') $statusClass = 'verified';
-                                        elseif ($case['status'] === 'Closed') $statusClass = 'closed';
-                                        elseif ($case['status'] === 'Open') $statusClass = 'open';
-                                    ?>
-                                    <div class="case-item <?= $statusClass ?>" data-created="<?= $case['created_at'] instanceof DateTime ? $case['created_at']->format('Y-m-d') : date('Y-m-d') ?>">
-                                        <div class="case-item-title">
-                                            <span><i class="fas fa-fire-extinguisher text-danger"></i> <?= htmlspecialchars($case['code']) ?> - <?= htmlspecialchars($case['area']) ?></span>
-                                            <?php
-                                            if ($case['status'] === 'Open') echo '<span class="badge bg-danger">Open</span>';
-                                            elseif ($case['status'] === 'Closed') echo '<span class="badge bg-info">Closed</span>';
-                                            elseif ($case['status'] === 'Verified') echo '<span class="badge bg-success">Verified</span>';
-                                            else echo '<span class="badge bg-warning text-dark">Proses</span>';
-                                            ?>
-                                        </div>
-                                        <div class="case-item-desc">
-                                            <strong>Issue:</strong> <span class="text-danger"><?= htmlspecialchars($case['abnormal_case']) ?></span><br>
-                                            <strong>Action:</strong> <?= htmlspecialchars($case['countermeasure'] ?: 'Menunggu planning...') ?>
-                                        </div>
-                                        <div class="case-item-meta">
-                                            <?php if($case['due_date']): ?><span><i class="far fa-clock"></i> <?= $case['due_date']->format('d M') ?></span><?php endif; ?>
-                                            
-                                            <?php if($case['pic_name']): ?>
-                                                <span class="ms-auto" title="<?= htmlspecialchars($case['pic_name']) ?>"><img src="storage/users/<?= htmlspecialchars($case['pic_photo'] ?: 'default.png') ?>" class="avatar-mini"> <?= htmlspecialchars(explode(' ', trim($case['pic_name']))[0]) ?></span>
-                                            <?php else: ?>
-                                                <span class="ms-auto text-danger"><i class="fas fa-user-times"></i> No PIC</span>
-                                            <?php endif; ?>
-                                        </div>
-                                        <div class="case-item-actions border-top pt-2 mt-2">
-                                            <button class="btn btn-warning btn-edit-case" title="Edit Detail" data-id="<?= $case['id'] ?>" data-type="apar" data-abcase="<?= htmlspecialchars($case['abnormal_case']) ?>" data-counter="<?= htmlspecialchars($case['countermeasure'] ?? '') ?>" data-due="<?= $case['due_date'] ? $case['due_date']->format('Y-m-d') : '' ?>" data-pic="<?= $case['pic_id'] ?>" <?= $isDisabled ?>><i class="fas fa-edit"></i> Edit</button>
-                                            <button class="btn btn-primary btn-update-status" title="Update Status" data-id="<?= $case['id'] ?>" data-type="apar" data-status="<?= $case['status'] ?>" data-abcase="<?= htmlspecialchars($case['abnormal_case']) ?>" <?= $isDisabled ?>><i class="fas fa-sync-alt"></i> Status</button>
-                                            <?php if ($case['status'] === 'Closed' && strtolower($_SESSION['user_role'] ?? '') === 'admin'): ?>
-                                                <button class="btn btn-success btn-verify-case" title="Verify Case" data-id="<?= $case['id'] ?>" data-type="apar"><i class="fas fa-check-double"></i> Verify</button>
-                                            <?php endif; ?>
-                                            <?php if ($case['repair_photo']): ?>
-                                                <a href="storage/<?= $case['repair_photo'] ?>" target="_blank" class="btn btn-info ms-auto" title="Bukti Foto"><i class="far fa-image"></i></a>
-                                            <?php endif; ?>
-                                        </div>
-                                    </div>
-                                    <?php endforeach; ?>
-                                <?php endif; ?>
+                        <div class="tab-pane fade show active" id="apar-cases-tab" role="tabpanel">
+                            <div class="table-responsive">
+                                <table id="apar-action-table" class="display table table-striped table-hover table-dashboard w-100">
+                                    <thead>
+                                        <tr>
+                                            <th>Code</th>
+                                            <th>Area</th>
+                                            <th>Issue</th>
+                                            <th>Countermeasure</th>
+                                            <th>PIC</th>
+                                            <th>Due Date</th>
+                                            <th>Status</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ($aparAbnormalCases as $case): 
+                                            // Pre-calculate session values if needed here or use data-attributes
+                                        ?>
+                                        <tr>
+                                            <td><strong><?= htmlspecialchars($case['code']) ?></strong></td>
+                                            <td><?= htmlspecialchars($case['area']) ?></td>
+                                            <td class="text-danger fw-bold"><?= htmlspecialchars($case['abnormal_case']) ?></td>
+                                            <td><?= htmlspecialchars($case['countermeasure'] ?: '-') ?></td>
+                                            <td>
+                                                <?php if($case['pic_name']): ?>
+                                                    <span title="<?= htmlspecialchars($case['pic_name']) ?>"><img src="storage/users/<?= htmlspecialchars($case['pic_photo'] ?: 'default.png') ?>" class="avatar-mini me-1"> <?= htmlspecialchars($case['pic_name']) ?></span>
+                                                <?php else: ?>
+                                                    <span class="text-danger"><i class="fas fa-user-times"></i>-</span>
+                                                <?php endif; ?>
+                                            </td>
+                                            <td><?= $case['due_date'] ? $case['due_date']->format('d/m/Y') : '-' ?></td>
+                                            <td>
+                                                <?php
+                                                if ($case['status'] === 'Open') echo '<span class="badge bg-danger">Open</span>';
+                                                elseif ($case['status'] === 'Closed') echo '<span class="badge bg-info">Closed</span>';
+                                                elseif ($case['status'] === 'Verified') echo '<span class="badge bg-success">Verified</span>';
+                                                else echo '<span class="badge bg-warning text-dark">Proses</span>';
+                                                ?>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm">
+                                                    <?php 
+                                                        $can_edit = (empty($case['pic_id']) || $case['pic_id'] == ($_SESSION['user_id'] ?? null) || strtolower($_SESSION['user_role'] ?? '') === 'admin');
+                                                        $isDisabled = ($case['status'] === 'Verified' || !$can_edit) ? 'disabled' : '';
+                                                    ?>
+                                                    <button class="btn btn-warning btn-edit-case" data-id="<?= $case['id'] ?>" data-type="apar" data-abcase="<?= htmlspecialchars($case['abnormal_case']) ?>" data-counter="<?= htmlspecialchars($case['countermeasure'] ?? '') ?>" data-due="<?= $case['due_date'] ? $case['due_date']->format('Y-m-d') : '' ?>" data-pic="<?= $case['pic_id'] ?>" <?= $isDisabled ?>><i class="fas fa-edit"></i></button>
+                                                    <button class="btn btn-primary btn-update-status" data-id="<?= $case['id'] ?>" data-type="apar" data-status="<?= $case['status'] ?>" data-abcase="<?= htmlspecialchars($case['abnormal_case']) ?>" <?= $isDisabled ?>><i class="fas fa-sync-alt"></i></button>
+                                                    <?php if ($case['status'] === 'Closed' && strtolower($_SESSION['user_role'] ?? '') === 'admin'): ?>
+                                                        <button class="btn btn-success btn-verify-case" data-id="<?= $case['id'] ?>" data-type="apar"><i class="fas fa-check-double"></i></button>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
 
                         <!-- HYDRANT CASES TAB -->
-                        <div class="tab-pane fade h-100" id="hydrant-cases" role="tabpanel">
-                            <div class="compact-list">
-                                <?php if (empty($hydrantAbnormalCases)): ?>
-                                    <div class="text-center text-muted mt-5"><i class="fas fa-check-circle" style="font-size:2rem; color:var(--c-ok); margin-bottom:5px;"></i><br>Zero issues.</div>
-                                <?php else: ?>
-                                    <?php
-                                    foreach ($hydrantAbnormalCases as $case):
-                                        $user_id = $_SESSION['user_id'] ?? null;
-                                        $user_role = strtolower($_SESSION['user_role'] ?? '');
-                                        $can_edit = (empty($case['pic_id']) || $case['pic_id'] == $user_id || $user_role === 'admin');
-                                        $isDisabled = ($case['status'] === 'Verified' || !$can_edit) ? 'disabled' : '';
-                                        
-                                        // Dynamic status class for border color
-                                        $statusClass = '';
-                                        if ($case['status'] === 'Verified') $statusClass = 'verified';
-                                        elseif ($case['status'] === 'Closed') $statusClass = 'closed';
-                                        elseif ($case['status'] === 'Open') $statusClass = 'open';
-                                    ?>
-                                    <div class="case-item <?= $statusClass ?>" data-created="<?= $case['created_at'] instanceof DateTime ? $case['created_at']->format('Y-m-d') : date('Y-m-d') ?>">
-                                        <div class="case-item-title">
-                                            <span><i class="fas fa-water text-info"></i> <?= htmlspecialchars($case['code']) ?> - <?= htmlspecialchars($case['area']) ?></span>
-                                            <?php
-                                            if ($case['status'] === 'Open') echo '<span class="badge bg-danger">Open</span>';
-                                            elseif ($case['status'] === 'Closed') echo '<span class="badge bg-info">Closed</span>';
-                                            elseif ($case['status'] === 'Verified') echo '<span class="badge bg-success">Verified</span>';
-                                            else echo '<span class="badge bg-warning text-dark">Proses</span>';
-                                            ?>
-                                        </div>
-                                        <div class="case-item-desc">
-                                            <strong>Issue:</strong> <span class="text-danger"><?= htmlspecialchars($case['abnormal_case']) ?></span><br>
-                                            <strong>Action:</strong> <?= htmlspecialchars($case['countermeasure'] ?: 'Menunggu planning...') ?>
-                                        </div>
-                                        <div class="case-item-meta">
-                                            <?php if($case['due_date']): ?><span><i class="far fa-clock"></i> <?= $case['due_date']->format('d M') ?></span><?php endif; ?>
-                                            
-                                            <?php if($case['pic_name']): ?>
-                                                <span class="ms-auto" title="<?= htmlspecialchars($case['pic_name']) ?>"><img src="storage/users/<?= htmlspecialchars($case['pic_photo'] ?: 'default.png') ?>" class="avatar-mini"> <?= htmlspecialchars(explode(' ', trim($case['pic_name']))[0]) ?></span>
-                                            <?php else: ?>
-                                                <span class="ms-auto text-danger"><i class="fas fa-user-times"></i> No PIC</span>
-                                            <?php endif; ?>
-                                        </div>
-                                        <div class="case-item-actions border-top pt-2 mt-2">
-                                            <button class="btn btn-warning btn-edit-case" title="Edit Detail" data-id="<?= $case['id'] ?>" data-type="hydrant" data-abcase="<?= htmlspecialchars($case['abnormal_case']) ?>" data-counter="<?= htmlspecialchars($case['countermeasure'] ?? '') ?>" data-due="<?= $case['due_date'] ? $case['due_date']->format('Y-m-d') : '' ?>" data-pic="<?= $case['pic_id'] ?>" <?= $isDisabled ?>><i class="fas fa-edit"></i> Edit</button>
-                                            <button class="btn btn-primary btn-update-status" title="Update Status" data-id="<?= $case['id'] ?>" data-type="hydrant" data-status="<?= $case['status'] ?>" data-abcase="<?= htmlspecialchars($case['abnormal_case']) ?>" <?= $isDisabled ?>><i class="fas fa-sync-alt"></i> Status</button>
-                                            <?php if ($case['status'] === 'Closed' && strtolower($_SESSION['user_role'] ?? '') === 'admin'): ?>
-                                                <button class="btn btn-success btn-verify-case" title="Verify Case" data-id="<?= $case['id'] ?>" data-type="hydrant"><i class="fas fa-check-double"></i> Verify</button>
-                                            <?php endif; ?>
-                                            <?php if ($case['repair_photo']): ?>
-                                                <a href="storage/<?= $case['repair_photo'] ?>" target="_blank" class="btn btn-info ms-auto" title="Bukti Foto"><i class="far fa-image"></i></a>
-                                            <?php endif; ?>
-                                        </div>
-                                    </div>
-                                    <?php endforeach; ?>
-                                <?php endif; ?>
+                        <div class="tab-pane fade" id="hydrant-cases-tab" role="tabpanel">
+                            <div class="table-responsive">
+                                <table id="hydrant-action-table" class="display table table-striped table-hover table-dashboard w-100">
+                                    <thead>
+                                        <tr>
+                                            <th>Code</th>
+                                            <th>Area</th>
+                                            <th>Issue</th>
+                                            <th>Countermeasure</th>
+                                            <th>PIC</th>
+                                            <th>Due Date</th>
+                                            <th>Status</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ($hydrantAbnormalCases as $case): ?>
+                                        <tr>
+                                            <td><strong><?= htmlspecialchars($case['code']) ?></strong></td>
+                                            <td><?= htmlspecialchars($case['area']) ?></td>
+                                            <td class="text-danger fw-bold"><?= htmlspecialchars($case['abnormal_case']) ?></td>
+                                            <td><?= htmlspecialchars($case['countermeasure'] ?: '-') ?></td>
+                                            <td>
+                                                <?php if($case['pic_name']): ?>
+                                                    <span title="<?= htmlspecialchars($case['pic_name']) ?>"><img src="storage/users/<?= htmlspecialchars($case['pic_photo'] ?: 'default.png') ?>" class="avatar-mini me-1"> <?= htmlspecialchars($case['pic_name']) ?></span>
+                                                <?php else: ?>
+                                                    <span class="text-danger"><i class="fas fa-user-times"></i>-</span>
+                                                <?php endif; ?>
+                                            </td>
+                                            <td><?= $case['due_date'] ? $case['due_date']->format('d/m/Y') : '-' ?></td>
+                                            <td>
+                                                <?php
+                                                if ($case['status'] === 'Open') echo '<span class="badge bg-danger">Open</span>';
+                                                elseif ($case['status'] === 'Closed') echo '<span class="badge bg-info">Closed</span>';
+                                                elseif ($case['status'] === 'Verified') echo '<span class="badge bg-success">Verified</span>';
+                                                else echo '<span class="badge bg-warning text-dark">Proses</span>';
+                                                ?>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group btn-group-sm">
+                                                    <?php 
+                                                        $can_edit = (empty($case['pic_id']) || $case['pic_id'] == ($_SESSION['user_id'] ?? null) || strtolower($_SESSION['user_role'] ?? '') === 'admin');
+                                                        $isDisabled = ($case['status'] === 'Verified' || !$can_edit) ? 'disabled' : '';
+                                                    ?>
+                                                    <button class="btn btn-warning btn-edit-case" data-id="<?= $case['id'] ?>" data-type="hydrant" data-abcase="<?= htmlspecialchars($case['abnormal_case']) ?>" data-counter="<?= htmlspecialchars($case['countermeasure'] ?? '') ?>" data-due="<?= $case['due_date'] ? $case['due_date']->format('Y-m-d') : '' ?>" data-pic="<?= $case['pic_id'] ?>" <?= $isDisabled ?>><i class="fas fa-edit"></i></button>
+                                                    <button class="btn btn-primary btn-update-status" data-id="<?= $case['id'] ?>" data-type="hydrant" data-status="<?= $case['status'] ?>" data-abcase="<?= htmlspecialchars($case['abnormal_case']) ?>" <?= $isDisabled ?>><i class="fas fa-sync-alt"></i></button>
+                                                    <?php if ($case['status'] === 'Closed' && strtolower($_SESSION['user_role'] ?? '') === 'admin'): ?>
+                                                        <button class="btn btn-success btn-verify-case" data-id="<?= $case['id'] ?>" data-type="hydrant"><i class="fas fa-check-double"></i></button>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
 
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
             </div>
         </div>
     </div>
@@ -632,8 +661,8 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
         // Panggil applyDateFilter() saat page load untuk memastikan KPI cards ter-update dari backend
         applyDateFilter();
 
-        // Edit Button Click
-        $('.btn-edit-case').on('click', function() {
+        // Edit Button Click (Using delegation for DataTables)
+        $(document).on('click', '.btn-edit-case', function() {
             $('#edit_case_id').val($(this).data('id'));
             $('#edit_case_type').val($(this).data('type'));
             $('#edit_abnormal_case').val($(this).data('abcase'));
@@ -645,8 +674,8 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
             modal.show();
         });
 
-        // Status Button Click
-        $('.btn-update-status').on('click', function() {
+        // Status Button Click (Using delegation for DataTables)
+        $(document).on('click', '.btn-update-status', function() {
             var currStatus = $(this).data('status');
             var abcase = $(this).data('abcase');
             
@@ -743,8 +772,8 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
             });
         });
 
-        // Verify Button
-        $('.btn-verify-case').on('click', function() {
+        // Verify Button (Using delegation for DataTables)
+        $(document).on('click', '.btn-verify-case', function() {
             var caseId = $(this).data('id');
             var caseType = $(this).data('type');
             
@@ -920,8 +949,8 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
     var APAR_options = {
         series: [totalAparProses, totalAparOK, totalAparAbnormal],
         chart: {
-            width: '100%',
             type: 'pie',
+            height: 200,
             events: {
                 dataPointSelection: function(event, chartContext, config) {
                     fetchChartDetail('apar', config.dataPointIndex);
@@ -930,7 +959,10 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
         },
         labels: chartStatuses,
         colors: ['#FFC107', '#28A745', '#DC3545'],
-        legend: { position: 'top' },
+        legend: { position: 'bottom', fontSize: '10px', offsetY: 0, marginTop: -10 },
+        tooltip: { enabled: true },
+        dataLabels: { enabled: false },
+        plotOptions: { pie: { donut: { size: '100%' } } },
         cursor: 'pointer'
     };
 
@@ -940,8 +972,8 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
     var Hydrant_options = {
         series: [totalHydrantProses, totalHydrantOK, totalHydrantAbnormal],
         chart: {
-            width: '100%',
             type: 'pie',
+            height: 200,
             events: {
                 dataPointSelection: function(event, chartContext, config) {
                     fetchChartDetail('hydrant', config.dataPointIndex);
@@ -950,7 +982,10 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
         },
         labels: chartStatuses,
         colors: ['#FFC107', '#28A745', '#DC3545'],
-        legend: { position: 'top' },
+        legend: { position: 'bottom', fontSize: '10px', offsetY: 0, marginTop: -10 },
+        tooltip: { enabled: true },
+        dataLabels: { enabled: false },
+        plotOptions: { pie: { donut: { size: '100%' } } },
         cursor: 'pointer'
     };
 
@@ -961,56 +996,26 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
 <!-- Javascript logic datatables -->
 <script>
     $(document).ready(function () {
-        var aparTable, hydrantTable;
-        var hydrantTableInitialized = false;
-
-        // Configuration for both tables
         var dtConfig = {
             paging: true,
+            pageLength: 5,
+            lengthMenu: [5, 10, 25, 50],
             searching: true,
             ordering: true,
             responsive: true,
-            retrieve: true, // Safety against re-initialization
             columnDefs: [
-                { orderable: false, targets: -1 } // Disable sorting on Action column
-            ],
-            language: {
-                emptyTable: "No abnormal cases"
-            }
+                { orderable: false, targets: -1 } // Action column
+            ]
         };
 
-        // Initialize APAR table immediately
-        aparTable = $("#table-apar").DataTable(dtConfig);
+        // Initialize DataTables
+        const aparActionTable = $("#apar-action-table").DataTable(dtConfig);
+        const hydrantActionTable = $("#hydrant-action-table").DataTable(dtConfig);
 
-        // Initialize Hydrant table when tab is shown
-        $('#hydrant-tab').on('shown.bs.tab', function (e) {
-            if (!hydrantTableInitialized) {
-                hydrantTable = $("#table-hydrant").DataTable(dtConfig);
-                hydrantTableInitialized = true;
-            } else if (hydrantTable) {
-                hydrantTable.columns.adjust().draw();
-            }
-        });
-
-        // Initialize Modal table
-        // Ensure columns adjust when tabs are switched
+        // Adjust columns on tab switch
         $('button[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
-            var targetId = $(e.target).attr('data-bs-target');
-            var tableId = '';
-            
-            if (targetId === '#apar-content') tableId = '#table-apar';
-            else if (targetId === '#hydrant-content') tableId = '#table-hydrant';
-            
-
-            if (tableId) {
-                var table = $(tableId).DataTable();
-                if (table) {
-                    setTimeout(function() {
-                        table.columns.adjust().draw();
-                    }, 100);
-                }
-            }
+            aparActionTable.columns.adjust().draw();
+            hydrantActionTable.columns.adjust().draw();
         });
-
     });
 </script>
