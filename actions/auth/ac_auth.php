@@ -12,32 +12,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $password = $_POST['password'] ?? '';
 
         if (empty($npk) || empty($password)) {
-            $_SESSION['error'] = "NPK dan Password wajib diisi!";
+            $_SESSION['error'] = "User ID dan Password wajib diisi!";
             header("Location: ../../login.php");
             exit;
         }
 
-        $query = "SELECT * FROM [apar].[dbo].[users] WHERE npk = ? AND is_active = 1";
-        $params = array($npk);
+        $query = "
+            SELECT 
+                u.USERID, 
+                u.PASSWORD, 
+                u.PASSWD,
+                u.EMPID, 
+                u.GROUPUSER, 
+                u.PicFile,
+                u.REALNAME,
+                e.EmployeeName
+            FROM [apar].[Users].[UserTable] u
+            LEFT JOIN [apar].[dbo].[HRD_EMPLOYEE_TABLE] e ON u.EMPID = e.EmpID
+            WHERE (u.USERID = ? OR u.EMPID = ?) AND u.CF_Active = 1
+        ";
+        $params = array($npk, $npk);
         $stmt = sqlsrv_query($koneksi, $query, $params);
 
         if ($stmt === false) {
-            $_SESSION['error'] = "Terjadi kesalahan sistem!";
+            $_SESSION['error'] = "Terjadi kesalahan sistem database!";
             header("Location: ../../login.php");
             exit;
         }
 
         $user = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
 
-        if ($user && password_verify($password, $user['password'])) {
+        // Validasi menggunakan MD5
+        $input_md5 = md5($password);
+        if ($user && ($input_md5 === $user['PASSWORD'] || $input_md5 === $user['PASSWD'] || $password === $user['PASSWORD'])) {
             // Success Login
-            $_SESSION['user_id'] = $user['id'];
-            $_SESSION['user_npk'] = $user['npk'];
-            $_SESSION['user_name'] = $user['name'];
-            $_SESSION['user_role'] = $user['role'];
-            $_SESSION['user_photo'] = $user['photo'];
+            $_SESSION['user_id'] = $user['EMPID'];
+            $_SESSION['user_npk'] = $user['USERID'];
+            $_SESSION['user_name'] = !empty($user['EmployeeName']) ? $user['EmployeeName'] : (!empty($user['REALNAME']) ? $user['REALNAME'] : $user['USERID']);
+            $_SESSION['user_role'] = !empty($user['GROUPUSER']) ? $user['GROUPUSER'] : 'user';
+            $_SESSION['user_photo'] = !empty($user['PicFile']) ? $user['PicFile'] : 'profile.jpg';
             
-            $_SESSION['success'] = "Selamat datang, " . $user['name'] . "!";
+            $_SESSION['success'] = "Selamat datang, " . $_SESSION['user_name'] . "!";
             
             if (!empty($_POST['redirect_to'])) {
                 header("Location: " . $_POST['redirect_to']);
@@ -46,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             exit;
         } else {
-            $_SESSION['error'] = "NPK atau Password salah!";
+            $_SESSION['error'] = "User ID atau Password salah!";
             header("Location: ../../login.php");
             exit;
         }

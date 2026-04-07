@@ -206,8 +206,8 @@ if (isset($_SESSION['user_id'])) {
                     <?php endif; ?>
                     
                     <div class="form-group form-group-default">
-                        <label>NPK</label>
-                        <input type="text" name="npk" class="form-control" placeholder="Masukkan NPK" required autofocus autocomplete="off">
+                        <label>User ID / NPK</label>
+                        <input type="text" name="npk" class="form-control" placeholder="Masukkan User ID / NPK" required autofocus autocomplete="off">
                     </div>
 
                     <div class="form-group form-group-default mt-3">

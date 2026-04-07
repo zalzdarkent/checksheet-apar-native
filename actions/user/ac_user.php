@@ -8,7 +8,19 @@ function get_all_users()
 {
     global $koneksi;
 
-    $kueri = "SELECT * FROM [apar].[dbo].[users]";
+    $kueri = "
+        SELECT 
+            u.EMPID as npk, 
+            ISNULL(e.EmployeeName, u.REALNAME) as name, 
+            u.GROUPUSER as role, 
+            u.CF_Active as is_active, 
+            u.PicFile as photo,
+            u.EMPID as id,
+            (SELECT STRING_AGG(location_name, ',') FROM [dbo].[user_pic_locations] WHERE EMPID = u.EMPID AND device_type = 'apar') as pic_apar_location,
+            (SELECT STRING_AGG(location_name, ',') FROM [dbo].[user_pic_locations] WHERE EMPID = u.EMPID AND device_type = 'hydrant') as pic_hydrant_location
+        FROM [apar].[Users].[UserTable] u
+        LEFT JOIN [apar].[dbo].[HRD_EMPLOYEE_TABLE] e ON u.EMPID = e.EmpID
+    ";
     $hasil = sqlsrv_query($koneksi, $kueri);
     $data = [];
     if ($hasil !== false) {
@@ -23,7 +35,20 @@ function get_user_by_id($id)
 {
     global $koneksi;
 
-    $kueri = "SELECT * FROM [apar].[dbo].[users] WHERE id = ?";
+    $kueri = "
+        SELECT 
+            u.USERID as npk, 
+            ISNULL(e.EmployeeName, u.REALNAME) as name, 
+            u.GROUPUSER as role, 
+            u.CF_Active as is_active, 
+            u.PicFile as photo,
+            u.EMPID as id,
+            (SELECT STRING_AGG(location_name, ',') FROM [dbo].[user_pic_locations] WHERE EMPID = u.EMPID AND device_type = 'apar') as pic_apar_location,
+            (SELECT STRING_AGG(location_name, ',') FROM [dbo].[user_pic_locations] WHERE EMPID = u.EMPID AND device_type = 'hydrant') as pic_hydrant_location
+        FROM [apar].[Users].[UserTable] u
+        LEFT JOIN [apar].[dbo].[HRD_EMPLOYEE_TABLE] e ON u.EMPID = e.EmpID
+        WHERE u.EMPID = ?
+    ";
     $params = array($id);
     $hasil = sqlsrv_query($koneksi, $kueri, $params);
     if ($hasil === false) {
@@ -213,36 +238,43 @@ function store_user()
     }
 }
 
-function set_status_user($id)
+function set_pic_locations($id)
 {
     global $koneksi;
     if (session_status() === PHP_SESSION_NONE) {
         session_start();
     }
-    $get = sqlsrv_query($koneksi, "SELECT is_active FROM [apar].[dbo].[users] WHERE id = ?", [$id]);
-    $user = sqlsrv_fetch_array($get, SQLSRV_FETCH_ASSOC);
 
-    if (!$user) {
-        $_SESSION['error'] = "User tidak ditemukan!";
-        header("Location: ../../index.php?page=user-management");
-        exit;
+    $hasil = true;
+    // 1. Delete existing for this user
+    $del = sqlsrv_query($koneksi, "DELETE FROM [dbo].[user_pic_locations] WHERE EMPID = ?", [$id]);
+    if ($del === false) $hasil = false;
+
+    // 2. Insert new APAR locations
+    if (isset($_POST['pic_apar_location']) && is_array($_POST['pic_apar_location'])) {
+        foreach ($_POST['pic_apar_location'] as $loc) {
+            $ins = sqlsrv_query($koneksi, "INSERT INTO [dbo].[user_pic_locations] (EMPID, device_type, location_name) VALUES (?, 'apar', ?)", [$id, $loc]);
+            if ($ins === false) $hasil = false;
+        }
     }
 
-    $new_status = $user['is_active'] == 1 ? 0 : 1;
-    $kueri = "UPDATE [apar].[dbo].[users] SET is_active = ? WHERE id = ?";
-    $params = [$new_status, $id];
-    $hasil = sqlsrv_query($koneksi, $kueri, $params);
-    if ($hasil !== false) {
-        $_SESSION['success'] = "User berhasil diupdate!";
-        header("Location: ../../index.php?page=user-management");
-        exit;
+    // 3. Insert new Hydrant locations
+    if (isset($_POST['pic_hydrant_location']) && is_array($_POST['pic_hydrant_location'])) {
+        foreach ($_POST['pic_hydrant_location'] as $loc) {
+            $ins = sqlsrv_query($koneksi, "INSERT INTO [dbo].[user_pic_locations] (EMPID, device_type, location_name) VALUES (?, 'hydrant', ?)", [$id, $loc]);
+            if ($ins === false) $hasil = false;
+        }
+    }
+
+    if ($hasil) {
+        $_SESSION['success'] = "PIC Lokasi berhasil diperbarui!";
     } else {
-        $_SESSION['error'] = "Gagal mengupdate user!";
-        header("Location: ../../index.php?page=user-management");
-        exit;
+        $errors = sqlsrv_errors();
+        $_SESSION['error'] = "Gagal memperbarui! " . (isset($errors[0]['message']) ? $errors[0]['message'] : 'Database Error');
     }
+    header("Location: ../../index.php?page=user-management");
+    exit;
 }
-
 
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -250,10 +282,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($method === 'PUT' && isset($_POST['id'])) {
         update_user($_POST['id']);
+    } else if (isset($_POST['action']) && $_POST['action'] === 'set_pic') {
+        set_pic_locations($_POST['id']);
     } else if (isset($_POST['action']) && $_POST['action'] === 'set_status') {
-        set_status_user($_POST['id']);
-    } else if (isset($_POST['name'])) {
-        store_user();
+        // Redundant due to centralization but kept for safety logic or removed if desired
     }
 } elseif ($_SERVER['REQUEST_METHOD'] === 'GET') {
     if (isset($_GET['id']) && isset($_GET['action']) && $_GET['action'] === 'delete') {

@@ -72,8 +72,15 @@ $statusClass = ($hydrant['status'] === 'OK' || $hydrant['status'] === 'Good') ? 
             margin-bottom: 30px;
         }
 
-        .status-ok { background: #27ae60; color: #fff; }
-        .status-abnormal { background: #e74c3c; color: #fff; }
+        .status-ok {
+            background: #27ae60;
+            color: #fff;
+        }
+
+        .status-abnormal {
+            background: #e74c3c;
+            color: #fff;
+        }
 
         .info-grid {
             display: grid;
@@ -162,18 +169,19 @@ $statusClass = ($hydrant['status'] === 'OK' || $hydrant['status'] === 'Good') ? 
 
     <div class="detail-card">
         <div class="hydrant-large-icon">
-            <?php 
-                $qr_url = $base_url . "index.php?page=hydrant-detail&id=" . $hydrant['id'];
+            <?php
+            $qr_url = $base_url . "index.php?page=hydrant-detail&id=" . $hydrant['id'];
             ?>
-            <img src="actions/ac_generate_qrcode.php?data=<?php echo urlencode($qr_url); ?>" 
-                 alt="QR Code" style="width: 150px; height: 150px; background: white; padding: 10px; border-radius: 10px;">
+            <img src="actions/ac_generate_qrcode.php?data=<?php echo urlencode($qr_url); ?>" alt="QR Code"
+                style="width: 150px; height: 150px; background: white; padding: 10px; border-radius: 10px;">
         </div>
         <div class="hydrant-large-code"><?php echo $hydrant['code']; ?></div>
-        
+
         <a href="?page=hydrant-inspect&id=<?php echo $hydrant['id']; ?>" class="btn btn-inspeksi">
             <i class="fas fa-clipboard-check"></i> Mulai Inspeksi
         </a>
-        <label for="qr-upload-input" class="btn btn-inspeksi bg-warning text-dark border-0 m-0 mb-4" id="btn-scan-qr" style="cursor:pointer; display:inline-block; margin-bottom: 25px !important;">
+        <label for="qr-upload-input" class="btn btn-inspeksi bg-warning text-dark border-0 m-0 mb-4" id="btn-scan-qr"
+            style="cursor:pointer; display:inline-block; margin-bottom: 25px !important;">
             <i class="fas fa-qrcode"></i> Scan QR
         </label>
         <input type="file" id="qr-upload-input" accept="image/*" capture="environment" style="display: none;">
@@ -223,7 +231,7 @@ $statusClass = ($hydrant['status'] === 'OK' || $hydrant['status'] === 'Good') ? 
                         <td><?php echo $h['inspection_date_fmt']; ?></td>
                         <td><?php echo $h['inspector_name'] ?: 'Unknown'; ?></td>
                         <td>
-                            <?php if(isset($h['insp_status']) && $h['insp_status'] === 'NG'): ?>
+                            <?php if (isset($h['insp_status']) && $h['insp_status'] === 'NG'): ?>
                                 <span class="badge bg-danger">✗ NG</span>
                             <?php else: ?>
                                 <span class="badge bg-success">✓ OK</span>
@@ -263,10 +271,10 @@ $statusClass = ($hydrant['status'] === 'OK' || $hydrant['status'] === 'Good') ? 
                         <td><?php echo $c['pic_name'] ?: 'Unassigned'; ?></td>
                         <td>
                             <span class="badge 
-                                <?php 
-                                    echo $c['status'] === 'Open' ? 'bg-danger' : 
-                                        ($c['status'] === 'On Progress' ? 'bg-warning' : 
-                                        ($c['status'] === 'Verified' ? 'bg-success' : 'bg-secondary')); 
+                                <?php
+                                echo $c['status'] === 'Open' ? 'bg-danger' :
+                                    ($c['status'] === 'On Progress' ? 'bg-warning' :
+                                        ($c['status'] === 'Verified' ? 'bg-success' : 'bg-secondary'));
                                 ?>">
                                 <?php echo $c['status']; ?>
                             </span>
@@ -280,7 +288,8 @@ $statusClass = ($hydrant['status'] === 'OK' || $hydrant['status'] === 'Good') ? 
                         </td>
                         <td>
                             <?php if (isset($c['repair_photo']) && $c['repair_photo']): ?>
-                                <a href="storage/<?php echo $c['repair_photo']; ?>" target="_blank" class="btn btn-sm btn-outline-info">View</a>
+                                <a href="storage/<?php echo $c['repair_photo']; ?>" target="_blank"
+                                    class="btn btn-sm btn-outline-info">View</a>
                             <?php else: ?>
                                 <span class="text-muted">-</span>
                             <?php endif; ?>
@@ -293,97 +302,97 @@ $statusClass = ($hydrant['status'] === 'OK' || $hydrant['status'] === 'Good') ? 
 </div>
 
 <script>
-$(document).ready(function() {
-    $('#qr-upload-input').on('change', function(e) {
-        var file = e.target.files[0];
-        if (!file) return;
+    $(document).ready(function () {
+        $('#qr-upload-input').on('change', function (e) {
+            var file = e.target.files[0];
+            if (!file) return;
 
-        // Tampilkan loading state
-        var scanBtn = $('#btn-scan-qr');
-        var originalBtnHtml = scanBtn.html();
-        scanBtn.html('<i class="fas fa-spinner fa-spin"></i> Scanning...');
-        scanBtn.css('pointer-events', 'none');
+            // Tampilkan loading state
+            var scanBtn = $('#btn-scan-qr');
+            var originalBtnHtml = scanBtn.html();
+            scanBtn.html('<i class="fas fa-spinner fa-spin"></i> Scanning...');
+            scanBtn.css('pointer-events', 'none');
 
-        var formData = new FormData();
-        formData.append('qr_image', file);
+            var formData = new FormData();
+            formData.append('qr_image', file);
 
-        $.ajax({
-            url: 'actions/ac_decode_qr.php',
-            type: 'POST',
-            data: formData,
-            contentType: false,
-            processData: false,
-            success: function(response) {
-                scanBtn.html(originalBtnHtml);
-                scanBtn.css('pointer-events', 'auto');
-                $('#qr-upload-input').val(''); // reset
+            $.ajax({
+                url: 'actions/ac_decode_qr.php',
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function (response) {
+                    scanBtn.html(originalBtnHtml);
+                    scanBtn.css('pointer-events', 'auto');
+                    $('#qr-upload-input').val(''); // reset
 
-                try {
-                    var actRes = typeof response === 'string' ? JSON.parse(response) : response;
-                    if (actRes.success) {
-                        if (actRes.text.startsWith("http")) {
-                            window.location.href = actRes.text;
+                    try {
+                        var actRes = typeof response === 'string' ? JSON.parse(response) : response;
+                        if (actRes.success) {
+                            if (actRes.text.startsWith("http")) {
+                                window.location.href = actRes.text;
+                            } else {
+                                alert("QR Code tidak valid atau bukan link sistem: " + actRes.text);
+                            }
                         } else {
-                            alert("QR Code tidak valid atau bukan link sistem: " + actRes.text);
+                            alert(actRes.message || 'Gagal membaca QR code dari gambar.');
                         }
-                    } else {
-                        alert(actRes.message || 'Gagal membaca QR code dari gambar.');
+                    } catch (err) {
+                        alert('Terjadi kesalahan menterjemahkan QR Code.');
                     }
-                } catch(err) {
-                    alert('Terjadi kesalahan menterjemahkan QR Code.');
+                },
+                error: function () {
+                    scanBtn.html(originalBtnHtml);
+                    scanBtn.css('pointer-events', 'auto');
+                    $('#qr-upload-input').val(''); // reset
+                    alert('Gagal menghubungi server untuk membaca QR code.');
                 }
-            },
-            error: function() {
-                scanBtn.html(originalBtnHtml);
-                scanBtn.css('pointer-events', 'auto');
-                $('#qr-upload-input').val(''); // reset
-                alert('Gagal menghubungi server untuk membaca QR code.');
-            }
+            });
         });
-    });
 
-    // Initialize history table if exists
-    if ($('#table-history').length) {
-        $('#table-history').DataTable({
-            "paging": true,
-            "pageLength": 10,
-            "searching": true,
-            "ordering": true,
-            "autoWidth": false,
-            "responsive": true,
-            "language": {
-                "search": "Cari:",
-                "paginate": {
-                    "first": "Pertama",
-                    "last": "Terakhir",
-                    "next": "Selanjutnya",
-                    "previous": "Sebelumnya"
-                },
-                "info": "Menampilkan _START_ ke _END_ dari _TOTAL_ entri"
-            }
-        });
-    }
-    
-    // Initialize cases table if exists
-    if ($('#table-cases').length) {
-        $('#table-cases').DataTable({
-            "paging": true,
-            "pageLength": 10,
-            "searching": true,
-            "ordering": true,
-            "autoWidth": false,
-            "responsive": true,
-            "language": {
-                "search": "Cari:",
-                "paginate": {
-                    "first": "Pertama",
-                    "last": "Terakhir",
-                    "next": "Selanjutnya",
-                    "previous": "Sebelumnya"
-                },
-                "info": "Menampilkan _START_ ke _END_ dari _TOTAL_ entri"
-            }
-        });
-    }
-});
+        // Initialize history table if exists
+        if ($('#table-history').length) {
+            $('#table-history').DataTable({
+                "paging": true,
+                "pageLength": 10,
+                "searching": true,
+                "ordering": true,
+                "autoWidth": false,
+                "responsive": true,
+                "language": {
+                    "search": "Cari:",
+                    "paginate": {
+                        "first": "Pertama",
+                        "last": "Terakhir",
+                        "next": "Selanjutnya",
+                        "previous": "Sebelumnya"
+                    },
+                    "info": "Menampilkan _START_ ke _END_ dari _TOTAL_ entri"
+                }
+            });
+        }
+
+        // Initialize cases table if exists
+        if ($('#table-cases').length) {
+            $('#table-cases').DataTable({
+                "paging": true,
+                "pageLength": 10,
+                "searching": true,
+                "ordering": true,
+                "autoWidth": false,
+                "responsive": true,
+                "language": {
+                    "search": "Cari:",
+                    "paginate": {
+                        "first": "Pertama",
+                        "last": "Terakhir",
+                        "next": "Selanjutnya",
+                        "previous": "Sebelumnya"
+                    },
+                    "info": "Menampilkan _START_ ke _END_ dari _TOTAL_ entri"
+                }
+            });
+        }
+    });
 </script>
