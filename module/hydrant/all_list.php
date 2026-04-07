@@ -232,7 +232,7 @@
                 {
                     data: 'status',
                     render: function (data, type, row) {
-                        const badgeClass = (data === 'Good') ? 'status-ok' : 'status-abnormal';
+                        const badgeClass = (data === 'OK') ? 'status-ok' : 'status-abnormal';
                         return `<span class="status-badge ${badgeClass}">${data}</span>`;
                     }
                 },
@@ -304,5 +304,5 @@
         backToTop.on('click', function () {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         });
-
+    });
 </script>
