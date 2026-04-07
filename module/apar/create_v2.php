@@ -191,13 +191,17 @@ $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php",
                                                         <input type="radio" class="btn-check" name="<?= $item['key'] ?>_ok"
                                                             id="<?= $item['key'] ?>_abnormal" value="0">
                                                         <label class="btn btn-outline-danger"
-                                                            for="<?= $item['key'] ?>_abnormal">NG</label>
+                                                            for="<?= $item['key'] ?>_abnormal">Abnormal</label>
                                                     </div>
                                                 </td>
                                                 <td>
-                                                    <input type="file" name="<?= $item['key'] ?>_foto"
-                                                        class="form-control form-control-sm" accept="image/*"
-                                                        <?= $item['req'] ? 'required' : '' ?>>
+                                                    <?php if ($item['req']): ?>
+                                                        <input type="file" name="<?= $item['key'] ?>_foto"
+                                                            class="form-control form-control-sm" accept="image/*"
+                                                            required>
+                                                    <?php else: ?>
+                                                        <div class="text-center text-muted small">-</div>
+                                                    <?php endif; ?>
                                                 </td>
                                             </tr>
                                         <?php endforeach; ?>

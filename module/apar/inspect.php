@@ -136,8 +136,12 @@ $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php",
                                     </div>
                                 </td>
                                 <td>
-                                    <input type="file" name="<?php echo $item['key']; ?>_foto" accept="image/*" class="form-control form-control-sm photo-input" data-item="<?php echo $item['key']; ?>">
-                                    <small class="text-muted photo-status"></small>
+                                    <?php if ($is_required): ?>
+                                        <input type="file" name="<?php echo $item['key']; ?>_foto" accept="image/*" class="form-control form-control-sm photo-input" data-item="<?php echo $item['key']; ?>">
+                                        <small class="text-muted photo-status"></small>
+                                    <?php else: ?>
+                                        <div class="text-center text-muted small mt-1">-</div>
+                                    <?php endif; ?>
                                 </td>
                                 <td>
                                     <?php if ($item['key'] === 'exp_date'): ?>

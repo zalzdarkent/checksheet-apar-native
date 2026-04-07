@@ -98,20 +98,20 @@ $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php",
                             $isOutdoor = ($hType === 'outdoor' || strpos($hType, 'outdoor') !== false);
 
                             $items = [
-                                ['key' => 'body_hydrant', 'name' => 'Body Hydrant', 'req' => 'both'],
-                                ['key' => 'selang', 'name' => 'Selang', 'req' => 'both'],
+                                ['key' => 'body_hydrant', 'name' => 'Body Hydrant', 'standard' => 'Tidak penyok', 'req' => 'both'],
+                                ['key' => 'selang', 'name' => 'Selang', 'standard' => 'Tidak robek', 'req' => 'both'],
                                 ['key' => 'couple_join', 'name' => 'Couple Join', 'req' => 'both'],
-                                ['key' => 'nozzle', 'name' => 'Nozzle', 'req' => 'both'],
+                                ['key' => 'nozzle', 'name' => 'Nozzle', 'standard' => 'Ada', 'req' => 'both'],
                                 ['key' => 'check_sheet', 'name' => 'Check Sheet', 'req' => 'both'],
-                                ['key' => 'valve_kran', 'name' => 'Valve/Kran', 'req' => 'indoor'],
-                                ['key' => 'lampu', 'name' => 'Lampu', 'req' => 'indoor'],
-                                ['key' => 'cover_lampu', 'name' => 'Cover Lampu', 'req' => 'indoor'],
+                                ['key' => 'valve_kran', 'name' => 'Valve/Kran', 'standar' => 'Tidak patah, tidak bocor', 'req' => 'indoor'],
+                                ['key' => 'lampu', 'name' => 'Lampu', 'standard' => 'Menyala', 'req' => 'indoor'],
+                                ['key' => 'cover_lampu', 'name' => 'Cover Lampu', 'standard' => 'Tidak pecah', 'req' => 'indoor'],
                                 ['key' => 'kunci_pilar_hydrant', 'name' => 'Kunci Pilar Hydrant', 'req' => 'outdoor'],
                                 ['key' => 'pilar_hydrant', 'name' => 'Pilar Hydrant', 'standard' => 'Mudah dibuka & tidak bocor', 'req' => 'outdoor'],
-                                ['key' => 'marking', 'name' => 'Marking', 'req' => 'both'],
-                                ['key' => 'sign_larangan', 'name' => 'Sign Larangan', 'req' => 'both'],
-                                ['key' => 'nomor_hydrant', 'name' => 'Nomor Hydrant', 'req' => 'both'],
-                                ['key' => 'wi_hydrant', 'name' => 'WI Hydrant', 'req' => 'both'],
+                                ['key' => 'marking', 'name' => 'Marking', 'standar' => 'Ada', 'req' => 'both'],
+                                ['key' => 'sign_larangan', 'name' => 'Sign Larangan', 'standard' => 'Ada, tidak sobek', 'req' => 'both'],
+                                ['key' => 'nomor_hydrant', 'name' => 'Nomor Hydrant', 'standard' => 'Ada', 'req' => 'both'],
+                                ['key' => 'wi_hydrant', 'name' => 'WI Hydrant', 'standard' => 'Ada, tidak sobek', 'req' => 'both'],
                             ];
 
                             foreach ($items as $idx => $item):

@@ -72,10 +72,12 @@ $user = get_user_by_id($id);
                                 <h1 class="fw-bold mb-1 text-dark"><?php echo $user['name']; ?></h1>
                                 <div
                                     class="d-flex flex-wrap justify-content-center justify-content-md-start gap-2 align-items-center mt-2">
-                                    <span class="text-muted small">
-                                        <i class="fas fa-calendar-alt me-1"></i> Registered since
-                                        <b><?php echo $user['created_at'] instanceof DateTime ? $user['created_at']->format('d M Y') : date('d M Y', strtotime($user['created_at'])); ?></b>
-                                    </span>
+                                    <?php if (!empty($user['created_at'])): ?>
+                                        <span class="text-muted small">
+                                            <i class="fas fa-calendar-alt me-1"></i> Registered since
+                                            <b><?php echo $user['created_at'] instanceof DateTime ? $user['created_at']->format('d M Y') : date('d M Y', strtotime($user['created_at'])); ?></b>
+                                        </span>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         </div>
