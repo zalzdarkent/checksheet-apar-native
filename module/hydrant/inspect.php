@@ -13,10 +13,11 @@ $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php",
 <div class="page-inner">
     <style>
         /* Ensure button text is always visible */
-        .btn-check:checked + .btn {
+        .btn-check:checked+.btn {
             color: white !important;
         }
-        .btn-outline-success:hover, 
+
+        .btn-outline-success:hover,
         .btn-outline-danger:hover {
             color: white !important;
         }
@@ -27,7 +28,8 @@ $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php",
     </div>
 
     <!-- Info Card -->
-    <div class="card mb-4 border-0 shadow-sm" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white;">
+    <div class="card mb-4 border-0 shadow-sm"
+        style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white;">
         <div class="card-body">
             <div class="row">
                 <div class="col-md-3 mb-2">
@@ -57,23 +59,14 @@ $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php",
                 <h5 class="mb-0">Tanggal & Jenis Pemeriksaan</h5>
             </div>
             <div class="card-body">
+                <input type="hidden" name="jenis_hydrant"
+                    value="<?php echo htmlspecialchars($hydrant['type'] ?: 'Standard'); ?>">
                 <div class="row">
-                    <div class="col-md-6">
+                    <div class="col-md-6 mb-3 mb-md-0">
                         <label class="form-label fw-semibold">Tanggal Pemeriksaan</label>
                         <input type="datetime-local" name="inspection_date" class="form-control" required>
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label fw-semibold">Jenis Hydrant</label>
-                        <select name="jenis_hydrant" class="form-select" required>
-                            <option value="">-- Pilih Jenis --</option>
-                            <option value="Hydrant Pilar">Hydrant Pilar</option>
-                            <option value="Hydrant Dinding">Hydrant Dinding</option>
-                            <option value="Hydrant Bawah Tanah">Hydrant Bawah Tanah</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="row mt-3">
-                    <div class="col-md-12">
                         <label class="form-label fw-semibold">Foto Unit Hydrant</label>
                         <input type="file" name="unit_photo" accept="image/*" class="form-control">
                         <small class="text-muted">Format: JPG, PNG (Optional)</small>
@@ -100,40 +93,77 @@ $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php",
                         </thead>
                         <tbody>
                             <?php
+                            $hType = strtolower(trim($hydrant['type'] ?? ''));
+                            $isIndoor = ($hType === 'indoor' || strpos($hType, 'indoor') !== false);
+                            $isOutdoor = ($hType === 'outdoor' || strpos($hType, 'outdoor') !== false);
+
                             $items = [
-                                ['key' => 'body_hydrant', 'name' => 'Body Hydrant'],
-                                ['key' => 'selang', 'name' => 'Selang'],
-                                ['key' => 'couple_join', 'name' => 'Couple Join'],
-                                ['key' => 'nozzle', 'name' => 'Nozzle'],
-                                ['key' => 'check_sheet', 'name' => 'Check Sheet'],
-                                ['key' => 'valve_kran', 'name' => 'Valve/Kran'],
-                                ['key' => 'lampu', 'name' => 'Lampu'],
-                                ['key' => 'cover_lampu', 'name' => 'Cover Lampu'],
-                                ['key' => 'box_display', 'name' => 'Box Display'],
-                                ['key' => 'konsul_hydrant', 'name' => 'Konsul Hydrant'],
-                                ['key' => 'jr', 'name' => 'JR'],
-                                ['key' => 'marking', 'name' => 'Marking'],
-                                ['key' => 'label', 'name' => 'Label'],
+                                ['key' => 'body_hydrant', 'name' => 'Body Hydrant', 'req' => 'both'],
+                                ['key' => 'selang', 'name' => 'Selang', 'req' => 'both'],
+                                ['key' => 'couple_join', 'name' => 'Couple Join', 'req' => 'both'],
+                                ['key' => 'nozzle', 'name' => 'Nozzle', 'req' => 'both'],
+                                ['key' => 'check_sheet', 'name' => 'Check Sheet', 'req' => 'both'],
+                                ['key' => 'valve_kran', 'name' => 'Valve/Kran', 'req' => 'indoor'],
+                                ['key' => 'lampu', 'name' => 'Lampu', 'req' => 'indoor'],
+                                ['key' => 'cover_lampu', 'name' => 'Cover Lampu', 'req' => 'indoor'],
+                                ['key' => 'kunci_pilar_hydrant', 'name' => 'Kunci Pilar Hydrant', 'req' => 'outdoor'],
+                                ['key' => 'pilar_hydrant', 'name' => 'Pilar Hydrant', 'standard' => 'Mudah dibuka & tidak bocor', 'req' => 'outdoor'],
+                                ['key' => 'marking', 'name' => 'Marking', 'req' => 'both'],
+                                ['key' => 'sign_larangan', 'name' => 'Sign Larangan', 'req' => 'both'],
+                                ['key' => 'nomor_hydrant', 'name' => 'Nomor Hydrant', 'req' => 'both'],
+                                ['key' => 'wi_hydrant', 'name' => 'WI Hydrant', 'req' => 'both'],
                             ];
-                            
+
                             foreach ($items as $idx => $item):
-                            ?>
-                            <tr>
-                                <td class="text-center align-middle"><?php echo $idx + 1; ?></td>
-                                <td class="align-middle"><?php echo $item['name']; ?></td>
-                                <td class="text-center align-middle">
-                                    <div class="btn-group btn-group-sm w-100" role="group">
-                                        <input type="radio" class="btn-check" name="<?php echo $item['key']; ?>_ok" id="<?php echo $item['key']; ?>_ok" value="1">
-                                        <label class="btn btn-outline-success btn-sm" for="<?php echo $item['key']; ?>_ok">OK</label>
-                                        
-                                        <input type="radio" class="btn-check" name="<?php echo $item['key']; ?>_ok" id="<?php echo $item['key']; ?>_abnormal" value="0">
-                                        <label class="btn btn-outline-danger btn-sm" for="<?php echo $item['key']; ?>_abnormal">Abnormal</label>
-                                    </div>
-                                </td>
-                                <td>
-                                    <input type="file" name="<?php echo $item['key']; ?>_foto" accept="image/*" class="form-control form-control-sm">
-                                </td>
-                            </tr>
+                                $isDisabled = false;
+                                $badge = '';
+
+                                if ($item['req'] === 'indoor' && !$isIndoor) {
+                                    $isDisabled = true;
+                                    $badge = '<br><span class="badge bg-secondary" style="font-size: 0.7em;">Khusus Indoor</span>';
+                                } elseif ($item['req'] === 'outdoor' && !$isOutdoor) {
+                                    $isDisabled = true;
+                                    $badge = '<br><span class="badge bg-secondary" style="font-size: 0.7em;">Khusus Outdoor</span>';
+                                }
+
+                                $disabledAttr = $isDisabled ? 'disabled' : 'required';
+                                $fileRequiredAttr = $isDisabled ? 'disabled' : 'required';
+                                ?>
+                                <tr class="<?php echo $isDisabled ? 'opacity-50 bg-light' : ''; ?>">
+                                    <td class="text-center align-middle"><?php echo $idx + 1; ?></td>
+                                    <td class="align-middle">
+                                        <?php echo $item['name']; ?>
+                                        <?php if (!$isDisabled): ?>
+                                            <span class="text-danger">*</span>
+                                        <?php endif; ?>
+
+                                        <?php if (isset($item['standard'])): ?>
+                                            <br>
+                                            <span style="font-size: 0.8em; color: #6c757d;">
+                                                (<?php echo $item['standard']; ?>)
+                                            </span>
+                                        <?php endif; ?>
+
+                                        <?php echo $badge; ?>
+                                    </td>
+                                    <td class="text-center align-middle">
+                                        <div class="btn-group btn-group-sm w-100" role="group">
+                                            <input type="radio" class="btn-check" name="<?php echo $item['key']; ?>_ok"
+                                                id="<?php echo $item['key']; ?>_ok" value="1" <?php echo $disabledAttr; ?>>
+                                            <label class="btn btn-outline-success btn-sm"
+                                                for="<?php echo $item['key']; ?>_ok">OK</label>
+
+                                            <input type="radio" class="btn-check" name="<?php echo $item['key']; ?>_ok"
+                                                id="<?php echo $item['key']; ?>_abnormal" value="0" <?php echo $disabledAttr; ?>>
+                                            <label class="btn btn-outline-danger btn-sm"
+                                                for="<?php echo $item['key']; ?>_abnormal">Abnormal</label>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <input type="file" name="<?php echo $item['key']; ?>_foto" accept="image/*"
+                                            class="form-control form-control-sm" <?php echo $fileRequiredAttr; ?>>
+                                    </td>
+                                </tr>
                             <?php endforeach; ?>
                         </tbody>
                     </table>
@@ -147,7 +177,8 @@ $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php",
                 <h5 class="mb-0">Catatan Umum</h5>
             </div>
             <div class="card-body">
-                <textarea name="general_notes" class="form-control" rows="4" placeholder="Tulis catatan atau temuan lainnya..."></textarea>
+                <textarea name="general_notes" class="form-control" rows="4"
+                    placeholder="Tulis catatan atau temuan lainnya..."></textarea>
             </div>
         </div>
 
@@ -168,47 +199,47 @@ $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php",
 </div>
 
 <script>
-document.getElementById('form-inspection').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    const formData = new FormData(this);
-    formData.append('type', 'hydrant');
-    formData.append('equipment_id', '<?php echo $hydrant['id']; ?>');
-    
-    const submitBtn = document.querySelector('button[type="submit"]');
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-    
-    fetch('actions/ac_store_inspection.php', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'success') {
-            alert('Inspeksi berhasil disimpan!');
-            window.location.href = data.redirect;
-        } else {
-            alert('Error: ' + data.message);
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = '<i class="fas fa-check-circle me-2"></i> Simpan Inspeksi';
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Terjadi kesalahan: ' + error.message);
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = '<i class="fas fa-check-circle me-2"></i> Simpan Inspeksi';
-    });
-});
+    document.getElementById('form-inspection').addEventListener('submit', function (e) {
+        e.preventDefault();
 
-// Set default datetime to now
-const now = new Date();
-const year = now.getFullYear();
-const month = String(now.getMonth() + 1).padStart(2, '0');
-const day = String(now.getDate()).padStart(2, '0');
-const hours = String(now.getHours()).padStart(2, '0');
-const minutes = String(now.getMinutes()).padStart(2, '0');
-const dateTimeLocal = `${year}-${month}-${day}T${hours}:${minutes}`;
-document.querySelector('input[name="inspection_date"]').value = dateTimeLocal;
+        const formData = new FormData(this);
+        formData.append('type', 'hydrant');
+        formData.append('equipment_id', '<?php echo $hydrant['id']; ?>');
+
+        const submitBtn = document.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+
+        fetch('actions/ac_store_inspection.php', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert('Inspeksi berhasil disimpan!');
+                    window.location.href = data.redirect;
+                } else {
+                    alert('Error: ' + data.message);
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-check-circle me-2"></i> Simpan Inspeksi';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Terjadi kesalahan: ' + error.message);
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-check-circle me-2"></i> Simpan Inspeksi';
+            });
+    });
+
+    // Set default datetime to now
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const dateTimeLocal = `${year}-${month}-${day}T${hours}:${minutes}`;
+    document.querySelector('input[name="inspection_date"]').value = dateTimeLocal;
 </script>

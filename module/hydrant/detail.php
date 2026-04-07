@@ -173,9 +173,10 @@ $statusClass = ($hydrant['status'] === 'OK' || $hydrant['status'] === 'Good') ? 
         <a href="?page=hydrant-inspect&id=<?php echo $hydrant['id']; ?>" class="btn btn-inspeksi">
             <i class="fas fa-clipboard-check"></i> Mulai Inspeksi
         </a>
-        <a href="print_qr.php?type=hydrant&ids=<?php echo $hydrant['id']; ?>" target="_blank" class="btn btn-inspeksi bg-warning text-dark border-0">
-            <i class="fas fa-print"></i> Print QR
-        </a>
+        <label for="qr-upload-input" class="btn btn-inspeksi bg-warning text-dark border-0 m-0 mb-4" id="btn-scan-qr" style="cursor:pointer; display:inline-block; margin-bottom: 25px !important;">
+            <i class="fas fa-qrcode"></i> Scan QR
+        </label>
+        <input type="file" id="qr-upload-input" accept="image/*" capture="environment" style="display: none;">
 
         <div class="d-block">
             <div class="status-badge <?php echo $statusClass; ?>">
@@ -293,6 +294,54 @@ $statusClass = ($hydrant['status'] === 'OK' || $hydrant['status'] === 'Good') ? 
 
 <script>
 $(document).ready(function() {
+    $('#qr-upload-input').on('change', function(e) {
+        var file = e.target.files[0];
+        if (!file) return;
+
+        // Tampilkan loading state
+        var scanBtn = $('#btn-scan-qr');
+        var originalBtnHtml = scanBtn.html();
+        scanBtn.html('<i class="fas fa-spinner fa-spin"></i> Scanning...');
+        scanBtn.css('pointer-events', 'none');
+
+        var formData = new FormData();
+        formData.append('qr_image', file);
+
+        $.ajax({
+            url: 'actions/ac_decode_qr.php',
+            type: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function(response) {
+                scanBtn.html(originalBtnHtml);
+                scanBtn.css('pointer-events', 'auto');
+                $('#qr-upload-input').val(''); // reset
+
+                try {
+                    var actRes = typeof response === 'string' ? JSON.parse(response) : response;
+                    if (actRes.success) {
+                        if (actRes.text.startsWith("http")) {
+                            window.location.href = actRes.text;
+                        } else {
+                            alert("QR Code tidak valid atau bukan link sistem: " + actRes.text);
+                        }
+                    } else {
+                        alert(actRes.message || 'Gagal membaca QR code dari gambar.');
+                    }
+                } catch(err) {
+                    alert('Terjadi kesalahan menterjemahkan QR Code.');
+                }
+            },
+            error: function() {
+                scanBtn.html(originalBtnHtml);
+                scanBtn.css('pointer-events', 'auto');
+                $('#qr-upload-input').val(''); // reset
+                alert('Gagal menghubungi server untuk membaca QR code.');
+            }
+        });
+    });
+
     // Initialize history table if exists
     if ($('#table-history').length) {
         $('#table-history').DataTable({

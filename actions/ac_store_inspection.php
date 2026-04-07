@@ -187,7 +187,7 @@ try {
         
     } else {
         $table = 'bimonthly_hydrant_inspections';
-        $items = ['body_hydrant', 'selang', 'couple_join', 'nozzle', 'check_sheet', 'valve_kran', 'lampu', 'cover_lampu', 'box_display', 'konsul_hydrant', 'jr', 'marking', 'label'];
+        $items = ['body_hydrant', 'selang', 'couple_join', 'nozzle', 'check_sheet', 'valve_kran', 'lampu', 'cover_lampu', 'kunci_pilar_hydrant', 'pilar_hydrant', 'marking', 'sign_larangan', 'nomor_hydrant', 'wi_hydrant'];
         $jenis = $_POST['jenis_hydrant'] ?? 'Unknown';
         
         $cols = ['hydrant_id', 'user_id', 'inspection_date', 'notes', 'jenis_hydrant', 'created_at', 'updated_at'];
@@ -195,7 +195,7 @@ try {
         $params = [$equipment_id, $user_id, $inspection_date, $general_notes, $jenis];
         
         foreach ($items as $item) {
-            $ok = (int)($_POST[$item . '_ok'] ?? 0);
+            $ok = isset($_POST[$item . '_ok']) ? (int)$_POST[$item . '_ok'] : 1;
             $foto_path = '';
             
             if (isset($_FILES[$item . '_foto']) && $_FILES[$item . '_foto']['size'] > 0) {
@@ -243,11 +243,12 @@ try {
             'valve_kran' => 'Valve Kran',
             'lampu' => 'Lampu',
             'cover_lampu' => 'Cover Lampu',
-            'box_display' => 'Box Display',
-            'konsul_hydrant' => 'Konsul Hydrant',
-            'jr' => 'JR',
+            'kunci_pilar_hydrant' => 'Kunci Pilar Hydrant',
+            'pilar_hydrant' => 'Pilar Hydrant',
             'marking' => 'Marking',
-            'label' => 'Label'
+            'sign_larangan' => 'Sign Larangan',
+            'nomor_hydrant' => 'Nomor Hydrant',
+            'wi_hydrant' => 'WI Hydrant'
         ];
         
         foreach ($items as $item) {
