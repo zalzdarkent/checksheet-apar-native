@@ -25,11 +25,14 @@ $sql = "SELECT
             code,
             location,
             area,
-            status,
-            type,
-            last_inspection_date,
-            is_active
-FROM [apar].[dbo].[hydrants] h
+            h.status,
+            h.type,
+            h.last_inspection_date,
+            h.is_active,
+            ISNULL(e.EmployeeName, u.REALNAME) as pic_name
+        FROM [apar].[dbo].[hydrants] h
+        LEFT JOIN [apar].[dbo].[HRD_EMPLOYEE_TABLE] e ON h.pic_empid = e.EmpID
+        LEFT JOIN [apar].[Users].[UserTable] u ON h.pic_empid = u.EMPID
         $where_clause
         ORDER BY h.is_active DESC, h.area ASC, h.code ASC";
 

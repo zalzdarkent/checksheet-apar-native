@@ -26,9 +26,10 @@ if ($id <= 0) {
         }
 
         // 2. Get Inspection History (Join with users for inspector name)
-        $sql_history = "SELECT h.*, u.name as inspector_name 
+        $sql_history = "SELECT h.*, ISNULL(e.EmployeeName, u.REALNAME) as inspector_name 
                         FROM [apar].[dbo].[bimonthly_apar_inspections] h
-                        LEFT JOIN [apar].[dbo].[users] u ON h.user_id = u.id
+                        LEFT JOIN [apar].[Users].[UserTable] u ON h.user_id = u.EMPID
+                        LEFT JOIN [apar].[dbo].[HRD_EMPLOYEE_TABLE] e ON h.user_id = e.EmpID
                         WHERE h.apar_id = ? 
                         ORDER BY h.inspection_date DESC";
         $stmt_history = sqlsrv_query($koneksi, $sql_history, [$id]);
@@ -58,10 +59,12 @@ if ($id <= 0) {
         }
 
         // 3. Get Abnormal Cases with PIC name
-        $sql_cases = "SELECT c.*, u.name as pic_name, v.name as verified_by_name
+        $sql_cases = "SELECT c.*, ISNULL(e_pic.EmployeeName, u_pic.REALNAME) as pic_name, ISNULL(e_ver.EmployeeName, u_ver.REALNAME) as verified_by_name
                       FROM [apar].[dbo].[apar_abnormal_cases] c
-                      LEFT JOIN [apar].[dbo].[users] u ON c.pic_id = u.id
-                      LEFT JOIN [apar].[dbo].[users] v ON c.verified_by = v.id
+                      LEFT JOIN [apar].[Users].[UserTable] u_pic ON c.pic_id = u_pic.EMPID
+                      LEFT JOIN [apar].[dbo].[HRD_EMPLOYEE_TABLE] e_pic ON c.pic_id = e_pic.EmpID
+                      LEFT JOIN [apar].[Users].[UserTable] u_ver ON c.verified_by = u_ver.EMPID
+                      LEFT JOIN [apar].[dbo].[HRD_EMPLOYEE_TABLE] e_ver ON c.verified_by = e_ver.EmpID
                       WHERE c.apar_id = ? 
                       ORDER BY c.created_at DESC";
         $stmt_cases = sqlsrv_query($koneksi, $sql_cases, [$id]);

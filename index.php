@@ -76,6 +76,8 @@ include("components/fragments/head.php");
                     'user-management' => 'module/user/index.php',
                     'add-user' => 'module/user/create.php',
                     'edit-user' => 'module/user/edit.php',
+                    'apar-create' => 'module/apar/create_v2.php',
+                    'hydrant-create' => 'module/hydrant/create_v2.php',
                     'report' => 'module/report/index.php'
                 ];
 

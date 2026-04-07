@@ -27,11 +27,14 @@ $sql = "SELECT
             area,
             weight,
             expired_date,
-            status,
-            type,
-            last_inspection_date,
-            is_active
+            a.status,
+            a.type,
+            a.last_inspection_date,
+            a.is_active,
+            ISNULL(e.EmployeeName, u.REALNAME) as pic_name
         FROM [apar].[dbo].[apars] a
+        LEFT JOIN [apar].[dbo].[HRD_EMPLOYEE_TABLE] e ON a.pic_empid = e.EmpID
+        LEFT JOIN [apar].[Users].[UserTable] u ON a.pic_empid = u.EMPID
         $where_clause
         ORDER BY a.is_active DESC, a.area ASC, a.code ASC";
 

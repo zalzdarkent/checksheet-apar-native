@@ -309,9 +309,9 @@ $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php",
                             Inactivate Selected</a></li>
                 </ul>
             </div>
-            <button class="btn btn-primary btn-round" id="btn-add-hydrant">
+            <a href="?page=hydrant-create&area=Disa" class="btn btn-primary btn-round">
                 <i class="fas fa-plus"></i> Add
-            </button>
+            </a>
         </div>
     </div>
 
@@ -742,4 +742,4 @@ $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php",
     });
 </script>
 
-<?php include(__DIR__ . '/../create.php'); ?>
+<?php // Modal removed ?>
