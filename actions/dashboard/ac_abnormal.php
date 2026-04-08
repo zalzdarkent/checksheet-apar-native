@@ -20,6 +20,116 @@ $table = ($type === 'apar') ? '[apar].[dbo].[apar_abnormal_cases]' : '[apar].[db
 $master_table = ($type === 'apar') ? '[apar].[dbo].[apars]' : '[apar].[dbo].[hydrants]';
 $fk_field = ($type === 'apar') ? 'apar_id' : 'hydrant_id';
 
+$apar_mapping = [
+    'Exp. Date' => 'exp_date',
+    'Pressure' => 'pressure',
+    'Weight CO2' => 'weight_co2',
+    'Tube' => 'tube',
+    'Hose' => 'hose',
+    'Bracket' => 'bracket',
+    'WI' => 'wi',
+    'Form Kejadian' => 'form_kejadian',
+    'SIGN Kotak' => 'sign_box',
+    'SIGN Segitiga' => 'sign_triangle',
+    'Marking Tiger' => 'marking_tiger',
+    'Marking Beam' => 'marking_beam',
+    '5R APAR' => 'sr_apar',
+    'Kocok APAR' => 'kocok_apar',
+    'Label' => 'label'
+];
+
+$hydrant_mapping = [
+    'Body Hydrant' => 'body_hydrant',
+    'Selang' => 'selang',
+    'Couple Join' => 'couple_join',
+    'Nozzle' => 'nozzle',
+    'Check Sheet' => 'check_sheet',
+    'Valve Kran' => 'valve_kran',
+    'Lampu' => 'lampu',
+    'Cover Lampu' => 'cover_lampu',
+    'Kunci Pilar Hydrant' => 'kunci_pilar_hydrant',
+    'Pilar Hydrant' => 'pilar_hydrant',
+    'Marking' => 'marking',
+    'Sign Larangan' => 'sign_larangan',
+    'Nomor Hydrant' => 'nomor_hydrant',
+    'WI Hydrant' => 'wi_hydrant'
+];
+
+if ($action === 'get_inspection_detail') {
+    $fetch_sql = "SELECT * FROM $table WHERE id = ?";
+    $fetch_stmt = sqlsrv_query($koneksi, $fetch_sql, [$id]);
+    $case_row = sqlsrv_fetch_array($fetch_stmt, SQLSRV_FETCH_ASSOC);
+
+    if (!$case_row) {
+        echo json_encode(['status' => 'error', 'message' => 'Case not found']);
+        exit;
+    }
+
+    $inspection_id = $case_row['inspection_id'];
+    if (!$inspection_id) {
+        echo json_encode(['status' => 'error', 'message' => 'No inspection data linked to this case']);
+        exit;
+    }
+
+    $inspection_table = ($type === 'apar') ? '[apar].[dbo].[bimonthly_apar_inspections]' : '[apar].[dbo].[bimonthly_hydrant_inspections]';
+    
+    $ins_sql = "SELECT * FROM $inspection_table WHERE id = ?";
+    $ins_stmt = sqlsrv_query($koneksi, $ins_sql, [$inspection_id]);
+    $ins_row = sqlsrv_fetch_array($ins_stmt, SQLSRV_FETCH_ASSOC);
+
+    if (!$ins_row) {
+        echo json_encode(['status' => 'error', 'message' => 'Inspection detail not found']);
+        exit;
+    }
+
+    $ng_items = [];
+    $mapping = ($type === 'apar') ? $apar_mapping : $hydrant_mapping;
+    foreach ($mapping as $label => $col_prefix) {
+        $col_ok = $col_prefix . '_ok';
+        $col_foto = $col_prefix . '_foto';
+        $col_desc = $col_prefix . '_keterangan'; // used for some apar fields
+        
+        if (isset($ins_row[$col_ok]) && $ins_row[$col_ok] === 0) {
+            $ng_items[] = [
+                'label' => $label,
+                'photo' => $ins_row[$col_foto] ?? null,
+                'keterangan' => $ins_row[$col_desc] ?? ''
+            ];
+        }
+    }
+
+    $case_info = [
+        'countermeasure' => $case_row['countermeasure'] ?? '-',
+        'due_date' => isset($case_row['due_date']) && is_object($case_row['due_date']) ? $case_row['due_date']->format('d/m/Y') : ($case_row['due_date'] ?? '-'),
+        'repair_photo' => isset($case_row['repair_photo']) && $case_row['repair_photo'] ? 'storage/' . $case_row['repair_photo'] : null
+    ];
+
+    echo json_encode([
+        'status' => 'success',
+        'inspection_date' => $ins_row['inspection_date'] ? $ins_row['inspection_date']->format('d/m/Y H:i') : '-',
+        'inspector_notes' => $ins_row['notes'] ?: '-',
+        'ng_items' => $ng_items,
+        'case_info' => $case_info
+    ]);
+    exit;
+}
+
+if ($action === 'start_progress') {
+    $countermeasure = $_POST['countermeasure'] ?? '';
+    $due_date = $_POST['due_date'] ?? null;
+    if ($due_date === '') $due_date = null;
+
+    $sql = "UPDATE $table SET status = 'On Progress', countermeasure = ?, due_date = ?, updated_at = GETDATE() WHERE id = ?";
+    $stmt = sqlsrv_query($koneksi, $sql, [$countermeasure, $due_date, $id]);
+    
+    if ($stmt === false) {
+        echo json_encode(['status' => 'error', 'message' => 'Gagal memulai proses.']);
+    } else {
+        echo json_encode(['status' => 'success', 'message' => 'Proses perbaikan dimulai.']);
+    }
+    exit;
+}
+
 if ($action === 'update_detail') {
     $abnormal_case = $_POST['abnormal_case'] ?? '';
     $countermeasure = $_POST['countermeasure'] ?? '';
@@ -146,20 +256,63 @@ if ($action === 'verify_case') {
     }
 
     $user_id = $_SESSION['user_id'];
-    $sql = "UPDATE $table SET 
-            status = 'Verified', 
-            verified_at = GETDATE(), 
-            verified_by = ?, 
-            updated_at = GETDATE() 
-            WHERE id = ?";
     
-    $stmt = sqlsrv_query($koneksi, $sql, [$user_id, $id]);
-    
-    if ($stmt === false) {
-        echo json_encode(['status' => 'error', 'message' => 'Gagal memverifikasi kasus.']);
+    $fetch_sql = "SELECT * FROM $table WHERE id = ?";
+    $fetch_stmt = sqlsrv_query($koneksi, $fetch_sql, [$id]);
+    $case_row = sqlsrv_fetch_array($fetch_stmt, SQLSRV_FETCH_ASSOC);
+
+    if ($case_row) {
+        $inspection_id = $case_row['inspection_id'];
+        $abnormal_items_text = $case_row['abnormal_case']; 
+        $device_id = $case_row[$fk_field];
+
+        sqlsrv_begin_transaction($koneksi);
+        
+        // 1. Update case status
+        $sql = "UPDATE $table SET 
+                status = 'Verified', 
+                verified_at = GETDATE(), 
+                verified_by = ?, 
+                updated_at = GETDATE() 
+                WHERE id = ?";
+        $stmt = sqlsrv_query($koneksi, $sql, [$user_id, $id]);
+        
+        // 2. Update Master Table Status
+        $updMasterSql = "UPDATE $master_table SET status = 'OK' WHERE id = ?";
+        $updMasterStmt = sqlsrv_query($koneksi, $updMasterSql, [$device_id]);
+        
+        // 3. Sync original records from 0 to 1
+        $updInspStmt = true;
+        if ($inspection_id) {
+            $inspection_table = ($type === 'apar') ? '[apar].[dbo].[bimonthly_apar_inspections]' : '[apar].[dbo].[bimonthly_hydrant_inspections]';
+            $mapping = ($type === 'apar') ? $apar_mapping : $hydrant_mapping;
+            $items = array_map('trim', explode(',', $abnormal_items_text));
+            $update_cols = [];
+            
+            foreach ($items as $item_label) {
+                if (isset($mapping[$item_label])) {
+                    $col = $mapping[$item_label] . '_ok';
+                    $update_cols[] = "$col = 1";
+                }
+            }
+            
+            if (!empty($update_cols)) {
+                $updInspSql = "UPDATE $inspection_table SET " . implode(', ', $update_cols) . " WHERE id = ?";
+                $updInspStmt = sqlsrv_query($koneksi, $updInspSql, [$inspection_id]);
+            }
+        }
+        
+        if ($stmt === false || $updMasterStmt === false || $updInspStmt === false) {
+            sqlsrv_rollback($koneksi);
+            echo json_encode(['status' => 'error', 'message' => 'Gagal memverifikasi kasus.', 'errors' => sqlsrv_errors()]);
+        } else {
+            sqlsrv_commit($koneksi);
+            echo json_encode(['status' => 'success', 'message' => 'Kasus berhasil diverifikasi. Status unit normal, histori NG tersimpan.']);
+        }
     } else {
-        echo json_encode(['status' => 'success', 'message' => 'Kasus berhasil diverifikasi.']);
+        echo json_encode(['status' => 'error', 'message' => 'Data kasus tidak ditemukan.']);
     }
+    
     exit;
 }
 
