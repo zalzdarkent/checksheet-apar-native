@@ -110,11 +110,13 @@ function get_apar_abnormal_cases()
             a.location,
             a.area,
             aac.pic_id,
-            u.name as pic_name,
-            u.photo as pic_photo
+            COALESCE(u_sys.name, e_pic.EmployeeName, u_emp.REALNAME) as pic_name,
+            u_sys.photo as pic_photo
             FROM [apar].[dbo].[apar_abnormal_cases] aac
             LEFT JOIN [apar].[dbo].[apars] a ON aac.apar_id = a.id
-            LEFT JOIN [apar].[dbo].[users] u ON aac.pic_id = u.id
+            LEFT JOIN [apar].[dbo].[users] u_sys ON LTRIM(RTRIM(aac.pic_id)) = LTRIM(RTRIM(u_sys.npk))
+            LEFT JOIN [apar].[dbo].[HRD_EMPLOYEE_TABLE] e_pic ON LTRIM(RTRIM(aac.pic_id)) = LTRIM(RTRIM(e_pic.EmpID))
+            LEFT JOIN [apar].[Users].[UserTable] u_emp ON LTRIM(RTRIM(aac.pic_id)) = LTRIM(RTRIM(u_emp.EMPID))
             WHERE aac.status IN ('Open', 'On Progress', 'Closed')
             ORDER BY CASE WHEN aac.status='Closed' THEN 1 ELSE 0 END ASC, aac.created_at DESC";
 
@@ -236,11 +238,13 @@ function get_hydrant_abnormal_cases()
             h.location,
             h.area,
             hac.pic_id,
-            u.name as pic_name,
-            u.photo as pic_photo
+            COALESCE(u_sys.name, e_pic.EmployeeName, u_emp.REALNAME) as pic_name,
+            u_sys.photo as pic_photo
             FROM [apar].[dbo].[hydrant_abnormal_cases] hac
             LEFT JOIN [apar].[dbo].[hydrants] h ON hac.hydrant_id = h.id
-            LEFT JOIN [apar].[dbo].[users] u ON hac.pic_id = u.id
+            LEFT JOIN [apar].[dbo].[users] u_sys ON LTRIM(RTRIM(hac.pic_id)) = LTRIM(RTRIM(u_sys.npk))
+            LEFT JOIN [apar].[dbo].[HRD_EMPLOYEE_TABLE] e_pic ON LTRIM(RTRIM(hac.pic_id)) = LTRIM(RTRIM(e_pic.EmpID))
+            LEFT JOIN [apar].[Users].[UserTable] u_emp ON LTRIM(RTRIM(hac.pic_id)) = LTRIM(RTRIM(u_emp.EMPID))
             WHERE hac.status IN ('Open', 'On Progress', 'Closed')
             ORDER BY CASE WHEN hac.status='Closed' THEN 1 ELSE 0 END ASC, hac.created_at DESC";
 

@@ -2,7 +2,8 @@
 include("actions/dashboard/ac_dashboard.php");
 
 $usersPIC = [];
-$resUsers = sqlsrv_query($koneksi, "SELECT id, name FROM [apar].[dbo].[users] WHERE is_active = 1 ORDER BY name ASC");
+// Fetch from UserTable to allow any employee to be a PIC
+$resUsers = sqlsrv_query($koneksi, "SELECT EMPID as id, EmployeeName as name FROM [apar].[Users].[UserTable] ORDER BY EmployeeName ASC");
 if ($resUsers !== false) {
     while ($u = sqlsrv_fetch_array($resUsers, SQLSRV_FETCH_ASSOC)) {
         $usersPIC[] = $u;
@@ -425,7 +426,7 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
                             <select class="form-select" name="pic_id" id="edit_pic_id">
                                 <option value="">-- No PIC Assigned --</option>
                                 <?php foreach ($usersPIC as $u): ?>
-                                    <option value="<?php echo $u['id']; ?>"><?php echo htmlspecialchars($u['name']); ?></option>
+                                    <option value="<?php echo htmlspecialchars($u['id']); ?>"><?php echo htmlspecialchars($u['name']); ?></option>
                                 <?php endforeach; ?>
                             </select>
                             <small class="text-muted">Hanya Admin dan PIC terpilih yang bisa mengupdate kasus ini kedepannya.</small>
