@@ -113,21 +113,20 @@ try {
             }
         }
         
-        $sql = "INSERT INTO [apar].[dbo].[" . $table . "] (" . implode(',', $cols) . ") VALUES (" . implode(',', $placeholders) . ")";
+        $sql = "INSERT INTO [apar].[dbo].[" . $table . "] (" . implode(',', $cols) . ") VALUES (" . implode(',', $placeholders) . "); SELECT SCOPE_IDENTITY() AS last_id;";
         $stmt = sqlsrv_query($koneksi, $sql, $params);
         
         if ($stmt === false) {
-            throw new Exception('Insert failed: ' . print_r(sqlsrv_errors(), true));
+            throw new Exception('Insert inspection failed: ' . print_r(sqlsrv_errors(), true));
         }
         
-        // Get last insertion ID
-        $id_stmt = sqlsrv_query($koneksi, "SELECT SCOPE_IDENTITY() AS last_id");
-        $last_inspection_id = null;
-        if ($id_stmt) {
-            $id_row = sqlsrv_fetch_array($id_stmt, SQLSRV_FETCH_ASSOC);
-            $last_inspection_id = $id_row['last_id'] ?? null;
-        }
+        // Advance to the Second Result Set to get SCOPE_IDENTITY()
+        sqlsrv_next_result($stmt);
+        $id_row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
+        $last_inspection_id = $id_row['last_id'] ?? null;
         
+        error_log("DEBUG: Captured last_inspection_id=" . ($last_inspection_id ?? 'NULL'));
+
         sqlsrv_query($koneksi, "UPDATE [apar].[dbo].[apars] SET last_inspection_date = ? WHERE id = ?", [$inspection_date, $equipment_id]);
         
         // Auto-detect abnormal items and update status
@@ -173,15 +172,42 @@ try {
             error_log("DEBUG: UPDATE apars result=" . ($result ? 'SUCCESS' : 'FAILED'));
             $debug_info['status_updated'] = ($result ? true : false);
             
+            // Capture PIC identity (EMPID) with Fallback to Area PIC
+            $info_sql = "SELECT pic_empid, area FROM [apar].[dbo].[apars] WHERE id = ?";
+            $info_stmt = sqlsrv_query($koneksi, $info_sql, [$equipment_id]);
+            $pic_id = null;
+            if ($info_stmt && $row = sqlsrv_fetch_array($info_stmt, SQLSRV_FETCH_ASSOC)) {
+                $p_empid = trim($row['pic_empid'] ?? '');
+                $p_area = trim($row['area'] ?? '');
+
+                // 1. Use unit's designated PIC
+                if (!empty($p_empid)) {
+                    $pic_id = $p_empid;
+                }
+
+                // 2. Fallback to Area PIC if unit's PIC is empty
+                if (empty($pic_id) && !empty($p_area)) {
+                    $f_sql = "SELECT TOP 1 EMPID FROM [apar].[dbo].[user_pic_locations] WHERE location_name = ? AND device_type = 'apar'";
+                    $f_stmt = sqlsrv_query($koneksi, $f_sql, [$p_area]);
+                    if ($f_stmt && $f_row = sqlsrv_fetch_array($f_stmt, SQLSRV_FETCH_ASSOC)) {
+                        $pic_id = $f_row['EMPID'];
+                    }
+                }
+            }
+            error_log("DEBUG: Storing PIC EMPID [" . ($pic_id ?? 'NULL') . "] in abnormal case.");
+
             // Create abnormal case record
             $abnormal_case_text = implode(', ', $abnormal_items);
-            $abnormal_sql = "INSERT INTO [apar].[dbo].[apar_abnormal_cases] (apar_id, inspection_id, abnormal_case, countermeasure, created_at, status) VALUES (?, ?, ?, '-', GETDATE(), 'Open')";
-            $result = sqlsrv_query($koneksi, $abnormal_sql, [$equipment_id, $last_inspection_id, $abnormal_case_text]);
+            $abnormal_sql = "INSERT INTO [apar].[dbo].[apar_abnormal_cases] (apar_id, inspection_id, abnormal_case, countermeasure, pic_id, created_at, status) VALUES (?, ?, ?, '-', ?, GETDATE(), 'Open')";
+            $result = sqlsrv_query($koneksi, $abnormal_sql, [$equipment_id, $last_inspection_id, $abnormal_case_text, $pic_id]);
+            
             error_log("DEBUG: INSERT apar_abnormal_cases result=" . ($result ? 'SUCCESS' : 'FAILED'));
             $debug_info['case_created'] = ($result ? true : false);
+            
             if (!$result) {
-                error_log("DEBUG: SQL Error: " . print_r(sqlsrv_errors(), true));
-                $debug_info['error'] = sqlsrv_errors();
+                $errors = sqlsrv_errors();
+                error_log("DEBUG: SQL Error: " . print_r($errors, true));
+                throw new Exception('Gagal menyimpan data kasus abnormal APAR: ' . print_r($errors, true));
             }
         }
         
@@ -215,20 +241,19 @@ try {
             $params[] = $foto_path;
         }
         
-        $sql = "INSERT INTO [apar].[dbo].[" . $table . "] (" . implode(',', $cols) . ") VALUES (" . implode(',', $placeholders) . ")";
+        $sql = "INSERT INTO [apar].[dbo].[" . $table . "] (" . implode(',', $cols) . ") VALUES (" . implode(',', $placeholders) . "); SELECT SCOPE_IDENTITY() AS last_id;";
         $stmt = sqlsrv_query($koneksi, $sql, $params);
         
         if ($stmt === false) {
-            throw new Exception('Insert failed: ' . print_r(sqlsrv_errors(), true));
+            throw new Exception('Insert hydrant inspection failed: ' . print_r(sqlsrv_errors(), true));
         }
-
-        // Get last insertion ID
-        $id_stmt = sqlsrv_query($koneksi, "SELECT SCOPE_IDENTITY() AS last_id");
-        $last_inspection_id = null;
-        if ($id_stmt) {
-            $id_row = sqlsrv_fetch_array($id_stmt, SQLSRV_FETCH_ASSOC);
-            $last_inspection_id = $id_row['last_id'] ?? null;
-        }
+        
+        // Advance to the Second Result Set to get SCOPE_IDENTITY()
+        sqlsrv_next_result($stmt);
+        $id_row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
+        $last_inspection_id = $id_row['last_id'] ?? null;
+        
+        error_log("DEBUG: Captured hydrant last_inspection_id=" . ($last_inspection_id ?? 'NULL'));
         
         sqlsrv_query($koneksi, "UPDATE [apar].[dbo].[hydrants] SET last_inspection_date = ? WHERE id = ?", [$inspection_date, $equipment_id]);
         
@@ -270,15 +295,42 @@ try {
             error_log("DEBUG: UPDATE hydrants result=" . ($result ? 'SUCCESS' : 'FAILED'));
             $debug_info['status_updated'] = ($result ? true : false);
             
+            // Capture PIC identity (EMPID) with Fallback to Area PIC
+            $info_sql = "SELECT pic_empid, area FROM [apar].[dbo].[hydrants] WHERE id = ?";
+            $info_stmt = sqlsrv_query($koneksi, $info_sql, [$equipment_id]);
+            $pic_id = null;
+            if ($info_stmt && $row = sqlsrv_fetch_array($info_stmt, SQLSRV_FETCH_ASSOC)) {
+                $p_empid = trim($row['pic_empid'] ?? '');
+                $p_area = trim($row['area'] ?? '');
+
+                // 1. Use unit's designated PIC
+                if (!empty($p_empid)) {
+                    $pic_id = $p_empid;
+                }
+
+                // 2. Fallback to Area PIC if unit's PIC is empty
+                if (empty($pic_id) && !empty($p_area)) {
+                    $f_sql = "SELECT TOP 1 EMPID FROM [apar].[dbo].[user_pic_locations] WHERE location_name = ? AND device_type = 'hydrant'";
+                    $f_stmt = sqlsrv_query($koneksi, $f_sql, [$p_area]);
+                    if ($f_stmt && $f_row = sqlsrv_fetch_array($f_stmt, SQLSRV_FETCH_ASSOC)) {
+                        $pic_id = $f_row['EMPID'];
+                    }
+                }
+            }
+            error_log("DEBUG: Storing Hydrant PIC EMPID [" . ($pic_id ?? 'NULL') . "] in abnormal case.");
+
             // Create abnormal case record
             $abnormal_case_text = implode(', ', $abnormal_items);
-            $abnormal_sql = "INSERT INTO [apar].[dbo].[hydrant_abnormal_cases] (hydrant_id, inspection_id, abnormal_case, countermeasure, created_at, status) VALUES (?, ?, ?, '-', GETDATE(), 'Open')";
-            $result = sqlsrv_query($koneksi, $abnormal_sql, [$equipment_id, $last_inspection_id, $abnormal_case_text]);
+            $abnormal_sql = "INSERT INTO [apar].[dbo].[hydrant_abnormal_cases] (hydrant_id, inspection_id, abnormal_case, countermeasure, pic_id, created_at, status) VALUES (?, ?, ?, '-', ?, GETDATE(), 'Open')";
+            $result = sqlsrv_query($koneksi, $abnormal_sql, [$equipment_id, $last_inspection_id, $abnormal_case_text, $pic_id]);
+            
             error_log("DEBUG: INSERT hydrant_abnormal_cases result=" . ($result ? 'SUCCESS' : 'FAILED'));
             $debug_info['case_created'] = ($result ? true : false);
+            
             if (!$result) {
-                error_log("DEBUG: SQL Error: " . print_r(sqlsrv_errors(), true));
-                $debug_info['error'] = sqlsrv_errors();
+                $errors = sqlsrv_errors();
+                error_log("DEBUG: SQL Error: " . print_r($errors, true));
+                throw new Exception('Gagal menyimpan data kasus abnormal Hydrant: ' . print_r($errors, true));
             }
         }
     }
