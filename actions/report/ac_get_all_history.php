@@ -20,15 +20,15 @@ try {
             l.created_at,
             l.due_date,
             l.verified_at,
-            COALESCE(u_sys.name, e_pic.EmployeeName, u_emp.REALNAME) as pic_name
-        FROM [apar].[dbo].[SE_FIRE_PROTECTION_LINES] l
-        LEFT JOIN [apar].[dbo].[SE_FIRE_PROTECTION_MASTER] m ON l.asset_id = m.id
-        LEFT JOIN [apar].[dbo].[users] u_sys ON LTRIM(RTRIM(l.pic_empid)) = LTRIM(RTRIM(u_sys.npk))
-        LEFT JOIN [apar].[dbo].[HRD_EMPLOYEE_TABLE] e_pic ON LTRIM(RTRIM(l.pic_empid)) = LTRIM(RTRIM(e_pic.EmpID))
-        LEFT JOIN [apar].[Users].[UserTable] u_emp ON LTRIM(RTRIM(l.pic_empid)) = LTRIM(RTRIM(u_emp.EMPID))
+            COALESCE(u_sys.REALNAME, e_pic.EmployeeName, u_emp.REALNAME) as pic_name
+        FROM [PRD].[dbo].[SE_FIRE_PROTECTION_LINES] l
+        LEFT JOIN [PRD].[dbo].[SE_FIRE_PROTECTION_MASTER] m ON l.asset_id = m.id
+        LEFT JOIN [ATI].[Users].[UserTable] u_sys ON LTRIM(RTRIM(l.pic_empid)) = LTRIM(RTRIM(u_sys.EMPID))
+        LEFT JOIN [ATI].[dbo].[HRD_EMPLOYEE_TABLE] e_pic ON LTRIM(RTRIM(l.pic_empid)) = LTRIM(RTRIM(e_pic.EmpID))
+        LEFT JOIN [ATI].[Users].[UserTable] u_emp ON LTRIM(RTRIM(l.pic_empid)) = LTRIM(RTRIM(u_emp.EMPID))
         ORDER BY l.created_at DESC
     ";
-    
+
     $stmt = sqlsrv_query($koneksi, $sql);
     if ($stmt !== false) {
         while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {

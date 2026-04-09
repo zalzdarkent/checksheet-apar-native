@@ -12,11 +12,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    $sql = "UPDATE [apar].[dbo].[SE_FIRE_PROTECTION_MASTER] 
+    $sql = "UPDATE [PRD].[dbo].[SE_FIRE_PROTECTION_MASTER] 
             SET x_coordinate = ?, y_coordinate = ?, updated_at = GETDATE() 
             WHERE asset_code = ? AND asset_type = ?";
     $params = [$x, $y, $code, $device_type];
-    
+
     $stmt = sqlsrv_query($koneksi, $sql, $params);
     if ($stmt) {
         echo json_encode(['status' => 'success', 'message' => 'Marker position updated']);

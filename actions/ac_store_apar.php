@@ -23,7 +23,7 @@ if (empty($area) || empty($code) || empty($location) || empty($weight) || empty(
 }
 
 // Double check if code already exists
-$check_query = "SELECT COUNT(*) as count FROM [apar].[dbo].[apars] WHERE code = ?";
+$check_query = "SELECT COUNT(*) as count FROM [PRD].[dbo].[apars] WHERE code = ?";
 $check_stmt = sqlsrv_query($koneksi, $check_query, [$code]);
 $check_row = sqlsrv_fetch_array($check_stmt, SQLSRV_FETCH_ASSOC);
 
@@ -33,7 +33,7 @@ if ($check_row['count'] > 0) {
 }
 
 // Prepare Insert
-$query = "INSERT INTO [apar].[dbo].[apars] 
+$query = "INSERT INTO [PRD].[dbo].[apars] 
           (code, location, area, weight, type, expired_date, status, is_active, created_at, updated_at) 
           VALUES (?, ?, ?, ?, ?, ?, ?, 1, GETDATE(), GETDATE())";
 

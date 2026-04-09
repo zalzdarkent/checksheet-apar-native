@@ -17,7 +17,8 @@ $where[] = "a.asset_type = 'APAR'";
 if ($search !== "") {
     $where[] = "(a.asset_code LIKE ? OR a.location LIKE ? OR a.model_type LIKE ? OR a.status LIKE ? OR a.weight LIKE ?)";
     $search_param = "%$search%";
-    for ($i = 0; $i < 5; $i++) $params[] = $search_param;
+    for ($i = 0; $i < 5; $i++)
+        $params[] = $search_param;
 }
 
 $where_clause = !empty($where) ? "WHERE " . implode(" AND ", $where) : "";
@@ -34,9 +35,9 @@ $sql = "SELECT
             a.last_inspection_date,
             a.is_active,
             ISNULL(e.EmployeeName, u.REALNAME) as pic_name
-        FROM [apar].[dbo].[SE_FIRE_PROTECTION_MASTER] a
-        LEFT JOIN [apar].[dbo].[HRD_EMPLOYEE_TABLE] e ON a.pic_empid = e.EmpID
-        LEFT JOIN [apar].[Users].[UserTable] u ON a.pic_empid = u.EMPID
+        FROM [PRD].[dbo].[SE_FIRE_PROTECTION_MASTER] a
+        LEFT JOIN [ATI].[dbo].[HRD_EMPLOYEE_TABLE] e ON a.pic_empid = e.EmpID
+        LEFT JOIN [ATI].[Users].[UserTable] u ON a.pic_empid = u.EMPID
         $where_clause
         ORDER BY a.is_active DESC, a.area ASC, a.asset_code ASC";
 
@@ -46,7 +47,7 @@ $apar_data = [];
 if ($result !== false) {
     while ($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)) {
         $is_expired = false;
-        
+
         if ($row['expired_date'] instanceof DateTime) {
             $today = new DateTime();
             $today->setTime(0, 0, 0);
@@ -57,7 +58,7 @@ if ($result !== false) {
         } else {
             $row['expired_date'] = '-';
         }
-        
+
         if ($row['last_inspection_date'] instanceof DateTime) {
             $row['last_inspection_date'] = $row['last_inspection_date']->format('d M Y');
         } else {
@@ -68,12 +69,12 @@ if ($result !== false) {
         $row['type'] = $row['type'] ?: 'N/A';
         $row['weight'] = $row['weight'] ?: '-';
         $row['is_expired'] = $is_expired;
-        
+
         // If expired, override status to 'Expired'
         if ($is_expired) {
             $row['status'] = 'Expired';
         }
-        
+
         $apar_data[] = $row;
     }
 }

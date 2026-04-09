@@ -20,8 +20,8 @@ $periods = array(
 $query = "SELECT DISTINCT
             m.id, m.asset_code as code, m.area, m.location,
             bi.inspection_date, bi.*
-          FROM [apar].[dbo].[SE_FIRE_PROTECTION_MASTER] m
-          LEFT JOIN [apar].[dbo].[SE_FIRE_PROTECTION_TRANS] bi 
+          FROM [PRD].[dbo].[SE_FIRE_PROTECTION_MASTER] m
+          LEFT JOIN [PRD].[dbo].[SE_FIRE_PROTECTION_TRANS] bi 
             ON m.id = bi.asset_id AND YEAR(bi.inspection_date) = $year
           WHERE m.asset_type = ? AND m.is_active = 1
           ORDER BY m.area, m.location, m.asset_code";
@@ -29,7 +29,8 @@ $query = "SELECT DISTINCT
 $stmt = sqlsrv_query($koneksi, $query, [$asset_type]);
 $equipment_raw = array();
 if ($stmt !== false) {
-    while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) $equipment_raw[] = $row;
+    while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC))
+        $equipment_raw[] = $row;
 }
 
 $title = "LAPORAN_PEMERIKSAAN_" . strtoupper($type) . "_BIMONTHLY_$year";
@@ -53,7 +54,8 @@ $html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
     <th rowspan="2">Lokasi</th>
     <th colspan="6">Periode Pemeriksaan</th>
 </tr><tr>';
-foreach ($periods as $p) $html .= "<th>{$p['name']}</th>";
+foreach ($periods as $p)
+    $html .= "<th>{$p['name']}</th>";
 $html .= '</tr></thead><tbody>';
 
 $no = 1;
@@ -61,7 +63,9 @@ $equipment_data = array();
 foreach ($equipment_raw as $item) {
     if (!isset($equipment_data[$item['id']])) {
         $equipment_data[$item['id']] = [
-            'code' => $item['code'], 'area' => $item['area'], 'location' => $item['location'],
+            'code' => $item['code'],
+            'area' => $item['area'],
+            'location' => $item['location'],
             'periods' => array_fill_keys(array_keys($periods), '')
         ];
     }
@@ -69,11 +73,16 @@ foreach ($equipment_raw as $item) {
         $month = $item['inspection_date']->format('n');
         foreach ($periods as $idx => $period) {
             if (in_array($month, $period['months'])) {
-                $check_items = ($type === 'apar') ? 
+                $check_items = ($type === 'apar') ?
                     ['exp_date_ok', 'pressure_ok', 'weight_co2_ok', 'tube_ok', 'hose_ok', 'bracket_ok', 'wi_ok', 'form_kejadian_ok', 'sign_box_ok', 'sign_triangle_ok', 'marking_tiger_ok', 'marking_beam_ok', 'sr_apar_ok', 'kocok_apar_ok', 'label_ok'] :
                     ['body_hydrant_ok', 'selang_ok', 'couple_join_ok', 'nozzle_ok', 'check_sheet_ok', 'valve_kran_ok', 'lampu_ok', 'cover_lampu_ok', 'box_display_ok', 'konsul_hydrant_ok', 'jr_ok', 'marking_ok', 'label_ok'];
                 $all_ok = true;
-                foreach ($check_items as $ci) { if (isset($item[$ci]) && $item[$ci] != 1) { $all_ok = false; break; } }
+                foreach ($check_items as $ci) {
+                    if (isset($item[$ci]) && $item[$ci] != 1) {
+                        $all_ok = false;
+                        break;
+                    }
+                }
                 $equipment_data[$item['id']]['periods'][$idx] = $all_ok ? 'OK' : 'NG';
                 break;
             }

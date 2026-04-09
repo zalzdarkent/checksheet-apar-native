@@ -12,7 +12,7 @@ if (empty($code)) {
 }
 
 // Unified check in MASTER table
-$query = "SELECT COUNT(*) as count FROM [apar].[dbo].[SE_FIRE_PROTECTION_MASTER] WHERE asset_code = ? AND asset_type = ?";
+$query = "SELECT COUNT(*) as count FROM [PRD].[dbo].[SE_FIRE_PROTECTION_MASTER] WHERE asset_code = ? AND asset_type = ?";
 $params = array($code, strtoupper($type));
 $stmt = sqlsrv_query($koneksi, $query, $params);
 

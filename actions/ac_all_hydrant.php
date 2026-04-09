@@ -17,7 +17,8 @@ $where[] = "h.asset_type = 'Hydrant'";
 if ($search !== "") {
     $where[] = "(h.asset_code LIKE ? OR h.location LIKE ? OR h.model_type LIKE ? OR h.status LIKE ?)";
     $search_param = "%$search%";
-    for ($i = 0; $i < 4; $i++) $params[] = $search_param;
+    for ($i = 0; $i < 4; $i++)
+        $params[] = $search_param;
 }
 
 $where_clause = !empty($where) ? "WHERE " . implode(" AND ", $where) : "";
@@ -32,9 +33,9 @@ $sql = "SELECT
             h.last_inspection_date,
             h.is_active,
             ISNULL(e.EmployeeName, u.REALNAME) as pic_name
-        FROM [apar].[dbo].[SE_FIRE_PROTECTION_MASTER] h
-        LEFT JOIN [apar].[dbo].[HRD_EMPLOYEE_TABLE] e ON h.pic_empid = e.EmpID
-        LEFT JOIN [apar].[Users].[UserTable] u ON h.pic_empid = u.EMPID
+        FROM [PRD].[dbo].[SE_FIRE_PROTECTION_MASTER] h
+        LEFT JOIN [ATI].[dbo].[HRD_EMPLOYEE_TABLE] e ON h.pic_empid = e.EmpID
+        LEFT JOIN [ATI].[Users].[UserTable] u ON h.pic_empid = u.EMPID
         $where_clause
         ORDER BY h.is_active DESC, h.area ASC, h.asset_code ASC";
 
@@ -51,7 +52,7 @@ if ($result !== false) {
 
         // Clean values
         $row['type'] = $row['type'] ?: 'N/A';
-        
+
         $hydrant_data[] = $row;
     }
 }

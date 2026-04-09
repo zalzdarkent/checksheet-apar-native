@@ -3,7 +3,7 @@ include("actions/dashboard/ac_dashboard.php");
 
 $usersPIC = [];
 // Fetch from UserTable to allow any employee to be a PIC
-$resUsers = sqlsrv_query($koneksi, "SELECT EMPID as id, EmployeeName as name FROM [apar].[Users].[UserTable] ORDER BY EmployeeName ASC");
+$resUsers = sqlsrv_query($koneksi, "SELECT EMPID as id, EmployeeName as name FROM [ATI].[Users].[UserTable] ORDER BY EmployeeName ASC");
 if ($resUsers !== false) {
     while ($u = sqlsrv_fetch_array($resUsers, SQLSRV_FETCH_ASSOC)) {
         $usersPIC[] = $u;
@@ -482,74 +482,75 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
                                         <?php foreach ($aparAbnormalCases as $case):
                                             // Pre-calculate session values if needed here or use data-attributes
                                             ?>
-                                                <tr>
-                                                    <td><strong><?= htmlspecialchars($case['code']) ?></strong></td>
-                                                    <td><?= htmlspecialchars($case['area']) ?></td>
-                                                    <td class="text-danger fw-bold">
-                                                        <?= htmlspecialchars($case['abnormal_case']) ?></td>
-                                                    <td><?= htmlspecialchars($case['countermeasure'] ?: '-') ?></td>
-                                                    <td>
-                                                        <?php if ($case['pic_name']): ?>
-                                                                <span title="<?= htmlspecialchars($case['pic_name']) ?>"><img
-                                                                        src="storage/users/<?= htmlspecialchars($case['pic_photo'] ?: 'default.png') ?>"
-                                                                        class="avatar-mini me-1">
-                                                                    <?= htmlspecialchars($case['pic_name']) ?></span>
-                                                        <?php else: ?>
-                                                                <span class="text-danger"><i class="fas fa-user-times"></i>-</span>
-                                                        <?php endif; ?>
-                                                    </td>
-                                                    <td><?= $case['due_date'] ? $case['due_date']->format('d/m/Y') : '-' ?></td>
-                                                    <td>
+                                            <tr>
+                                                <td><strong><?= htmlspecialchars($case['code']) ?></strong></td>
+                                                <td><?= htmlspecialchars($case['area']) ?></td>
+                                                <td class="text-danger fw-bold">
+                                                    <?= htmlspecialchars($case['abnormal_case']) ?>
+                                                </td>
+                                                <td><?= htmlspecialchars($case['countermeasure'] ?: '-') ?></td>
+                                                <td>
+                                                    <?php if ($case['pic_name']): ?>
+                                                        <span title="<?= htmlspecialchars($case['pic_name']) ?>"><img
+                                                                src="storage/users/<?= htmlspecialchars($case['pic_photo'] ?: 'default.png') ?>"
+                                                                class="avatar-mini me-1">
+                                                            <?= htmlspecialchars($case['pic_name']) ?></span>
+                                                    <?php else: ?>
+                                                        <span class="text-danger"><i class="fas fa-user-times"></i>-</span>
+                                                    <?php endif; ?>
+                                                </td>
+                                                <td><?= $case['due_date'] ? $case['due_date']->format('d/m/Y') : '-' ?></td>
+                                                <td>
+                                                    <?php
+                                                    if ($case['status'] === 'Open')
+                                                        echo '<span class="badge bg-danger">Open</span>';
+                                                    elseif ($case['status'] === 'Closed')
+                                                        echo '<span class="badge bg-info">Closed</span>';
+                                                    elseif ($case['status'] === 'Verified')
+                                                        echo '<span class="badge bg-success">Verified</span>';
+                                                    else
+                                                        echo '<span class="badge bg-warning text-dark">Proses</span>';
+                                                    ?>
+                                                </td>
+                                                <td>
+                                                    <div class="btn-group btn-group-sm">
                                                         <?php
-                                                        if ($case['status'] === 'Open')
-                                                            echo '<span class="badge bg-danger">Open</span>';
-                                                        elseif ($case['status'] === 'Closed')
-                                                            echo '<span class="badge bg-info">Closed</span>';
-                                                        elseif ($case['status'] === 'Verified')
-                                                            echo '<span class="badge bg-success">Verified</span>';
-                                                        else
-                                                            echo '<span class="badge bg-warning text-dark">Proses</span>';
+                                                        $can_edit = (empty($case['pic_id']) || $case['pic_id'] == ($_SESSION['user_id'] ?? null) || strtolower($_SESSION['user_role'] ?? '') === 'admin');
+                                                        $isDisabled = ($case['status'] === 'Verified' || !$can_edit) ? 'disabled' : '';
                                                         ?>
-                                                    </td>
-                                                    <td>
-                                                        <div class="btn-group btn-group-sm">
-                                                            <?php
-                                                            $can_edit = (empty($case['pic_id']) || $case['pic_id'] == ($_SESSION['user_id'] ?? null) || strtolower($_SESSION['user_role'] ?? '') === 'admin');
-                                                            $isDisabled = ($case['status'] === 'Verified' || !$can_edit) ? 'disabled' : '';
-                                                            ?>
 
-                                                            <?php if ($case['status'] === 'Open'): ?>
-                                                                    <button class="btn btn-info btn-view-detail text-white"
-                                                                        data-id="<?= $case['id'] ?>" data-type="apar"
-                                                                        data-status="<?= $case['status'] ?>"
-                                                                        title="Detail & Rencana Perbaikan"><i
-                                                                            class="fas fa-eye"></i></button>
-                                                            <?php elseif ($case['status'] === 'On Progress'): ?>
-                                                                    <button class="btn btn-warning btn-close-case text-dark border"
-                                                                        data-id="<?= $case['id'] ?>" data-type="apar"
-                                                                        data-abcase="<?= htmlspecialchars($case['abnormal_case']) ?>"
-                                                                        <?= $isDisabled ?>
-                                                                        title="Sedang Diperbaiki - Klik untuk Selesaikan Kasus"><i
-                                                                            class="fas fa-tools"></i></button>
-                                                            <?php elseif ($case['status'] === 'Closed'): ?>
-                                                                    <?php if (strtolower($_SESSION['user_role'] ?? '') === 'admin'): ?>
-                                                                            <button class="btn btn-success btn-verify-case"
-                                                                                data-id="<?= $case['id'] ?>" data-type="apar"
-                                                                                data-status="<?= $case['status'] ?>" title="Verifikasi Data"><i
-                                                                                    class="fas fa-check-double"></i></button>
-                                                                    <?php else: ?>
-                                                                            <button class="btn btn-info btn-view-detail text-white"
-                                                                                data-id="<?= $case['id'] ?>" data-type="apar"
-                                                                                data-status="<?= $case['status'] ?>" title="Detail & Status"><i
-                                                                                    class="fas fa-eye"></i></button>
-                                                                    <?php endif; ?>
-                                                            <?php elseif ($case['status'] === 'Verified'): ?>
-                                                                    <span class="text-success small fw-bold"><i
-                                                                            class="fas fa-check-circle"></i> Selesai</span>
+                                                        <?php if ($case['status'] === 'Open'): ?>
+                                                            <button class="btn btn-info btn-view-detail text-white"
+                                                                data-id="<?= $case['id'] ?>" data-type="apar"
+                                                                data-status="<?= $case['status'] ?>"
+                                                                title="Detail & Rencana Perbaikan"><i
+                                                                    class="fas fa-eye"></i></button>
+                                                        <?php elseif ($case['status'] === 'On Progress'): ?>
+                                                            <button class="btn btn-warning btn-close-case text-dark border"
+                                                                data-id="<?= $case['id'] ?>" data-type="apar"
+                                                                data-abcase="<?= htmlspecialchars($case['abnormal_case']) ?>"
+                                                                <?= $isDisabled ?>
+                                                                title="Sedang Diperbaiki - Klik untuk Selesaikan Kasus"><i
+                                                                    class="fas fa-screwdriver"></i></button>
+                                                        <?php elseif ($case['status'] === 'Closed'): ?>
+                                                            <?php if (strtolower($_SESSION['user_role'] ?? '') === 'admin'): ?>
+                                                                <button class="btn btn-success btn-verify-case"
+                                                                    data-id="<?= $case['id'] ?>" data-type="apar"
+                                                                    data-status="<?= $case['status'] ?>" title="Verifikasi Data"><i
+                                                                        class="fas fa-check-double"></i></button>
+                                                            <?php else: ?>
+                                                                <button class="btn btn-info btn-view-detail text-white"
+                                                                    data-id="<?= $case['id'] ?>" data-type="apar"
+                                                                    data-status="<?= $case['status'] ?>" title="Detail & Status"><i
+                                                                        class="fas fa-eye"></i></button>
                                                             <?php endif; ?>
-                                                        </div>
-                                                    </td>
-                                                </tr>
+                                                        <?php elseif ($case['status'] === 'Verified'): ?>
+                                                            <span class="text-success small fw-bold"><i
+                                                                    class="fas fa-check-circle"></i> Selesai</span>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                </td>
+                                            </tr>
                                         <?php endforeach; ?>
                                     </tbody>
                                 </table>
@@ -575,74 +576,75 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
                                     </thead>
                                     <tbody>
                                         <?php foreach ($hydrantAbnormalCases as $case): ?>
-                                                <tr>
-                                                    <td><strong><?= htmlspecialchars($case['code']) ?></strong></td>
-                                                    <td><?= htmlspecialchars($case['area']) ?></td>
-                                                    <td class="text-danger fw-bold">
-                                                        <?= htmlspecialchars($case['abnormal_case']) ?></td>
-                                                    <td><?= htmlspecialchars($case['countermeasure'] ?: '-') ?></td>
-                                                    <td>
-                                                        <?php if ($case['pic_name']): ?>
-                                                                <span title="<?= htmlspecialchars($case['pic_name']) ?>"><img
-                                                                        src="storage/users/<?= htmlspecialchars($case['pic_photo'] ?: 'default.png') ?>"
-                                                                        class="avatar-mini me-1">
-                                                                    <?= htmlspecialchars($case['pic_name']) ?></span>
-                                                        <?php else: ?>
-                                                                <span class="text-danger"><i class="fas fa-user-times"></i>-</span>
-                                                        <?php endif; ?>
-                                                    </td>
-                                                    <td><?= $case['due_date'] ? $case['due_date']->format('d/m/Y') : '-' ?></td>
-                                                    <td>
+                                            <tr>
+                                                <td><strong><?= htmlspecialchars($case['code']) ?></strong></td>
+                                                <td><?= htmlspecialchars($case['area']) ?></td>
+                                                <td class="text-danger fw-bold">
+                                                    <?= htmlspecialchars($case['abnormal_case']) ?>
+                                                </td>
+                                                <td><?= htmlspecialchars($case['countermeasure'] ?: '-') ?></td>
+                                                <td>
+                                                    <?php if ($case['pic_name']): ?>
+                                                        <span title="<?= htmlspecialchars($case['pic_name']) ?>"><img
+                                                                src="storage/users/<?= htmlspecialchars($case['pic_photo'] ?: 'default.png') ?>"
+                                                                class="avatar-mini me-1">
+                                                            <?= htmlspecialchars($case['pic_name']) ?></span>
+                                                    <?php else: ?>
+                                                        <span class="text-danger"><i class="fas fa-user-times"></i>-</span>
+                                                    <?php endif; ?>
+                                                </td>
+                                                <td><?= $case['due_date'] ? $case['due_date']->format('d/m/Y') : '-' ?></td>
+                                                <td>
+                                                    <?php
+                                                    if ($case['status'] === 'Open')
+                                                        echo '<span class="badge bg-danger">Open</span>';
+                                                    elseif ($case['status'] === 'Closed')
+                                                        echo '<span class="badge bg-info">Closed</span>';
+                                                    elseif ($case['status'] === 'Verified')
+                                                        echo '<span class="badge bg-success">Verified</span>';
+                                                    else
+                                                        echo '<span class="badge bg-warning text-dark">Proses</span>';
+                                                    ?>
+                                                </td>
+                                                <td>
+                                                    <div class="btn-group btn-group-sm">
                                                         <?php
-                                                        if ($case['status'] === 'Open')
-                                                            echo '<span class="badge bg-danger">Open</span>';
-                                                        elseif ($case['status'] === 'Closed')
-                                                            echo '<span class="badge bg-info">Closed</span>';
-                                                        elseif ($case['status'] === 'Verified')
-                                                            echo '<span class="badge bg-success">Verified</span>';
-                                                        else
-                                                            echo '<span class="badge bg-warning text-dark">Proses</span>';
+                                                        $can_edit = (empty($case['pic_id']) || $case['pic_id'] == ($_SESSION['user_id'] ?? null) || strtolower($_SESSION['user_role'] ?? '') === 'admin');
+                                                        $isDisabled = ($case['status'] === 'Verified' || !$can_edit) ? 'disabled' : '';
                                                         ?>
-                                                    </td>
-                                                    <td>
-                                                        <div class="btn-group btn-group-sm">
-                                                            <?php
-                                                            $can_edit = (empty($case['pic_id']) || $case['pic_id'] == ($_SESSION['user_id'] ?? null) || strtolower($_SESSION['user_role'] ?? '') === 'admin');
-                                                            $isDisabled = ($case['status'] === 'Verified' || !$can_edit) ? 'disabled' : '';
-                                                            ?>
 
-                                                            <?php if ($case['status'] === 'Open'): ?>
-                                                                    <button class="btn btn-info btn-view-detail text-white"
-                                                                        data-id="<?= $case['id'] ?>" data-type="hydrant"
-                                                                        data-status="<?= $case['status'] ?>"
-                                                                        title="Detail & Rencana Perbaikan"><i
-                                                                            class="fas fa-eye"></i></button>
-                                                            <?php elseif ($case['status'] === 'On Progress'): ?>
-                                                                    <button class="btn btn-warning btn-close-case text-dark border"
-                                                                        data-id="<?= $case['id'] ?>" data-type="hydrant"
-                                                                        data-abcase="<?= htmlspecialchars($case['abnormal_case']) ?>"
-                                                                        <?= $isDisabled ?>
-                                                                        title="Sedang Diperbaiki - Klik untuk Selesaikan Kasus"><i
-                                                                            class="fas fa-tools"></i></button>
-                                                            <?php elseif ($case['status'] === 'Closed'): ?>
-                                                                    <?php if (strtolower($_SESSION['user_role'] ?? '') === 'admin'): ?>
-                                                                            <button class="btn btn-success btn-verify-case"
-                                                                                data-id="<?= $case['id'] ?>" data-type="hydrant"
-                                                                                data-status="<?= $case['status'] ?>" title="Verifikasi Data"><i
-                                                                                    class="fas fa-check-double"></i></button>
-                                                                    <?php else: ?>
-                                                                            <button class="btn btn-info btn-view-detail text-white"
-                                                                                data-id="<?= $case['id'] ?>" data-type="hydrant"
-                                                                                data-status="<?= $case['status'] ?>" title="Detail & Status"><i
-                                                                                    class="fas fa-eye"></i></button>
-                                                                    <?php endif; ?>
-                                                            <?php elseif ($case['status'] === 'Verified'): ?>
-                                                                    <span class="text-success small fw-bold"><i
-                                                                            class="fas fa-check-circle"></i> Selesai</span>
+                                                        <?php if ($case['status'] === 'Open'): ?>
+                                                            <button class="btn btn-info btn-view-detail text-white"
+                                                                data-id="<?= $case['id'] ?>" data-type="hydrant"
+                                                                data-status="<?= $case['status'] ?>"
+                                                                title="Detail & Rencana Perbaikan"><i
+                                                                    class="fas fa-eye"></i></button>
+                                                        <?php elseif ($case['status'] === 'On Progress'): ?>
+                                                            <button class="btn btn-warning btn-close-case text-dark border"
+                                                                data-id="<?= $case['id'] ?>" data-type="hydrant"
+                                                                data-abcase="<?= htmlspecialchars($case['abnormal_case']) ?>"
+                                                                <?= $isDisabled ?>
+                                                                title="Sedang Diperbaiki - Klik untuk Selesaikan Kasus"><i
+                                                                    class="fas fa-tools"></i></button>
+                                                        <?php elseif ($case['status'] === 'Closed'): ?>
+                                                            <?php if (strtolower($_SESSION['user_role'] ?? '') === 'admin'): ?>
+                                                                <button class="btn btn-success btn-verify-case"
+                                                                    data-id="<?= $case['id'] ?>" data-type="hydrant"
+                                                                    data-status="<?= $case['status'] ?>" title="Verifikasi Data"><i
+                                                                        class="fas fa-check-double"></i></button>
+                                                            <?php else: ?>
+                                                                <button class="btn btn-info btn-view-detail text-white"
+                                                                    data-id="<?= $case['id'] ?>" data-type="hydrant"
+                                                                    data-status="<?= $case['status'] ?>" title="Detail & Status"><i
+                                                                        class="fas fa-eye"></i></button>
                                                             <?php endif; ?>
-                                                        </div>
-                                                    </td>
-                                                </tr>
+                                                        <?php elseif ($case['status'] === 'Verified'): ?>
+                                                            <span class="text-success small fw-bold"><i
+                                                                    class="fas fa-check-circle"></i> Selesai</span>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                </td>
+                                            </tr>
                                         <?php endforeach; ?>
                                     </tbody>
                                 </table>
@@ -691,8 +693,9 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
                         <select class="form-select" name="pic_id" id="edit_pic_id">
                             <option value="">-- No PIC Assigned --</option>
                             <?php foreach ($usersPIC as $u): ?>
-                                    <option value="<?php echo htmlspecialchars($u['id']); ?>">
-                                        <?php echo htmlspecialchars($u['name']); ?></option>
+                                <option value="<?php echo htmlspecialchars($u['id']); ?>">
+                                    <?php echo htmlspecialchars($u['name']); ?>
+                                </option>
                             <?php endforeach; ?>
                         </select>
                         <small class="text-muted">Hanya Admin dan PIC terpilih yang bisa mengupdate kasus ini
@@ -794,7 +797,7 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
                             <label class="form-label fw-bold">Tindakan Perbaikan (Countermeasure) <span
                                     class="text-danger">*</span></label>
                             <textarea class="form-control" name="countermeasure" id="input_countermeasure" rows="2"
-                                placeholder="Jelaskan tindakan yang akan dilakukan..." required></textarea>
+                                placeholder="Jelaskan tindakan yang akan dilATIkan..." required></textarea>
                         </div>
                         <div class="mb-3">
                             <label class="form-label fw-bold">Tanggal Target Selesai (Due Date) <span
@@ -810,7 +813,7 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
                             Perbaikan</h6>
                         <div class="row">
                             <div class="col-md-7">
-                                <strong class="d-block mb-1 text-muted small">Tindakan yang Dilakukan:</strong>
+                                <strong class="d-block mb-1 text-muted small">Tindakan yang DilATIkan:</strong>
                                 <div id="det_countermeasure" class="text-dark bg-white p-2 rounded border mb-3">-</div>
                                 <strong class="d-block mb-1 text-muted small">Target Selesai:</strong>
                                 <div id="det_due_date" class="text-dark fw-bold">-</div>
@@ -1170,7 +1173,7 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
                 data: $(this).serialize(),
                 dataType: 'json',
                 success: function (res) {
-                    
+
                     if (res.status == 'success') {
                         Swal.fire('Sukses', res.message, 'success').then(() => window.location.reload());
                     } else {
@@ -1214,7 +1217,7 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
                 data: $(this).serialize(),
                 dataType: 'json',
                 success: function (res) {
-                    
+
                     if (res.status == 'success') {
                         Swal.fire('Sukses', res.message, 'success').then(() => window.location.reload());
                     } else {

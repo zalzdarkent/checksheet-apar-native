@@ -27,8 +27,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 u.PicFile,
                 u.REALNAME,
                 e.EmployeeName
-            FROM [apar].[Users].[UserTable] u
-            LEFT JOIN [apar].[dbo].[HRD_EMPLOYEE_TABLE] e ON u.EMPID = e.EmpID
+            FROM [ATI].[Users].[UserTable] u
+            LEFT JOIN [ATI].[dbo].[HRD_EMPLOYEE_TABLE] e ON u.EMPID = e.EmpID
             WHERE (u.USERID = ? OR u.EMPID = ?) AND u.CF_Active = 1
         ";
         $params = array($npk, $npk);
@@ -51,9 +51,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['user_name'] = !empty($user['EmployeeName']) ? $user['EmployeeName'] : (!empty($user['REALNAME']) ? $user['REALNAME'] : $user['USERID']);
             $_SESSION['user_role'] = !empty($user['GROUPUSER']) ? $user['GROUPUSER'] : 'user';
             $_SESSION['user_photo'] = !empty($user['PicFile']) ? $user['PicFile'] : 'profile.jpg';
-            
+
             $_SESSION['success'] = "Selamat datang, " . $_SESSION['user_name'] . "!";
-            
+
             if (!empty($_POST['redirect_to'])) {
                 header("Location: " . $_POST['redirect_to']);
             } else {

@@ -8,11 +8,11 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-$area     = $_POST['area']     ?? '';
-$code     = $_POST['code']     ?? '';
+$area = $_POST['area'] ?? '';
+$code = $_POST['code'] ?? '';
 $location = $_POST['location'] ?? '';
-$type     = $_POST['type']     ?? '';
-$status   = $_POST['status']   ?? '';
+$type = $_POST['type'] ?? '';
+$status = $_POST['status'] ?? '';
 
 // Validation
 if (empty($area) || empty($code) || empty($location) || empty($type) || empty($status)) {
@@ -21,9 +21,9 @@ if (empty($area) || empty($code) || empty($location) || empty($type) || empty($s
 }
 
 // Check if code already exists
-$check_query = "SELECT COUNT(*) as count FROM [apar].[dbo].[hydrants] WHERE code = ?";
-$check_stmt  = sqlsrv_query($koneksi, $check_query, [$code]);
-$check_row   = sqlsrv_fetch_array($check_stmt, SQLSRV_FETCH_ASSOC);
+$check_query = "SELECT COUNT(*) as count FROM [PRD].[dbo].[SE_FIRE_PROTECTION_MASTER] WHERE asset_code = ?";
+$check_stmt = sqlsrv_query($koneksi, $check_query, [$code]);
+$check_row = sqlsrv_fetch_array($check_stmt, SQLSRV_FETCH_ASSOC);
 
 if ($check_row['count'] > 0) {
     echo json_encode(['success' => false, 'message' => 'Kode Hydrant sudah digunakan!']);
@@ -31,12 +31,12 @@ if ($check_row['count'] > 0) {
 }
 
 // Insert
-$query = "INSERT INTO [apar].[dbo].[hydrants]
-          (code, location, area, type, status, is_active, created_at, updated_at)
-          VALUES (?, ?, ?, ?, ?, 1, GETDATE(), GETDATE())";
+$query = "INSERT INTO [PRD].[dbo].[SE_FIRE_PROTECTION_MASTER]
+          (asset_code, location, area, model_type, status, asset_type, is_active, created_at, updated_at)
+          VALUES (?, ?, ?, ?, ?, 'HYDRANT', 1, GETDATE(), GETDATE())";
 
 $params = [$code, $location, $area, $type, $status];
-$stmt   = sqlsrv_query($koneksi, $query, $params);
+$stmt = sqlsrv_query($koneksi, $query, $params);
 
 if ($stmt === false) {
     $errors = sqlsrv_errors();

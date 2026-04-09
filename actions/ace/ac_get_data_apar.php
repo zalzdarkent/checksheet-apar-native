@@ -20,7 +20,7 @@ $params[] = $limit;
 $sql = "SELECT 
             id, asset_code as code, location, model_type as type, status, 
             expired_date, last_inspection_date as last_inspection, is_active
-        FROM [apar].[dbo].[SE_FIRE_PROTECTION_MASTER] m
+        FROM [PRD].[dbo].[SE_FIRE_PROTECTION_MASTER] m
         WHERE m.asset_type = 'APAR' AND m.area = 'Ace' $where_search
         ORDER BY m.is_active DESC, m.asset_code ASC
         OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";

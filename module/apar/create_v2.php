@@ -130,7 +130,7 @@ $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php",
                         <div class="card-body">
                             <div class="alert alert-warning mb-4">
                                 <i class="fas fa-exclamation-triangle me-2"></i>
-                                <strong>Penting:</strong> Harap lakukan pengecekan kondisi fisik APAR sebelum disimpan
+                                <strong>Penting:</strong> Harap lATIkan pengecekan kondisi fisik APAR sebelum disimpan
                                 ke sistem.
                             </div>
 
@@ -197,8 +197,7 @@ $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php",
                                                 <td>
                                                     <?php if ($item['req']): ?>
                                                         <input type="file" name="<?= $item['key'] ?>_foto"
-                                                            class="form-control form-control-sm" accept="image/*"
-                                                            required>
+                                                            class="form-control form-control-sm" accept="image/*" required>
                                                     <?php else: ?>
                                                         <div class="text-center text-muted small">-</div>
                                                     <?php endif; ?>

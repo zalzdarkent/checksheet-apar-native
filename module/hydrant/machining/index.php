@@ -6,7 +6,7 @@ $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "
 $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php", "", $_SERVER['PHP_SELF']);
 ?>
 
-<div class="page-inner">    
+<div class="page-inner">
     <style>
         .apar-card-container {
             display: grid;
@@ -302,9 +302,11 @@ $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php",
                 <ul class="dropdown-menu">
                     <li><a class="dropdown-item" href="#" id="print-qr-selected"><i class="fas fa-qrcode"></i> Print QR
                             Code</a></li>
-                    <li><a class="dropdown-item text-success" id="active-selected" href="#"><i class="fas fa-check-circle"></i>
+                    <li><a class="dropdown-item text-success" id="active-selected" href="#"><i
+                                class="fas fa-check-circle"></i>
                             Activate Selected</a></li>
-                    <li><a class="dropdown-item text-danger" id="inactive-selected" href="#"><i class="fas fa-power-off"></i>
+                    <li><a class="dropdown-item text-danger" id="inactive-selected" href="#"><i
+                                class="fas fa-power-off"></i>
                             Inactivate Selected</a></li>
                 </ul>
             </div>
@@ -328,26 +330,27 @@ $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php",
 
     <div id="hydrant-container" class="apar-card-container">
         <?php if (empty($hydrant_data)): ?>
-            <div id="no-data-msg" class="text-center w-100 py-5" style="grid-column: 1 / -1; color: #a0a0a0; font-size: 1.2rem;">Data tidak
+            <div id="no-data-msg" class="text-center w-100 py-5"
+                style="grid-column: 1 / -1; color: #a0a0a0; font-size: 1.2rem;">Data tidak
                 ditemukan</div>
         <?php else: ?>
             <?php foreach ($hydrant_data as $item): ?>
                 <?php $statusClass = ($item['status'] === 'OK' || $item['status'] === 'Good') ? 'status-ok' : 'status-abnormal'; ?>
-                <div class="hydrant-card apar-card <?php echo $item['is_active'] == 0 ? 'inactive' : ''; ?>" data-id="<?php echo $item['id']; ?>">
+                <div class="hydrant-card apar-card <?php echo $item['is_active'] == 0 ? 'inactive' : ''; ?>"
+                    data-id="<?php echo $item['id']; ?>">
                     <input type="checkbox" class="card-checkbox item-checkbox">
-                    <button class="status-toggle-btn <?php echo $item['is_active'] == 0 ? 'is-inactive' : ''; ?>" 
-                            data-id="<?php echo $item['id']; ?>" 
-                            data-status="<?php echo $item['is_active']; ?>"
-                            title="<?php echo $item['is_active'] == 0 ? 'Activate' : 'Inactivate'; ?>">
+                    <button class="status-toggle-btn <?php echo $item['is_active'] == 0 ? 'is-inactive' : ''; ?>"
+                        data-id="<?php echo $item['id']; ?>" data-status="<?php echo $item['is_active']; ?>"
+                        title="<?php echo $item['is_active'] == 0 ? 'Activate' : 'Inactivate'; ?>">
                         <i class="fas fa-power-off"></i>
                     </button>
 
                     <div class="apar-qr-placeholder">
-                        <?php 
-                            $qr_url = $base_url . "index.php?page=hydrant-detail&id=" . $item['id'];
+                        <?php
+                        $qr_url = $base_url . "index.php?page=hydrant-detail&id=" . $item['id'];
                         ?>
-                        <img src="actions/ac_generate_qrcode.php?data=<?php echo urlencode($qr_url); ?>"
-                            alt="QR Code" class="qr-img">
+                        <img src="actions/ac_generate_qrcode.php?data=<?php echo urlencode($qr_url); ?>" alt="QR Code"
+                            class="qr-img">
                     </div>
 
                     <div class="apar-info">
@@ -363,8 +366,10 @@ $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php",
                     </div>
 
                     <div class="card-footer-actions">
-                        <a href="?page=hydrant-detail&id=<?php echo $item['id']; ?>" class="btn btn-info btn-action" title="View Details"><i class="fas fa-eye"></i></a>
-                        <button class="btn btn-warning btn-action btn-print-qr" data-id="<?php echo $item['id']; ?>" title="Print QR"><i class="fas fa-print"></i></button>
+                        <a href="?page=hydrant-detail&id=<?php echo $item['id']; ?>" class="btn btn-info btn-action"
+                            title="View Details"><i class="fas fa-eye"></i></a>
+                        <button class="btn btn-warning btn-action btn-print-qr" data-id="<?php echo $item['id']; ?>"
+                            title="Print QR"><i class="fas fa-print"></i></button>
                     </div>
                 </div>
             <?php endforeach; ?>
@@ -455,12 +460,12 @@ $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php",
             const selectedIds = $('.item-checkbox:checked').map(function () {
                 return $(this).closest('.apar-card, .hydrant-card').data('id');
             }).get();
-            
+
             if (selectedIds.length === 0) {
                 alert('Pilih item terlebih dahulu');
                 return;
             }
-            
+
             window.open('print_qr.php?type=hydrant&ids=' + selectedIds.join(','), '_blank');
         });
 
@@ -556,7 +561,7 @@ $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php",
                 $.notify({
                     icon: 'fas fa-exclamation-triangle',
                     title: 'Gagal',
-                    message: 'Pilih data dengan status yang sama untuk melakukan aksi massal (jangan dicampur).',
+                    message: 'Pilih data dengan status yang sama untuk melATIkan aksi massal (jangan dicampur).',
                 }, {
                     type: 'danger',
                     placement: { from: "top", align: "right" },
@@ -617,10 +622,10 @@ $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php",
             });
         });
 
-        $('#search-input').on('input', function() {
+        $('#search-input').on('input', function () {
             clearTimeout(searchTimeout);
             searchQuery = $(this).val();
-            searchTimeout = setTimeout(function() {
+            searchTimeout = setTimeout(function () {
                 currentPage = 0; // Will be incremented to 1 in loadMore
                 hasMore = true;
                 $('#hydrant-container').empty();
@@ -727,7 +732,7 @@ $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php",
 
         // Back to Top Logic
         const backToTop = $('#back-to-top');
-        $(window).scroll(function() {
+        $(window).scroll(function () {
             if ($(window).scrollTop() > 300) {
                 backToTop.addClass('show');
             } else {
@@ -735,7 +740,7 @@ $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php",
             }
         });
 
-        backToTop.on('click', function() {
+        backToTop.on('click', function () {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         });
     });

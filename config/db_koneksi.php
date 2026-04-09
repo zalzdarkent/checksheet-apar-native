@@ -1,9 +1,9 @@
 <?php
 
 $hostname = gethostname();
-$serverName = "DESKTOP-1V8I9K6\SQLEXPRESS"; 
+$serverName = "DESKTOP-1V8I9K6\SQLEXPRESS";
 
-$database = "apar";
+$database = "PRD";
 $username = "sa";
 $password = "Saaccountalif123";
 
@@ -27,29 +27,29 @@ $last_check = file_exists($daily_check_file) ? file_get_contents($daily_check_fi
 
 if ($last_check !== $today) {
     // 1. Create audit trail entries for newly expired units
-    $insert_cases_sql = "INSERT INTO [apar].[dbo].[SE_FIRE_PROTECTION_LINES] 
+    $insert_cases_sql = "INSERT INTO [PRD].[dbo].[SE_FIRE_PROTECTION_LINES] 
                          (asset_id, finding_desc, repair_status, created_at)
                          SELECT id, 'Unit Expired (Auto-Status NG)', 'Open', GETDATE()
-                         FROM [apar].[dbo].[SE_FIRE_PROTECTION_MASTER]
+                         FROM [PRD].[dbo].[SE_FIRE_PROTECTION_MASTER]
                          WHERE expired_date <= CAST(GETDATE() AS DATE) 
                          AND status <> 'NG'
                          AND id NOT IN (
-                             SELECT asset_id FROM [apar].[dbo].[SE_FIRE_PROTECTION_LINES] 
+                             SELECT asset_id FROM [PRD].[dbo].[SE_FIRE_PROTECTION_LINES] 
                              WHERE finding_desc LIKE 'Unit Expired%' 
                              AND repair_status IN ('Open', 'On Progress')
                          )";
     sqlsrv_query($koneksi, $insert_cases_sql);
 
     // 2. Mark master unit status to NG
-    $update_expired_sql = "UPDATE [apar].[dbo].[SE_FIRE_PROTECTION_MASTER] 
+    $update_expired_sql = "UPDATE [PRD].[dbo].[SE_FIRE_PROTECTION_MASTER] 
                            SET status = 'NG' 
                            WHERE expired_date <= CAST(GETDATE() AS DATE) 
                            AND status <> 'NG'";
     sqlsrv_query($koneksi, $update_expired_sql);
-    
+
     if (!is_dir(__DIR__ . '/../storage')) {
         mkdir(__DIR__ . '/../storage', 0777, true);
     }
     file_put_contents($daily_check_file, $today);
-} 
+}
 ?>

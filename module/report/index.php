@@ -24,7 +24,7 @@ $hydrant_abnormal = 0;
 $sql_m = "SELECT 
             SUM(CASE WHEN asset_type = 'APAR' THEN 1 ELSE 0 END) as t_apar, 
             SUM(CASE WHEN asset_type = 'HYDRANT' THEN 1 ELSE 0 END) as t_hydrant 
-          FROM [apar].[dbo].[SE_FIRE_PROTECTION_MASTER] WHERE is_active = 1";
+          FROM [PRD].[dbo].[SE_FIRE_PROTECTION_MASTER] WHERE is_active = 1";
 $stmt_m = sqlsrv_query($koneksi, $sql_m);
 if ($stmt_m && $row_m = sqlsrv_fetch_array($stmt_m, SQLSRV_FETCH_ASSOC)) {
     $total_apar = $row_m['t_apar'] ?? 0;
@@ -39,16 +39,16 @@ $hydrant_items = ['body_hydrant_ok', 'selang_ok', 'couple_join_ok', 'nozzle_ok',
 $hydrant_ng_check = "AND (" . implode(" != 1 OR ", $hydrant_items) . " != 1)";
 
 // Get Abnormal Counts from unified TRANS
-$sql_ab_apar = "SELECT COUNT(*) as total FROM [apar].[dbo].[SE_FIRE_PROTECTION_TRANS] bi
-                INNER JOIN [apar].[dbo].[SE_FIRE_PROTECTION_MASTER] m ON bi.asset_id = m.id
+$sql_ab_apar = "SELECT COUNT(*) as total FROM [PRD].[dbo].[SE_FIRE_PROTECTION_TRANS] bi
+                INNER JOIN [PRD].[dbo].[SE_FIRE_PROTECTION_MASTER] m ON bi.asset_id = m.id
                 WHERE m.asset_type = 'APAR' $dateFilter $apar_ng_check";
 $stmt_ab_apar = sqlsrv_query($koneksi, $sql_ab_apar);
 if ($stmt_ab_apar && $row_a = sqlsrv_fetch_array($stmt_ab_apar, SQLSRV_FETCH_ASSOC)) {
     $apar_abnormal = $row_a['total'] ?? 0;
 }
 
-$sql_ab_hydrant = "SELECT COUNT(*) as total FROM [apar].[dbo].[SE_FIRE_PROTECTION_TRANS] bi
-                   INNER JOIN [apar].[dbo].[SE_FIRE_PROTECTION_MASTER] m ON bi.asset_id = m.id
+$sql_ab_hydrant = "SELECT COUNT(*) as total FROM [PRD].[dbo].[SE_FIRE_PROTECTION_TRANS] bi
+                   INNER JOIN [PRD].[dbo].[SE_FIRE_PROTECTION_MASTER] m ON bi.asset_id = m.id
                    WHERE m.asset_type = 'HYDRANT' $dateFilter $hydrant_ng_check";
 $stmt_ab_hydrant = sqlsrv_query($koneksi, $sql_ab_hydrant);
 if ($stmt_ab_hydrant && $row_h = sqlsrv_fetch_array($stmt_ab_hydrant, SQLSRV_FETCH_ASSOC)) {
@@ -70,16 +70,17 @@ function getInspections($type, $dateFilter)
                     m.area,
                     m.location,
                     bi.*
-                  FROM [apar].[dbo].[SE_FIRE_PROTECTION_TRANS] bi
-                  INNER JOIN [apar].[dbo].[SE_FIRE_PROTECTION_MASTER] m ON bi.asset_id = m.id
+                  FROM [PRD].[dbo].[SE_FIRE_PROTECTION_TRANS] bi
+                  INNER JOIN [PRD].[dbo].[SE_FIRE_PROTECTION_MASTER] m ON bi.asset_id = m.id
                   WHERE m.asset_type = '$asset_type' $dateFilter
                   ORDER BY bi.inspection_date DESC";
 
         $stmt = sqlsrv_query($koneksi, $query);
-        if ($stmt === false) return array();
+        if ($stmt === false)
+            return array();
 
         while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
-            $check_items = ($type === 'apar') ? 
+            $check_items = ($type === 'apar') ?
                 ['exp_date_ok', 'pressure_ok', 'weight_co2_ok', 'tube_ok', 'hose_ok', 'bracket_ok', 'wi_ok', 'form_kejadian_ok', 'sign_box_ok', 'sign_triangle_ok', 'marking_tiger_ok', 'marking_beam_ok', 'sr_apar_ok', 'kocok_apar_ok', 'label_ok'] :
                 ['body_hydrant_ok', 'selang_ok', 'couple_join_ok', 'nozzle_ok', 'check_sheet_ok', 'valve_kran_ok', 'lampu_ok', 'cover_lampu_ok', 'box_display_ok', 'konsul_hydrant_ok', 'jr_ok', 'marking_ok', 'label_ok'];
 
@@ -105,7 +106,8 @@ function getInspections($type, $dateFilter)
                 'status' => $all_ok ? 'OK' : 'Abnormal'
             );
         }
-    } catch (Exception $e) { }
+    } catch (Exception $e) {
+    }
     return $data;
 }
 
@@ -147,11 +149,25 @@ $hydrantData = getInspections('hydrant', $dateFilter);
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
         }
 
-        .border-left-primary { border-left-color: #007bff !important; }
-        .border-left-warning { border-left-color: #ffc107 !important; }
-        .border-left-success { border-left-color: #28a745 !important; }
-        .border-left-danger { border-left-color: #dc3545 !important; }
-        .border-left-info { border-left-color: #17a2b8 !important; }
+        .border-left-primary {
+            border-left-color: #007bff !important;
+        }
+
+        .border-left-warning {
+            border-left-color: #ffc107 !important;
+        }
+
+        .border-left-success {
+            border-left-color: #28a745 !important;
+        }
+
+        .border-left-danger {
+            border-left-color: #dc3545 !important;
+        }
+
+        .border-left-info {
+            border-left-color: #17a2b8 !important;
+        }
 
         .status-card-custom h3 {
             font-size: 2.2rem;
@@ -184,11 +200,26 @@ $hydrantData = getInspections('hydrant', $dateFilter);
             transition: all 0.3s;
         }
 
-        .export-btn-excel { background: #28a745; color: white; }
-        .export-btn-pdf { background: #dc3545; color: white; }
+        .export-btn-excel {
+            background: #28a745;
+            color: white;
+        }
 
-        .table-slim { font-size: 0.85rem; margin-bottom: 0; }
-        .table-slim td, .table-slim th { padding: 6px 10px; vertical-align: middle; }
+        .export-btn-pdf {
+            background: #dc3545;
+            color: white;
+        }
+
+        .table-slim {
+            font-size: 0.85rem;
+            margin-bottom: 0;
+        }
+
+        .table-slim td,
+        .table-slim th {
+            padding: 6px 10px;
+            vertical-align: middle;
+        }
 
         .status-badge {
             padding: 4px 8px;
@@ -200,8 +231,17 @@ $hydrantData = getInspections('hydrant', $dateFilter);
             min-width: 70px;
         }
 
-        .status-ok { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-        .status-abnormal { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .status-ok {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status-abnormal {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
     </style>
 
     <div class="filter-bar">
@@ -265,19 +305,25 @@ $hydrantData = getInspections('hydrant', $dateFilter);
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h4 class="card-title mb-0">Recent Inspections (Last 5)</h4>
                     <div class="export-button-group">
-                        <button class="export-btn export-btn-excel btn-apar-excel"><i class="fas fa-file-excel"></i> APAR Excel</button>
-                        <button class="export-btn export-btn-pdf btn-apar-pdf"><i class="fas fa-file-pdf"></i> APAR PDF</button>
-                        <button class="export-btn export-btn-excel btn-hydrant-excel"><i class="fas fa-file-excel"></i> Hydrant Excel</button>
-                        <button class="export-btn export-btn-pdf btn-hydrant-pdf"><i class="fas fa-file-pdf"></i> Hydrant PDF</button>
+                        <button class="export-btn export-btn-excel btn-apar-excel"><i class="fas fa-file-excel"></i>
+                            APAR Excel</button>
+                        <button class="export-btn export-btn-pdf btn-apar-pdf"><i class="fas fa-file-pdf"></i> APAR
+                            PDF</button>
+                        <button class="export-btn export-btn-excel btn-hydrant-excel"><i class="fas fa-file-excel"></i>
+                            Hydrant Excel</button>
+                        <button class="export-btn export-btn-pdf btn-hydrant-pdf"><i class="fas fa-file-pdf"></i>
+                            Hydrant PDF</button>
                     </div>
                 </div>
                 <div class="card-body">
                     <ul class="nav nav-tabs" role="tablist">
                         <li class="nav-item">
-                            <button class="nav-link active" id="apar-tab" data-bs-toggle="tab" data-bs-target="#apar-content" type="button" role="tab">APAR Inspections</button>
+                            <button class="nav-link active" id="apar-tab" data-bs-toggle="tab"
+                                data-bs-target="#apar-content" type="button" role="tab">APAR Inspections</button>
                         </li>
                         <li class="nav-item">
-                            <button class="nav-link" id="hydrant-tab" data-bs-toggle="tab" data-bs-target="#hydrant-content" type="button" role="tab">Hydrant Inspections</button>
+                            <button class="nav-link" id="hydrant-tab" data-bs-toggle="tab"
+                                data-bs-target="#hydrant-content" type="button" role="tab">Hydrant Inspections</button>
                         </li>
                     </ul>
 
@@ -294,15 +340,20 @@ $hydrantData = getInspections('hydrant', $dateFilter);
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <?php if (!empty($aparData)): foreach ($aparData as $row): ?>
+                                        <?php if (!empty($aparData)):
+                                            foreach ($aparData as $row): ?>
+                                                <tr>
+                                                    <td><?php echo $row['inspection_date']; ?></td>
+                                                    <td><?php echo $row['code']; ?></td>
+                                                    <td><?php echo $row['area']; ?></td>
+                                                    <td><span
+                                                            class="status-badge <?php echo $row['status'] === 'OK' ? 'status-ok' : 'status-abnormal'; ?>"><?php echo $row['status']; ?></span>
+                                                    </td>
+                                                </tr>
+                                            <?php endforeach; else: ?>
                                             <tr>
-                                                <td><?php echo $row['inspection_date']; ?></td>
-                                                <td><?php echo $row['code']; ?></td>
-                                                <td><?php echo $row['area']; ?></td>
-                                                <td><span class="status-badge <?php echo $row['status'] === 'OK' ? 'status-ok' : 'status-abnormal'; ?>"><?php echo $row['status']; ?></span></td>
+                                                <td colspan="4" class="text-center text-muted">Tidak ada data.</td>
                                             </tr>
-                                        <?php endforeach; else: ?>
-                                            <tr><td colspan="4" class="text-center text-muted">Tidak ada data.</td></tr>
                                         <?php endif; ?>
                                     </tbody>
                                 </table>
@@ -321,15 +372,20 @@ $hydrantData = getInspections('hydrant', $dateFilter);
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <?php if (!empty($hydrantData)): foreach ($hydrantData as $row): ?>
+                                        <?php if (!empty($hydrantData)):
+                                            foreach ($hydrantData as $row): ?>
+                                                <tr>
+                                                    <td><?php echo $row['inspection_date']; ?></td>
+                                                    <td><?php echo $row['code']; ?></td>
+                                                    <td><?php echo $row['area']; ?></td>
+                                                    <td><span
+                                                            class="status-badge <?php echo $row['status'] === 'OK' ? 'status-ok' : 'status-abnormal'; ?>"><?php echo $row['status']; ?></span>
+                                                    </td>
+                                                </tr>
+                                            <?php endforeach; else: ?>
                                             <tr>
-                                                <td><?php echo $row['inspection_date']; ?></td>
-                                                <td><?php echo $row['code']; ?></td>
-                                                <td><?php echo $row['area']; ?></td>
-                                                <td><span class="status-badge <?php echo $row['status'] === 'OK' ? 'status-ok' : 'status-abnormal'; ?>"><?php echo $row['status']; ?></span></td>
+                                                <td colspan="4" class="text-center text-muted">Tidak ada data.</td>
                                             </tr>
-                                        <?php endforeach; else: ?>
-                                            <tr><td colspan="4" class="text-center text-muted">Tidak ada data.</td></tr>
                                         <?php endif; ?>
                                     </tbody>
                                 </table>

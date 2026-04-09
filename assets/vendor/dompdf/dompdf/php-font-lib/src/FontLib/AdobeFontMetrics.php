@@ -15,7 +15,8 @@ use FontLib\TrueType\File;
  *
  * @package php-font-lib
  */
-class AdobeFontMetrics {
+class AdobeFontMetrics
+{
   private $f;
 
   /**
@@ -23,11 +24,13 @@ class AdobeFontMetrics {
    */
   private $font;
 
-  function __construct(File $font) {
+  function __construct(File $font)
+  {
     $this->font = $font;
   }
 
-  function write($file, $encoding = null) {
+  function write($file, $encoding = null)
+  {
     $map_data = array();
 
     if ($encoding) {
@@ -37,7 +40,7 @@ class AdobeFontMetrics {
         throw new \Exception("Unknown encoding ($encoding)");
       }
 
-      $map      = new EncodingMap($map_file);
+      $map = new EncodingMap($map_file);
       $map_data = $map->parse();
     }
 
@@ -74,8 +77,7 @@ class AdobeFontMetrics {
 
     if (isset($hhea["ascent"])) {
       $this->addPair("FontHeightOffset", $font->normalizeFUnit($hhea["lineGap"]));
-    }
-    else {
+    } else {
       $this->addPair("FontHeightOffset", $font->normalizeFUnit($os2["typoLineGap"]));
     }
 
@@ -104,8 +106,7 @@ class AdobeFontMetrics {
       $this->addPair("Ascender", $font->normalizeFUnit($lowerD->yMax));
     } elseif (isset($hhea["ascent"])) {
       $this->addPair("Ascender", $font->normalizeFUnit($hhea["ascent"]));
-    }
-    else {
+    } else {
       $this->addPair("Ascender", $font->normalizeFUnit($os2["typoAscender"]));
     }
 
@@ -116,9 +117,8 @@ class AdobeFontMetrics {
       $this->addPair("Descender", $font->normalizeFUnit($lowerP->yMin));
     } elseif (isset($hhea["descent"])) {
       $this->addPair("Descender", $font->normalizeFUnit($hhea["descent"]));
-    }
-    else {
-      $this->addPair("Descender", -abs($font->normalizeFUnit($os2["typoDescender"])));
+    } else {
+      $this->addPair("Descender", -abs($font->normalizeFUnit($os2["tyPRDescender"])));
     }
 
     $head = $font->getData("head");
@@ -130,7 +130,7 @@ class AdobeFontMetrics {
     ));
 
     if ($glyphIndexArray) {
-      $hmtx  = $font->getData("hmtx");
+      $hmtx = $font->getData("hmtx");
       $names = $font->getData("post", "names");
 
       $this->startSection("CharMetrics", count($hmtx));
@@ -150,23 +150,22 @@ class AdobeFontMetrics {
           }
 
           $this->addMetric(array(
-            "C"  => ($code > 255 ? -1 : $code),
+            "C" => ($code > 255 ? -1 : $code),
             "WX" => $font->normalizeFUnit($hmtx[$g][0]),
-            "N"  => $name,
+            "N" => $name,
           ));
         }
-      }
-      else {
+      } else {
         foreach ($glyphIndexArray as $c => $g) {
           if (!isset($hmtx[$g])) {
             $hmtx[$g] = $hmtx[0];
           }
 
           $this->addMetric(array(
-            "U"  => $c,
+            "U" => $c,
             "WX" => $font->normalizeFUnit($hmtx[$g][0]),
-            "N"  => (isset($names[$g]) ? $names[$g] : sprintf("uni%04x", $c)),
-            "G"  => $g,
+            "N" => (isset($names[$g]) ? $names[$g] : sprintf("uni%04x", $c)),
+            "G" => $g,
           ));
         }
       }
@@ -222,19 +221,23 @@ class AdobeFontMetrics {
     $this->endSection("FontMetrics");
   }
 
-  function addLine($line) {
+  function addLine($line)
+  {
     fwrite($this->f, "$line\n");
   }
 
-  function addPair($key, $value) {
+  function addPair($key, $value)
+  {
     $this->addLine("$key $value");
   }
 
-  function addArray($key, $array) {
+  function addArray($key, $array)
+  {
     $this->addLine("$key " . implode(" ", $array));
   }
 
-  function addMetric($data) {
+  function addMetric($data)
+  {
     $array = array();
     foreach ($data as $key => $value) {
       $array[] = "$key $value";
@@ -242,11 +245,13 @@ class AdobeFontMetrics {
     $this->addLine(implode(" ; ", $array));
   }
 
-  function startSection($name, $value = "") {
+  function startSection($name, $value = "")
+  {
     $this->addLine("Start$name $value");
   }
 
-  function endSection($name) {
+  function endSection($name)
+  {
     $this->addLine("End$name");
   }
 }

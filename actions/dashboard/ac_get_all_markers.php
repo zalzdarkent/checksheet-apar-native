@@ -15,7 +15,7 @@ $sql = "
         m.y_coordinate,
         LOWER(m.asset_type) as device_type,
         (SELECT TOP 1 finding_desc 
-         FROM [apar].[dbo].[SE_FIRE_PROTECTION_LINES] 
+         FROM [PRD].[dbo].[SE_FIRE_PROTECTION_LINES] 
          WHERE asset_id = m.id AND repair_status <> 'Verified' 
          ORDER BY created_at DESC) as issue,
         CASE 
@@ -23,7 +23,7 @@ $sql = "
             WHEN m.status = 'On Progress' THEN 'Proses'
             ELSE 'Abnormal'
         END as status_badge
-    FROM [apar].[dbo].[SE_FIRE_PROTECTION_MASTER] m
+    FROM [PRD].[dbo].[SE_FIRE_PROTECTION_MASTER] m
     WHERE m.x_coordinate IS NOT NULL AND m.y_coordinate IS NOT NULL AND m.is_active = 1
 ";
 

@@ -7,7 +7,7 @@ $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "
 $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php", "", $_SERVER['PHP_SELF']);
 ?>
 
-<div class="page-inner">    
+<div class="page-inner">
     <style>
         .apar-card-container {
             display: grid;
@@ -302,11 +302,16 @@ $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php",
         }
 
         @keyframes blink-red {
-            0%, 49%, 100% {
+
+            0%,
+            49%,
+            100% {
                 color: #e74c3c;
                 text-shadow: 0 0 10px rgba(231, 76, 60, 0.8);
             }
-            50%, 99% {
+
+            50%,
+            99% {
                 color: #fff;
                 text-shadow: 0 0 5px rgba(231, 76, 60, 0.4);
             }
@@ -317,9 +322,12 @@ $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php",
         }
 
         @keyframes pulse-red {
-            0%, 100% {
+
+            0%,
+            100% {
                 box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7);
             }
+
             50% {
                 box-shadow: 0 0 0 8px rgba(231, 76, 60, 0);
             }
@@ -344,10 +352,13 @@ $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php",
         }
 
         @keyframes pulse-badge {
-            0%, 100% {
+
+            0%,
+            100% {
                 opacity: 1;
                 transform: scale(1);
             }
+
             50% {
                 opacity: 0.8;
                 transform: scale(1.05);
@@ -367,9 +378,11 @@ $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php",
                 <ul class="dropdown-menu">
                     <li><a class="dropdown-item" href="#" id="print-qr-selected"><i class="fas fa-qrcode"></i> Print QR
                             Code</a></li>
-                    <li><a class="dropdown-item text-success" href="#" id="active-selected"><i class="fas fa-check-circle"></i>
+                    <li><a class="dropdown-item text-success" href="#" id="active-selected"><i
+                                class="fas fa-check-circle"></i>
                             Activate Selected</a></li>
-                    <li><a class="dropdown-item text-danger" href="#" id="inactive-selected"><i class="fas fa-power-off"></i>
+                    <li><a class="dropdown-item text-danger" href="#" id="inactive-selected"><i
+                                class="fas fa-power-off"></i>
                             Inactivate Selected</a></li>
                 </ul>
             </div>
@@ -393,18 +406,20 @@ $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php",
 
     <div id="apar-container" class="apar-card-container">
         <?php if (empty($apar_data)): ?>
-            <div id="no-data-msg" class="text-center w-100 py-5" style="grid-column: 1 / -1; color: #a0a0a0; font-size: 1.2rem;">Data tidak
+            <div id="no-data-msg" class="text-center w-100 py-5"
+                style="grid-column: 1 / -1; color: #a0a0a0; font-size: 1.2rem;">Data tidak
                 ditemukan</div>
         <?php else: ?>
             <?php foreach ($apar_data as $item): ?>
                 <?php $statusClass = ($item['status'] === 'OK' || $item['status'] === 'Good') ? 'status-ok' : 'status-abnormal'; ?>
                 <?php $expiredClass = (isset($item['is_expired']) && $item['is_expired']) ? 'expired' : ''; ?>
-                <div class="apar-card <?php echo $item['is_active'] == 0 ? 'inactive' : ''; ?> <?php echo $expiredClass; ?>" data-id="<?php echo $item['id']; ?>" data-expired="<?php echo (isset($item['is_expired']) && $item['is_expired']) ? '1' : '0'; ?>">
+                <div class="apar-card <?php echo $item['is_active'] == 0 ? 'inactive' : ''; ?> <?php echo $expiredClass; ?>"
+                    data-id="<?php echo $item['id']; ?>"
+                    data-expired="<?php echo (isset($item['is_expired']) && $item['is_expired']) ? '1' : '0'; ?>">
                     <input type="checkbox" class="card-checkbox item-checkbox">
-                    <button class="status-toggle-btn <?php echo $item['is_active'] == 0 ? 'is-inactive' : ''; ?>" 
-                            data-id="<?php echo $item['id']; ?>" 
-                            data-status="<?php echo $item['is_active']; ?>"
-                            title="<?php echo $item['is_active'] == 0 ? 'Activate' : 'Inactivate'; ?>">
+                    <button class="status-toggle-btn <?php echo $item['is_active'] == 0 ? 'is-inactive' : ''; ?>"
+                        data-id="<?php echo $item['id']; ?>" data-status="<?php echo $item['is_active']; ?>"
+                        title="<?php echo $item['is_active'] == 0 ? 'Activate' : 'Inactivate'; ?>">
                         <i class="fas fa-power-off"></i>
                     </button>
                     <?php if (isset($item['is_expired']) && $item['is_expired']): ?>
@@ -415,11 +430,11 @@ $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php",
                     <?php endif; ?>
 
                     <div class="apar-qr-placeholder">
-                        <?php 
-                            $qr_url = $base_url . "index.php?page=apar-detail&id=" . $item['id'];
+                        <?php
+                        $qr_url = $base_url . "index.php?page=apar-detail&id=" . $item['id'];
                         ?>
-                        <img src="actions/ac_generate_qrcode.php?data=<?php echo urlencode($qr_url); ?>"
-                            alt="QR Code" class="qr-img">
+                        <img src="actions/ac_generate_qrcode.php?data=<?php echo urlencode($qr_url); ?>" alt="QR Code"
+                            class="qr-img">
                     </div>
 
                     <div class="apar-info">
@@ -435,8 +450,10 @@ $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php",
                     </div>
 
                     <div class="card-footer-actions">
-                        <a href="?page=apar-detail&id=<?php echo $item['id']; ?>" class="btn btn-info btn-action" title="View Details"><i class="fas fa-eye"></i></a>
-                        <button class="btn btn-warning btn-action btn-print-qr" data-id="<?php echo $item['id']; ?>" title="Print QR"><i class="fas fa-print"></i></button>
+                        <a href="?page=apar-detail&id=<?php echo $item['id']; ?>" class="btn btn-info btn-action"
+                            title="View Details"><i class="fas fa-eye"></i></a>
+                        <button class="btn btn-warning btn-action btn-print-qr" data-id="<?php echo $item['id']; ?>"
+                            title="Print QR"><i class="fas fa-print"></i></button>
                     </div>
                 </div>
             <?php endforeach; ?>
@@ -527,12 +544,12 @@ $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php",
             const selectedIds = $('.item-checkbox:checked').map(function () {
                 return $(this).closest('.apar-card').data('id');
             }).get();
-            
+
             if (selectedIds.length === 0) {
                 alert('Pilih item terlebih dahulu');
                 return;
             }
-            
+
             window.open('print_qr.php?type=apar&ids=' + selectedIds.join(','), '_blank');
         });
 
@@ -628,7 +645,7 @@ $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php",
                 $.notify({
                     icon: 'fas fa-exclamation-triangle',
                     title: 'Gagal',
-                    message: 'Pilih data dengan status yang sama untuk melakukan aksi massal (jangan dicampur).',
+                    message: 'Pilih data dengan status yang sama untuk melATIkan aksi massal (jangan dicampur).',
                 }, {
                     type: 'danger',
                     placement: { from: "top", align: "right" },
@@ -689,10 +706,10 @@ $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php",
             });
         });
 
-        $('#search-input').on('input', function() {
+        $('#search-input').on('input', function () {
             clearTimeout(searchTimeout);
             searchQuery = $(this).val();
-            searchTimeout = setTimeout(function() {
+            searchTimeout = setTimeout(function () {
                 currentPage = 0; // Will be incremented to 1 in loadMore
                 hasMore = true;
                 $('#apar-container').empty();
@@ -801,7 +818,7 @@ $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php",
 
         // Back to Top Logic
         const backToTop = $('#back-to-top');
-        $(window).scroll(function() {
+        $(window).scroll(function () {
             if ($(window).scrollTop() > 300) {
                 backToTop.addClass('show');
             } else {
@@ -809,7 +826,7 @@ $base_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . str_replace("index.php",
             }
         });
 
-        backToTop.on('click', function() {
+        backToTop.on('click', function () {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         });
     });

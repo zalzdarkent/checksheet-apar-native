@@ -1,8 +1,8 @@
 <?php
 include(__DIR__ . '/../../config/db_koneksi.php');
 
-$limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 12;
-$page = isset($_GET['p']) ? (int)$_GET['p'] : 1;
+$limit = isset($_GET['limit']) ? (int) $_GET['limit'] : 12;
+$page = isset($_GET['p']) ? (int) $_GET['p'] : 1;
 $offset = ($page - 1) * $limit;
 
 $search = isset($_GET['q']) ? $_GET['q'] : '';
@@ -12,9 +12,9 @@ $params = [];
 
 if ($search !== "") {
     $where_search = " AND (
-        a.code LIKE ? OR 
+        a.asset_code LIKE ? OR 
         a.location LIKE ? OR 
-        a.type LIKE ? OR 
+        a.model_type LIKE ? OR 
         CAST(a.last_inspection_date AS VARCHAR) LIKE ?
     )";
     $search_param = "%$search%";
@@ -26,15 +26,15 @@ $params[] = $limit;
 
 $sql = "SELECT 
             id,
-            code,
+            asset_code as code,
             location,
-            type,
+            model_type as type,
             status,
             last_inspection_date as last_inspection,
             is_active
-        FROM [apar].[dbo].[hydrants] a
-        WHERE a.area = 'Ace' $where_search
-        ORDER BY a.is_active DESC, a.code ASC
+        FROM [PRD].[dbo].[SE_FIRE_PROTECTION_MASTER] a
+        WHERE a.area = 'Ace' AND a.asset_type = 'HYDRANT' $where_search
+        ORDER BY a.is_active DESC, a.asset_code ASC
         OFFSET ? ROWS
         FETCH NEXT ? ROWS ONLY";
 
