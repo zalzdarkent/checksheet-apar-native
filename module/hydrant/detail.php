@@ -212,7 +212,7 @@ $statusClass = ($hydrant['status'] === 'OK' || $hydrant['status'] === 'Good') ? 
         </div>
     </div>
 
-    <div class="section-title">Riwayat Pemeriksaan</div>
+    <div class="section-title">Riwayat Pengecekan Rutin (Bimonthly)</div>
     <?php if (empty($hydrant['history'])): ?>
         <div class="empty-state">Belum ada data pemeriksaan.</div>
     <?php else: ?>
@@ -223,6 +223,7 @@ $statusClass = ($hydrant['status'] === 'OK' || $hydrant['status'] === 'Good') ? 
                     <th>Oleh</th>
                     <th>Status</th>
                     <th>Catatan</th>
+                    <th>Aksi</th>
                 </tr>
             </thead>
             <tbody>
@@ -232,19 +233,24 @@ $statusClass = ($hydrant['status'] === 'OK' || $hydrant['status'] === 'Good') ? 
                         <td><?php echo $h['inspector_name'] ?: 'Unknown'; ?></td>
                         <td>
                             <?php if (isset($h['insp_status']) && $h['insp_status'] === 'NG'): ?>
-                                <span class="badge bg-danger">✗ NG</span>
+                                <span class="badge bg-danger">✗ NG</span><br>
+                                <small class="text-danger fw-bold">(<?php echo htmlspecialchars($h['ng_text']); ?>)</small>
                             <?php else: ?>
                                 <span class="badge bg-success">✓ OK</span>
                             <?php endif; ?>
                         </td>
                         <td><?php echo $h['notes'] ?: '-'; ?></td>
+                        <td>
+                            <button class='btn btn-sm btn-info text-white btn-view-history' data-info='<?php echo htmlspecialchars(json_encode($h['full_items']), ENT_QUOTES, 'UTF-8'); ?>'><i class='fas fa-eye'></i> Detail</button>
+                        </td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>
         </table>
     <?php endif; ?>
 
-    <div class="section-title">Abnormal Case</div>
+
+    <div class="section-title">Riwayat Kerusakan & Perbaikan (Abnormal History)</div>
     <?php if (empty($hydrant['cases'])): ?>
         <div class="empty-state">Belum ada abnormal case.</div>
     <?php else: ?>
@@ -394,5 +400,58 @@ $statusClass = ($hydrant['status'] === 'OK' || $hydrant['status'] === 'Good') ? 
                 }
             });
         }
+
+        // Modal Trigger for view history
+        $(document).on('click', '.btn-view-history', function() {
+            var items = $(this).data('info');
+            var container = $('#history_items_container');
+            container.empty();
+            
+            if (!items || items.length === 0) {
+                container.append('<div class="col-12 text-center text-muted">Tidak ada rincian data item.</div>');
+            } else {
+                items.forEach(function(item) {
+                    var isOk = (item.ok === 1 || item.ok === '1' || item.ok === true || item.ok === 'true');
+                    var statusHtml = isOk ? '<strong class="d-block text-success">✓ OK</strong>' : '<strong class="d-block text-danger">✗ NG</strong>';
+                    
+                    var photoHtml = (item.photo && item.photo.trim() !== '') ? '<img src="storage/inspections/' + item.photo + '" class="img-fluid rounded border mt-2" style="max-height:120px; object-fit:cover;">' : '<div class="text-muted small mt-2 fst-italic">Tanpa foto</div>';
+                    
+                    var ketHtml = item.keterangan ? '<div class="small mt-1 text-secondary">Ket: ' + item.keterangan + '</div>' : '';
+
+                    container.append(`
+                        <div class="col-md-6 col-lg-4">
+                            <div class="border p-2 rounded bg-light items-box h-100">
+                                <span class="d-block text-muted small fw-bold mb-1">` + item.label + `</span>
+                                ` + statusHtml + `
+                                ` + ketHtml + `
+                                ` + photoHtml + `
+                            </div>
+                        </div>
+                    `);
+                });
+            }
+            var modal = new bootstrap.Modal(document.getElementById('historyDetailModal'));
+            modal.show();
+        });
     });
 </script>
+
+<!-- Modal View Inspection History Data -->
+<div class="modal fade" id="historyDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">Rincian Hasil Inspeksi</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3" id="history_items_container">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>

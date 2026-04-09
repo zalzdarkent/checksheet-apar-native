@@ -132,6 +132,12 @@ $grupHydrantAktif = cekGrupAktif($halamanSekarang, 'hydrant-');
                         <p>Report</p>
                     </a>
                 </li>
+                <li class="nav-item <?= cekMenuAktif($halamanSekarang, 'all-history') ?>">
+                    <a href="index.php?page=all-history">
+                        <i class="fas fa-history"></i>
+                        <p>Advanced History</p>
+                    </a>
+                </li>
                 <li class="nav-item <?= cekMenuAktif($halamanSekarang, 'user-management') ?>">
                     <a href="index.php?page=user-management">
                         <i class="fas fa-users"></i>

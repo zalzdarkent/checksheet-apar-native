@@ -78,7 +78,8 @@ include("components/fragments/head.php");
                     'edit-user' => 'module/user/edit.php',
                     'apar-create' => 'module/apar/create_v2.php',
                     'hydrant-create' => 'module/hydrant/create_v2.php',
-                    'report' => 'module/report/index.php'
+                    'report' => 'module/report/index.php',
+                    'all-history' => 'module/report/all_history.php'
                 ];
 
                 // Extract area dan type dari route (misal: 'apar-ace' => type='apar', area='Ace')

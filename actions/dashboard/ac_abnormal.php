@@ -281,26 +281,8 @@ if ($action === 'verify_case') {
         $updMasterSql = "UPDATE $master_table SET status = 'OK' WHERE id = ?";
         $updMasterStmt = sqlsrv_query($koneksi, $updMasterSql, [$device_id]);
         
-        // 3. Sync original records from 0 to 1
+        // 3. (Removed Sync to keep original history as NG)
         $updInspStmt = true;
-        if ($inspection_id) {
-            $inspection_table = ($type === 'apar') ? '[apar].[dbo].[bimonthly_apar_inspections]' : '[apar].[dbo].[bimonthly_hydrant_inspections]';
-            $mapping = ($type === 'apar') ? $apar_mapping : $hydrant_mapping;
-            $items = array_map('trim', explode(',', $abnormal_items_text));
-            $update_cols = [];
-            
-            foreach ($items as $item_label) {
-                if (isset($mapping[$item_label])) {
-                    $col = $mapping[$item_label] . '_ok';
-                    $update_cols[] = "$col = 1";
-                }
-            }
-            
-            if (!empty($update_cols)) {
-                $updInspSql = "UPDATE $inspection_table SET " . implode(', ', $update_cols) . " WHERE id = ?";
-                $updInspStmt = sqlsrv_query($koneksi, $updInspSql, [$inspection_id]);
-            }
-        }
         
         if ($stmt === false || $updMasterStmt === false || $updInspStmt === false) {
             sqlsrv_rollback($koneksi);

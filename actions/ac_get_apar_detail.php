@@ -35,7 +35,15 @@ if ($id <= 0) {
         $stmt_history = sqlsrv_query($koneksi, $sql_history, [$id]);
         $history = [];
         
-        $items = ['exp_date', 'pressure', 'weight_co2', 'tube', 'hose', 'bracket', 'wi', 'form_kejadian', 'sign_box', 'sign_triangle', 'marking_tiger', 'marking_beam', 'sr_apar', 'kocok_apar', 'label'];
+        $items = [
+            'exp_date' => 'Expired Date', 'pressure' => 'Pressure', 
+            'weight_co2' => 'Weight CO2', 'tube' => 'Tube', 
+            'hose' => 'Hose', 'bracket' => 'Bracket', 'wi' => 'WI', 
+            'form_kejadian' => 'Form Kejadian', 'sign_box' => 'Sign Kotak', 
+            'sign_triangle' => 'Sign Segitiga', 'marking_tiger' => 'Marking Tiger', 
+            'marking_beam' => 'Marking Tiang', 'sr_apar' => 'SR Apar', 
+            'kocok_apar' => 'Kocok Apar', 'label' => 'Label'
+        ];
         
         if ($stmt_history !== false) {
             while ($row = sqlsrv_fetch_array($stmt_history, SQLSRV_FETCH_ASSOC)) {
@@ -46,13 +54,25 @@ if ($id <= 0) {
                 }
                 
                 $is_ng = false;
-                foreach ($items as $item) {
-                     if (isset($row[$item . '_ok']) && $row[$item . '_ok'] === 0) {
+                $ng_details = [];
+                $ng_items_list = [];
+                foreach ($items as $item_key => $item_label) {
+                     if (isset($row[$item_key . '_ok']) && $row[$item_key . '_ok'] === 0) {
                          $is_ng = true;
-                         break;
+                         $ng_details[] = $item_label;
                      }
+                     // Attach all item info for the modal later
+                     $ng_items_list[] = [
+                         'key' => $item_key,
+                         'label' => $item_label,
+                         'ok' => isset($row[$item_key . '_ok']) ? $row[$item_key . '_ok'] : 1,
+                         'photo' => isset($row[$item_key . '_foto']) ? $row[$item_key . '_foto'] : null,
+                         'keterangan' => isset($row[$item_key . '_keterangan']) ? $row[$item_key . '_keterangan'] : null
+                     ];
                 }
                 $row['insp_status'] = $is_ng ? 'NG' : 'OK';
+                $row['ng_text'] = implode(', ', $ng_details);
+                $row['full_items'] = $ng_items_list;
 
                 $history[] = $row;
             }
