@@ -180,10 +180,10 @@ $statusClass = ($hydrant['status'] === 'OK' || $hydrant['status'] === 'Good') ? 
         <a href="?page=hydrant-inspect&id=<?php echo $hydrant['id']; ?>" class="btn btn-inspeksi">
             <i class="fas fa-clipboard-check"></i> Mulai Inspeksi
         </a>
-        <label for="qr-upload-input" class="btn btn-inspeksi bg-warning text-dark border-0 m-0 mb-4" id="btn-scan-qr"
+        <button type="button" class="btn btn-inspeksi bg-warning text-dark border-0 m-0 mb-4" id="btn-scan-qr"
             style="cursor:pointer; display:inline-block; margin-bottom: 25px !important;">
             <i class="fas fa-qrcode"></i> Scan QR
-        </label>
+        </button>
         <input type="file" id="qr-upload-input" accept="image/*" capture="environment" style="display: none;">
 
         <div class="d-block">
@@ -211,6 +211,59 @@ $statusClass = ($hydrant['status'] === 'OK' || $hydrant['status'] === 'Good') ? 
             </div>
         </div>
     </div>
+
+    <!-- Scanner Modal -->
+    <div class="modal fade" id="scannerModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-dark text-white">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold"><i class="fas fa-camera me-2"></i>Scanner Live</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center p-4">
+                    <div id="scanner-container" class="position-relative overflow-hidden rounded bg-black" style="width: 100%; aspect-ratio: 1/1;">
+                        <video id="scanner-video" autoplay muted playsinline style="width: 100%; height: 100%; object-fit: cover;"></video>
+                        <div class="scanner-overlay"></div>
+                    </div>
+                    <p class="mt-3 mb-0 small opacity-75">Arahkan kamera ke QR Code unit.</p>
+                </div>
+                <div class="modal-footer border-0 pt-0 justify-content-center">
+                    <button type="button" class="btn btn-sm btn-outline-light" onclick="$('#qr-upload-input').click()">
+                        <i class="fas fa-image me-1"></i> Upload dari Galeri
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .scanner-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 70%;
+            height: 70%;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.5);
+            border-radius: 20px;
+        }
+        .scanner-overlay::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: #0088cc;
+            box-shadow: 0 0 10px #0088cc;
+            animation: scan-line 2s linear infinite;
+        }
+        @keyframes scan-line {
+            0% { top: 0; }
+            100% { top: 100%; }
+        }
+    </style>
 
     <div class="section-title">Riwayat Pengecekan Rutin (Bimonthly)</div>
     <?php if (empty($hydrant['history'])): ?>
@@ -307,8 +360,36 @@ $statusClass = ($hydrant['status'] === 'OK' || $hydrant['status'] === 'Good') ? 
     <?php endif; ?>
 </div>
 
+<script src="assets/vendor/zxing/zxing.min.js"></script>
+<script src="assets/js/qr-scanner.js"></script>
 <script>
     $(document).ready(function () {
+        // Live Scanner Modal handling
+        const scannerModalEL = document.getElementById('scannerModal');
+        const scannerModal = new bootstrap.Modal(scannerModalEL);
+
+        $('#btn-scan-qr').on('click', function() {
+            scannerModal.show();
+        });
+
+        scannerModalEL.addEventListener('shown.bs.modal', function() {
+            SystemQRScanner.startScan('scanner-video', function(resultText) {
+                if (resultText) {
+                    if (resultText.startsWith("http")) {
+                        window.location.href = resultText;
+                    } else {
+                        alert("QR Code tidak valid: " + resultText);
+                        SystemQRScanner.stopScan();
+                        scannerModal.hide();
+                    }
+                }
+            });
+        });
+
+        scannerModalEL.addEventListener('hidden.bs.modal', function() {
+            SystemQRScanner.stopScan();
+        });
+
         $('#qr-upload-input').on('change', function (e) {
             var file = e.target.files[0];
             if (!file) return;
@@ -316,9 +397,8 @@ $statusClass = ($hydrant['status'] === 'OK' || $hydrant['status'] === 'Good') ? 
             // Tampilkan loading state
             var scanBtn = $('#btn-scan-qr');
             var originalBtnHtml = scanBtn.html();
-            scanBtn.html('<i class="fas fa-spinner fa-spin"></i> Scanning...');
-            scanBtn.css('pointer-events', 'none');
-
+            scanBtn.html('<i class="fas fa-spinner fa-spin"></i> Reading...');
+            
             var formData = new FormData();
             formData.append('qr_image', file);
 
@@ -330,8 +410,8 @@ $statusClass = ($hydrant['status'] === 'OK' || $hydrant['status'] === 'Good') ? 
                 processData: false,
                 success: function (response) {
                     scanBtn.html(originalBtnHtml);
-                    scanBtn.css('pointer-events', 'auto');
                     $('#qr-upload-input').val(''); // reset
+                    scannerModal.hide();
 
                     try {
                         var actRes = typeof response === 'string' ? JSON.parse(response) : response;
@@ -350,7 +430,6 @@ $statusClass = ($hydrant['status'] === 'OK' || $hydrant['status'] === 'Good') ? 
                 },
                 error: function () {
                     scanBtn.html(originalBtnHtml);
-                    scanBtn.css('pointer-events', 'auto');
                     $('#qr-upload-input').val(''); // reset
                     alert('Gagal menghubungi server untuk membaca QR code.');
                 }
