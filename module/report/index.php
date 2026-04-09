@@ -357,5 +357,32 @@ $hydrantData = getInspections('hydrant', $dateFilter);
         $('.btn-apar-pdf').on('click', function () { window.location.href = 'actions/report/ac_export_pdf.php?type=apar'; });
         $('.btn-hydrant-excel').on('click', function () { window.location.href = 'actions/report/ac_export_excel_new.php?type=hydrant'; });
         $('.btn-hydrant-pdf').on('click', function () { window.location.href = 'actions/report/ac_export_pdf.php?type=hydrant'; });
+
+        // Initialize DataTables
+        const dtConfig = {
+            paging: true,
+            pageLength: 10,
+            searching: true,
+            ordering: true,
+            info: true,
+            language: {
+                search: "Search:",
+                lengthMenu: "_MENU_ per page",
+                info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                paginate: {
+                    next: "Next",
+                    previous: "Prev"
+                }
+            }
+        };
+
+        const tableApar = $('#table-apar').DataTable(dtConfig);
+        const tableHydrant = $('#table-hydrant').DataTable(dtConfig);
+
+        // Adjust columns on tab switch
+        $('button[data-bs-toggle="tab"]').on('shown.bs.tab', function (e) {
+            tableApar.columns.adjust().draw();
+            tableHydrant.columns.adjust().draw();
+        });
     });
 </script>
