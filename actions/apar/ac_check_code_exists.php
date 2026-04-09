@@ -11,10 +11,9 @@ if (empty($code)) {
     exit;
 }
 
-$table = ($type === 'hydrant') ? '[apar].[dbo].[hydrants]' : '[apar].[dbo].[apars]';
-
-$query = "SELECT COUNT(*) as count FROM $table WHERE code = ?";
-$params = array($code);
+// Unified check in MASTER table
+$query = "SELECT COUNT(*) as count FROM [apar].[dbo].[SE_FIRE_PROTECTION_MASTER] WHERE asset_code = ? AND asset_type = ?";
+$params = array($code, strtoupper($type));
 $stmt = sqlsrv_query($koneksi, $query, $params);
 
 if ($stmt === false) {

@@ -12,8 +12,10 @@ if ($area !== 'All Areas') {
     $params[] = $area;
 }
 
+$where[] = "a.asset_type = 'APAR'";
+
 if ($search !== "") {
-    $where[] = "(a.code LIKE ? OR a.location LIKE ? OR a.type LIKE ? OR a.status LIKE ? OR a.weight LIKE ?)";
+    $where[] = "(a.asset_code LIKE ? OR a.location LIKE ? OR a.model_type LIKE ? OR a.status LIKE ? OR a.weight LIKE ?)";
     $search_param = "%$search%";
     for ($i = 0; $i < 5; $i++) $params[] = $search_param;
 }
@@ -22,21 +24,21 @@ $where_clause = !empty($where) ? "WHERE " . implode(" AND ", $where) : "";
 
 $sql = "SELECT 
             id,
-            code,
+            asset_code as code,
             location,
             area,
             weight,
             expired_date,
             a.status,
-            a.type,
+            a.model_type as type,
             a.last_inspection_date,
             a.is_active,
             ISNULL(e.EmployeeName, u.REALNAME) as pic_name
-        FROM [apar].[dbo].[apars] a
+        FROM [apar].[dbo].[SE_FIRE_PROTECTION_MASTER] a
         LEFT JOIN [apar].[dbo].[HRD_EMPLOYEE_TABLE] e ON a.pic_empid = e.EmpID
         LEFT JOIN [apar].[Users].[UserTable] u ON a.pic_empid = u.EMPID
         $where_clause
-        ORDER BY a.is_active DESC, a.area ASC, a.code ASC";
+        ORDER BY a.is_active DESC, a.area ASC, a.asset_code ASC";
 
 $result = sqlsrv_query($koneksi, $sql, $params);
 $apar_data = [];

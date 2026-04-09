@@ -1,263 +1,104 @@
 <?php
 include(__DIR__ . '/../../config/db_koneksi.php');
 
-// start apar
-function get_total_apar()
+// Helper for Master Stats
+function get_stats($type, $status = null, $only_inspected_this_month = false, $only_abnormal = false)
 {
     global $koneksi;
-
-    $getTotalAPAR = sqlsrv_query($koneksi, "SELECT COUNT(*) AS total_apar FROM [apar].[dbo].[apars]");
-    if ($getTotalAPAR === false) {
-        return 0;
+    
+    $where = ["a.asset_type = ?"];
+    $params = [$type];
+    
+    if ($status) {
+        $where[] = "a.status = ?";
+        $params[] = $status;
     }
-    $stmt = sqlsrv_fetch_array($getTotalAPAR, SQLSRV_FETCH_ASSOC);
-    if ($stmt) {
-        return $stmt['total_apar'];
+
+    if ($only_inspected_this_month) {
+        $where[] = "EXISTS (
+            SELECT 1 FROM [apar].[dbo].[SE_FIRE_PROTECTION_TRANS] t
+            WHERE t.asset_id = a.id
+            AND MONTH(t.inspection_date) = MONTH(GETDATE())
+            AND YEAR(t.inspection_date) = YEAR(GETDATE())
+        )";
+    }
+
+    if ($only_abnormal) {
+        // Assets are abnormal if status != OK OR expired
+        $where[] = "(a.status <> 'OK' OR (a.expired_date IS NOT NULL AND a.expired_date <= CAST(GETDATE() AS DATE)))";
+    }
+
+    $where_clause = "WHERE " . implode(" AND ", $where);
+    $sql = "SELECT COUNT(*) AS total FROM [apar].[dbo].[SE_FIRE_PROTECTION_MASTER] a $where_clause";
+    
+    $stmt = sqlsrv_query($koneksi, $sql, $params);
+    if ($stmt && $row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+        return $row['total'];
     }
     return 0;
 }
-function get_total_apar_proses()
-{
+
+// ----------------- APAR Summaries -----------------
+function get_total_apar() { return get_stats('APAR'); }
+function get_total_apar_proses() { 
     global $koneksi;
-
-    $sql = "SELECT COUNT(*) AS total_proses 
-        FROM [apar].[dbo].[apars] a
-        WHERE (a.expired_date IS NULL OR a.expired_date > GETDATE())
-        AND NOT EXISTS (
-            SELECT 1 
-            FROM [apar].[dbo].[bimonthly_inspections] bi
-            WHERE bi.apar_unit_id = a.id
-                AND MONTH(bi.inspection_date) = MONTH(GETDATE())
-                AND YEAR(bi.inspection_date) = YEAR(GETDATE())
-        );";
-
-    $getTotalAPARProses = sqlsrv_query($koneksi, $sql);
-    if ($getTotalAPARProses === false) {
-        return 0;
-    }
-    $stmt = sqlsrv_fetch_array($getTotalAPARProses, SQLSRV_FETCH_ASSOC);
-    if ($stmt) {
-        return $stmt['total_proses'];
-    }
-    return 0;
+    // Total APAR minus those inspected this month
+    $total = get_total_apar();
+    $inspected = get_stats('APAR', null, true);
+    return max(0, $total - $inspected);
 }
-function get_total_apar_ok()
-{
-    global $koneksi;
+function get_total_apar_ok() { return get_stats('APAR', 'OK', true); }
+function get_total_apar_abnormal() { return get_stats('APAR', null, false, true); }
 
-    $sql = "
-    SELECT COUNT(*) AS totalOK FROM [apar].[dbo].[apars] a
-    WHERE a.status = 'OK'
-    AND (a.expired_date IS NULL OR a.expired_date > GETDATE())
-    AND EXISTS (
-        SELECT 1 
-        FROM [apar].[dbo].[bimonthly_inspections] bi
-        WHERE bi.apar_unit_id = a.id
-            AND MONTH(bi.inspection_date) = MONTH(GETDATE())
-            AND YEAR(bi.inspection_date) = YEAR(GETDATE())
-    );";
-
-    $getTotalAPAROK = sqlsrv_query($koneksi, $sql);
-    if ($getTotalAPAROK === false) {
-        return 0;
-    }
-    $stmt = sqlsrv_fetch_array($getTotalAPAROK, SQLSRV_FETCH_ASSOC);
-    if ($stmt) {
-        return $stmt['totalOK'];
-    }
-    return 0;
+// ----------------- Hydrant Summaries -----------------
+function get_total_hydrant() { return get_stats('Hydrant'); }
+function get_total_hydrant_proses() { 
+    $total = get_total_hydrant();
+    $inspected = get_stats('Hydrant', null, true);
+    return max(0, $total - $inspected);
 }
-function get_total_apar_abnormal()
-{
-    global $koneksi;
+function get_total_hydrant_ok() { return get_stats('Hydrant', 'OK', true); }
+function get_total_hydrant_abnormal() { return get_stats('Hydrant', null, false, true); }
 
-    $sql = "SELECT COUNT(*) AS total_abnormal
-            FROM [apar].[dbo].[apars] a
-            WHERE a.expired_date <= GETDATE()
-            OR (a.status <> 'OK'
-            AND EXISTS (
-                SELECT 1 
-                FROM [apar].[dbo].[bimonthly_inspections] bi
-                WHERE bi.apar_unit_id = a.id
-                    AND MONTH(bi.inspection_date) = MONTH(GETDATE())
-                    AND YEAR(bi.inspection_date) = YEAR(GETDATE())
-            ));";
-
-    $getTotalAPARAbnormal = sqlsrv_query($koneksi, $sql);
-    if ($getTotalAPARAbnormal === false) {
-        return 0;
-    }
-    $stmt = sqlsrv_fetch_array($getTotalAPARAbnormal, SQLSRV_FETCH_ASSOC);
-    if ($stmt) {
-        return $stmt['total_abnormal'];
-    }
-    return 0;
-}
-function get_apar_abnormal_cases()
+// ----------------- Abnormal Cases (Consolidated) -----------------
+function get_all_abnormal_cases($type)
 {
     global $koneksi;
 
     $sql = "SELECT 
-            aac.id,
-            aac.apar_id,
-            aac.abnormal_case,
-            aac.countermeasure,
-            aac.due_date,
-            aac.repair_photo,
-            aac.status,
-            aac.created_at,
-            a.code,
-            a.location,
-            a.area,
-            aac.pic_id,
-            COALESCE(u_sys.name, e_pic.EmployeeName, u_emp.REALNAME) as pic_name,
-            u_sys.photo as pic_photo
-            FROM [apar].[dbo].[apar_abnormal_cases] aac
-            LEFT JOIN [apar].[dbo].[apars] a ON aac.apar_id = a.id
-            LEFT JOIN [apar].[dbo].[users] u_sys ON LTRIM(RTRIM(aac.pic_id)) = LTRIM(RTRIM(u_sys.npk))
-            LEFT JOIN [apar].[dbo].[HRD_EMPLOYEE_TABLE] e_pic ON LTRIM(RTRIM(aac.pic_id)) = LTRIM(RTRIM(e_pic.EmpID))
-            LEFT JOIN [apar].[Users].[UserTable] u_emp ON LTRIM(RTRIM(aac.pic_id)) = LTRIM(RTRIM(u_emp.EMPID))
-            WHERE aac.status IN ('Open', 'On Progress', 'Closed')
-            ORDER BY CASE WHEN aac.status='Closed' THEN 1 ELSE 0 END ASC, aac.created_at DESC";
+                l.id,
+                l.asset_id,
+                l.finding_desc as abnormal_case,
+                l.countermeasure,
+                l.due_date,
+                l.repair_photo,
+                l.repair_status as status,
+                l.created_at,
+                m.asset_code as code,
+                m.location,
+                m.area,
+                l.pic_empid as pic_id,
+                l.verified_by as verifier_id,
+                COALESCE(u_sys.name, e_pic.EmployeeName, u_emp.REALNAME) as pic_name,
+                u_sys.photo as pic_photo
+            FROM [apar].[dbo].[SE_FIRE_PROTECTION_LINES] l
+            INNER JOIN [apar].[dbo].[SE_FIRE_PROTECTION_MASTER] m ON l.asset_id = m.id
+            LEFT JOIN [apar].[dbo].[users] u_sys ON LTRIM(RTRIM(l.pic_empid)) = LTRIM(RTRIM(u_sys.npk))
+            LEFT JOIN [apar].[dbo].[HRD_EMPLOYEE_TABLE] e_pic ON LTRIM(RTRIM(l.pic_empid)) = LTRIM(RTRIM(e_pic.EmpID))
+            LEFT JOIN [apar].[Users].[UserTable] u_emp ON LTRIM(RTRIM(l.pic_empid)) = LTRIM(RTRIM(u_emp.EMPID))
+            WHERE m.asset_type = ? AND l.repair_status IN ('Open', 'On Progress', 'Closed')
+            ORDER BY CASE WHEN l.repair_status='Closed' THEN 1 ELSE 0 END ASC, l.created_at DESC";
 
-    $result = sqlsrv_query($koneksi, $sql);
+    $result = sqlsrv_query($koneksi, $sql, [$type]);
     $data = [];
-    
     if ($result !== false) {
         while ($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)) {
             $data[] = $row;
         }
     }
-    
-    return $data;
-}
-// end apar
-
-function get_total_hydrant()
-{
-    global $koneksi;
-
-    $getTotalAPAR = sqlsrv_query($koneksi, "SELECT COUNT(*) AS total_hydrant FROM [apar].[dbo].[hydrants]");
-    if ($getTotalAPAR === false) {
-        return 0;
-    }
-    $stmt = sqlsrv_fetch_array($getTotalAPAR, SQLSRV_FETCH_ASSOC);
-    if ($stmt) {
-        return $stmt['total_hydrant'];
-    }
-    return 0;
-}
-function get_total_hydrant_proses()
-{
-    global $koneksi;
-
-    $sql = "SELECT COUNT(*) AS total_hydrant_proses
-            FROM [apar].[dbo].[hydrants] h
-            WHERE NOT EXISTS (
-                SELECT 1 
-                FROM [apar].[dbo].[bimonthly_inspections] bi
-                WHERE bi.hydrant_unit_id = h.id
-                AND MONTH(bi.inspection_date) = MONTH(GETDATE())
-                AND YEAR(bi.inspection_date) = YEAR(GETDATE())
-            );";
-
-    $getTotalHydrantProses = sqlsrv_query($koneksi, $sql);
-    if ($getTotalHydrantProses === false) {
-        return 0;
-    }
-    $stmt = sqlsrv_fetch_array($getTotalHydrantProses, SQLSRV_FETCH_ASSOC);
-    if ($stmt) {
-        return $stmt['total_hydrant_proses'];
-    }
-    return 0;
-}
-function get_total_hydrant_ok()
-{
-    global $koneksi;
-
-    $sql = "SELECT COUNT(*) AS total_hydrant_ok
-            FROM [apar].[dbo].[hydrants] h
-            WHERE h.status = 'OK'
-            AND EXISTS (
-                SELECT 1 
-                FROM [apar].[dbo].[bimonthly_inspections] bi
-                WHERE bi.hydrant_unit_id = h.id
-                    AND MONTH(bi.inspection_date) = MONTH(GETDATE())
-                    AND YEAR(bi.inspection_date) = YEAR(GETDATE())
-            );";
-
-    $getTotalHydrantOK = sqlsrv_query($koneksi, $sql);
-    if ($getTotalHydrantOK === false) {
-        return 0;
-    }
-    $stmt = sqlsrv_fetch_array($getTotalHydrantOK, SQLSRV_FETCH_ASSOC);
-    if ($stmt) {
-        return $stmt['total_hydrant_ok'];
-    }
-    return 0;
-}
-function get_total_hydrant_abnormal()
-{
-    global $koneksi;
-
-    $sql = "SELECT COUNT(*) AS total_hydrant_abnormal
-            FROM [apar].[dbo].[hydrants] h
-            WHERE h.status <> 'OK'
-            AND EXISTS (
-                SELECT 1 
-                FROM [apar].[dbo].[bimonthly_inspections] bi
-                WHERE bi.hydrant_id = h.id
-                    AND MONTH(bi.inspection_date) = MONTH(GETDATE())
-                    AND YEAR(bi.inspection_date) = YEAR(GETDATE())
-            );";
-
-    $getTotalHydrantAbnormal = sqlsrv_query($koneksi, $sql);
-    if ($getTotalHydrantAbnormal === false) {
-        return 0;
-    }
-    $stmt = sqlsrv_fetch_array($getTotalHydrantAbnormal, SQLSRV_FETCH_ASSOC);
-    if ($stmt) {
-        return $stmt['total_hydrant_abnormal'];
-    }
-    return 0;
-}
-function get_hydrant_abnormal_cases()
-{
-    global $koneksi;
-
-    $sql = "SELECT 
-            hac.id,
-            hac.hydrant_id,
-            hac.abnormal_case,
-            hac.countermeasure,
-            hac.due_date,
-            hac.repair_photo,
-            hac.status,
-            hac.created_at,
-            h.code,
-            h.location,
-            h.area,
-            hac.pic_id,
-            COALESCE(u_sys.name, e_pic.EmployeeName, u_emp.REALNAME) as pic_name,
-            u_sys.photo as pic_photo
-            FROM [apar].[dbo].[hydrant_abnormal_cases] hac
-            LEFT JOIN [apar].[dbo].[hydrants] h ON hac.hydrant_id = h.id
-            LEFT JOIN [apar].[dbo].[users] u_sys ON LTRIM(RTRIM(hac.pic_id)) = LTRIM(RTRIM(u_sys.npk))
-            LEFT JOIN [apar].[dbo].[HRD_EMPLOYEE_TABLE] e_pic ON LTRIM(RTRIM(hac.pic_id)) = LTRIM(RTRIM(e_pic.EmpID))
-            LEFT JOIN [apar].[Users].[UserTable] u_emp ON LTRIM(RTRIM(hac.pic_id)) = LTRIM(RTRIM(u_emp.EMPID))
-            WHERE hac.status IN ('Open', 'On Progress', 'Closed')
-            ORDER BY CASE WHEN hac.status='Closed' THEN 1 ELSE 0 END ASC, hac.created_at DESC";
-
-    $result = sqlsrv_query($koneksi, $sql);
-    $data = [];
-    
-    if ($result !== false) {
-        while ($row = sqlsrv_fetch_array($result, SQLSRV_FETCH_ASSOC)) {
-            $data[] = $row;
-        }
-    }
-    
     return $data;
 }
 
+function get_apar_abnormal_cases() { return get_all_abnormal_cases('APAR'); }
+function get_hydrant_abnormal_cases() { return get_all_abnormal_cases('Hydrant'); }
 ?>

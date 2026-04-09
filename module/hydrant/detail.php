@@ -250,7 +250,7 @@ $statusClass = ($hydrant['status'] === 'OK' || $hydrant['status'] === 'Good') ? 
     <?php endif; ?>
 
 
-    <div class="section-title">Riwayat Kerusakan & Perbaikan (Abnormal History)</div>
+    <div class="section-title">Riwayat Kerusakan & Perbaikan</div>
     <?php if (empty($hydrant['cases'])): ?>
         <div class="empty-state">Belum ada abnormal case.</div>
     <?php else: ?>

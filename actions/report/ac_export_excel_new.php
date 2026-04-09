@@ -1,59 +1,37 @@
 <?php
 require_once __DIR__ . '/../../config/db_koneksi.php';
 
-// Check for ZipArchive
 if (!class_exists('ZipArchive')) {
-    die("Error: ZipArchive extension PHP tidak aktif. Silakan aktifkan di php.ini");
+    die("Error: ZipArchive extension PHP tidak aktif.");
 }
 
 $type = $_GET['type'] ?? 'apar';
 $year = date('Y');
+$asset_type = strtoupper($type);
 
-if ($type === 'apar') {
-    $query = "SELECT 
-                a.id as apar_id_master, a.code, a.area, a.location,
-                ISNULL(a.expired_date, '') as exp_date,
-                bi.id as inspection_id,
-                bi.inspection_date, bi.user_id,
-                bi.exp_date_ok, bi.pressure_ok, bi.weight_co2_ok,
-                bi.tube_ok, bi.hose_ok, bi.bracket_ok, bi.wi_ok, bi.form_kejadian_ok,
-                bi.sign_box_ok, bi.sign_triangle_ok, bi.marking_tiger_ok, bi.marking_beam_ok,
-                bi.sr_apar_ok, bi.kocok_apar_ok, bi.label_ok, bi.notes,
-                u.name
-              FROM [apar].[dbo].[apars] a
-              INNER JOIN [apar].[dbo].[bimonthly_apar_inspections] bi ON a.id = bi.apar_id
-              LEFT JOIN [apar].[dbo].[users] u ON bi.user_id = u.id
-              WHERE a.is_active = 1 AND YEAR(bi.inspection_date) = $year
-              ORDER BY bi.inspection_date DESC";
-    $filename = "DATA_INSPEKSI_APAR_" . $year;
-} else {
-    $query = "SELECT 
-                h.id as hydrant_id_master, h.code, h.area, h.location,
-                bi.id as inspection_id,
-                bi.inspection_date, bi.user_id,
-                bi.body_hydrant_ok, bi.selang_ok, bi.couple_join_ok,
-                bi.nozzle_ok, bi.check_sheet_ok, bi.valve_kran_ok, bi.lampu_ok,
-                bi.cover_lampu_ok, bi.box_display_ok, bi.konsul_hydrant_ok, bi.jr_ok,
-                bi.marking_ok, bi.label_ok, bi.notes,
-                u.name
-              FROM [apar].[dbo].[hydrants] h
-              INNER JOIN [apar].[dbo].[bimonthly_hydrant_inspections] bi ON h.id = bi.hydrant_id
-              LEFT JOIN [apar].[dbo].[users] u ON bi.user_id = u.id
-              WHERE h.is_active = 1 AND YEAR(bi.inspection_date) = $year
-              ORDER BY bi.inspection_date DESC";
-    $filename = "DATA_INSPEKSI_HYDRANT_" . $year;
-}
+// Unified Query
+$query = "SELECT 
+            m.id as asset_id, m.asset_code as code, m.area, m.location,
+            bi.inspection_date, bi.user_id, bi.notes, bi.*,
+            ISNULL(e.EmployeeName, u.REALNAME) as inspector_name
+          FROM [apar].[dbo].[SE_FIRE_PROTECTION_TRANS] bi
+          INNER JOIN [apar].[dbo].[SE_FIRE_PROTECTION_MASTER] m ON bi.asset_id = m.id
+          LEFT JOIN [apar].[dbo].[HRD_EMPLOYEE_TABLE] e ON bi.user_id = e.EmpID
+          LEFT JOIN [apar].[Users].[UserTable] u ON bi.user_id = u.EMPID
+          WHERE m.asset_type = ? AND m.is_active = 1 AND YEAR(bi.inspection_date) = $year
+          ORDER BY bi.inspection_date DESC";
 
-$stmt = sqlsrv_query($koneksi, $query);
+$stmt = sqlsrv_query($koneksi, $query, [$asset_type]);
 $rows_data = array();
 if ($stmt !== false) {
     while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
-        // Hapus filter ini agar semua data muncul
         $rows_data[] = $row;
     }
 }
 
-// Generate TRUE XLSX (OpenXML)
+$filename = "DATA_INSPEKSI_" . strtoupper($type) . "_" . $year;
+
+// True XLSX helper
 function generateXLSX($filename, $sheetName, $data) {
     $temp = sys_get_temp_dir() . '/' . uniqid('xlsx');
     mkdir($temp); mkdir($temp.'/_rels'); mkdir($temp.'/xl'); mkdir($temp.'/xl/_rels'); mkdir($temp.'/xl/worksheets');
@@ -70,8 +48,7 @@ function generateXLSX($filename, $sheetName, $data) {
     foreach($strings as $s) $xml_strings .= '<si><t>'.htmlspecialchars($s).'</t></si>';
     $xml_strings .= '</sst>';
     
-    $xml_ws = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">';
-    $xml_ws .= '<mergeCells count="2"><mergeCell ref="A1:L1"/><mergeCell ref="A2:L2"/></mergeCells>';
+    $xml_ws = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">';
     $xml_ws .= '<sheetData>';
     foreach($data as $ri => $rv) {
         $xml_ws .= '<row r="'.($ri+1).'">';
@@ -90,74 +67,60 @@ function generateXLSX($filename, $sheetName, $data) {
     file_put_contents($temp.'/xl/sharedStrings.xml', $xml_strings);
     file_put_contents($temp.'/xl/worksheets/sheet1.xml', $xml_ws);
 
-    $zip = new ZipArchive();
-    $zip_path = $temp.'.xlsx';
+    $zip = new ZipArchive(); $zip_path = $temp.'.xlsx';
     if($zip->open($zip_path, ZipArchive::CREATE)) {
         $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($temp, RecursiveDirectoryIterator::SKIP_DOTS), RecursiveIteratorIterator::LEAVES_ONLY);
         foreach($files as $file) {
             $filePath = $file->getRealPath();
-            $relativePath = substr($filePath, strlen(realpath($temp)) + 1);
-            $zip->addFile($filePath, str_replace('\\', '/', $relativePath));
+            $zip->addFile($filePath, substr($filePath, strlen(realpath($temp)) + 1));
         }
         $zip->close();
     }
-    
     header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     header('Content-Disposition: attachment; filename="'.$filename.'.xlsx"');
-    readfile($zip_path);
-    unlink($zip_path);
+    readfile($zip_path); unlink($zip_path);
     $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($temp, RecursiveDirectoryIterator::SKIP_DOTS), RecursiveIteratorIterator::CHILD_FIRST);
     foreach($files as $file) ($file->isDir()) ? rmdir($file->getRealPath()) : unlink($file->getRealPath());
-    rmdir($temp);
-    exit;
+    rmdir($temp); exit;
 }
 
 $monthName = date('F');
+$final_rows = array();
 if ($type === 'apar') {
-    $final_rows[] = array('LAPORAN INSPEKSI BIMONTHLY APAR', '', '', '', '', '', '', '', '', '', '', '');
-    $final_rows[] = array('TAHUN ' . $year . ' - BULAN ' . $monthName, '', '', '', '', '', '', '', '', '', '', '');
-    $final_rows[] = array('No', 'Tanggal', 'Kode APAR', 'Area', 'Lokasi', 'Exp. Date', 'Pressure', 'Selang', 'Status Akhir', 'Inspektor', 'Catatan');
+    $final_rows[] = array('LAPORAN INSPEKSI ' . strtoupper($type), '', '', '', '', '', '', '', '', '', '');
+    $final_rows[] = array('TAHUN ' . $year, '', '', '', '', '', '', '', '', '', '');
+    $final_rows[] = array('No', 'Tanggal', 'Kode', 'Area', 'Lokasi', 'Exp', 'Pressure', 'Hose', 'Status', 'Inspector', 'Catatan');
 } else {
-    $final_rows[] = array('LAPORAN INSPEKSI BIMONTHLY HYDRANT', '', '', '', '', '', '', '', '', '', '', '');
-    $final_rows[] = array('TAHUN ' . $year . ' - BULAN ' . $monthName, '', '', '', '', '', '', '', '', '', '', '');
-    $final_rows[] = array('No', 'Tanggal', 'Kode Hydrant', 'Area', 'Lokasi', 'Body', 'Selang', 'Nozzle', 'Status Akhir', 'Inspektor', 'Catatan');
+    $final_rows[] = array('LAPORAN INSPEKSI ' . strtoupper($type), '', '', '', '', '', '', '', '', '', '');
+    $final_rows[] = array('TAHUN ' . $year, '', '', '', '', '', '', '', '', '', '');
+    $final_rows[] = array('No', 'Tanggal', 'Kode', 'Area', 'Lokasi', 'Body', 'Hose', 'Nozzle', 'Status', 'Inspector', 'Catatan');
 }
 
 $no = 1;
 foreach ($rows_data as $row) {
+    $d_row = array($no++);
+    $d_row[] = ($row['inspection_date'] instanceof DateTime) ? $row['inspection_date']->format('d/m/Y H:i') : ($row['inspection_date'] ?? '-');
+    $d_row[] = $row['code'];
+    $d_row[] = $row['area'];
+    $d_row[] = $row['location'];
+    
     if ($type === 'apar') {
-        // Map according to your screenshot columns: No | Tanggal | Kode | Area | Lokasi | Exp. Date | Pressure | Selang | Status Akhir | Inspektor | Catatan
-        $d_row = array($no++);
-        $d_row[] = ($row['inspection_date'] instanceof DateTime) ? $row['inspection_date']->format('d/m/Y H:i') : ($row['inspection_date'] ?? '-');
-        $d_row[] = $row['code'];
-        $d_row[] = $row['area'];
-        $d_row[] = $row['location'];
-        $d_row[] = ($row['exp_date_ok'] == 1) ? 'OK' : 'ABNORMAL';
-        $d_row[] = ($row['pressure_ok'] == 1) ? 'OK' : 'ABNORMAL';
-        $d_row[] = ($row['hose_ok'] == 1) ? 'OK' : 'ABNORMAL';
-        
-        // Status Akhir logic
-        $all_ok = ($row['exp_date_ok'] == 1 && $row['pressure_ok'] == 1 && $row['hose_ok'] == 1 && $row['tube_ok'] == 1 && $row['bracket_ok'] == 1); // simplified for layout
-        $d_row[] = $all_ok ? 'OK' : 'ABNORMAL';
-        
-        $d_row[] = $row['name'] ?? '-';
-        $d_row[] = $row['notes'] ?? '-';
+        $d_row[] = ($row['exp_date_ok'] == 1) ? 'OK' : 'NG';
+        $d_row[] = ($row['pressure_ok'] == 1) ? 'OK' : 'NG';
+        $d_row[] = ($row['hose_ok'] == 1) ? 'OK' : 'NG';
+        $check_items = ['exp_date_ok', 'pressure_ok', 'weight_co2_ok', 'tube_ok', 'hose_ok', 'bracket_ok', 'wi_ok', 'form_kejadian_ok', 'sign_box_ok', 'sign_triangle_ok', 'marking_tiger_ok', 'marking_beam_ok', 'sr_apar_ok', 'kocok_apar_ok', 'label_ok'];
     } else {
-        $d_row = array($no++);
-        $d_row[] = ($row['inspection_date'] instanceof DateTime) ? $row['inspection_date']->format('d/m/Y H:i') : ($row['inspection_date'] ?? '-');
-        $d_row[] = $row['code'];
-        $d_row[] = $row['area'];
-        $d_row[] = $row['location'];
-        $d_row[] = ($row['body_hydrant_ok'] == 1) ? 'OK' : 'ABNORMAL';
-        $d_row[] = ($row['selang_ok'] == 1) ? 'OK' : 'ABNORMAL';
-        $d_row[] = ($row['nozzle_ok'] == 1) ? 'OK' : 'ABNORMAL';
-        
-        $all_ok = ($row['body_hydrant_ok'] == 1 && $row['selang_ok'] == 1 && $row['nozzle_ok'] == 1);
-        $d_row[] = $all_ok ? 'OK' : 'ABNORMAL';
-        
-        $d_row[] = $row['name'] ?? '-';
-        $d_row[] = $row['notes'] ?? '-';
+        $d_row[] = ($row['body_hydrant_ok'] == 1) ? 'OK' : 'NG';
+        $d_row[] = ($row['selang_ok'] == 1) ? 'OK' : 'NG';
+        $d_row[] = ($row['nozzle_ok'] == 1) ? 'OK' : 'NG';
+        $check_items = ['body_hydrant_ok', 'selang_ok', 'couple_join_ok', 'nozzle_ok', 'check_sheet_ok', 'valve_kran_ok', 'lampu_ok', 'cover_lampu_ok', 'box_display_ok', 'konsul_hydrant_ok', 'jr_ok', 'marking_ok', 'label_ok'];
     }
+    
+    $all_ok = true;
+    foreach ($check_items as $ci) { if (isset($row[$ci]) && $row[$ci] != 1) { $all_ok = false; break; } }
+    $d_row[] = $all_ok ? 'OK' : 'ABNORMAL';
+    $d_row[] = $row['inspector_name'] ?? '-';
+    $d_row[] = $row['notes'] ?? '-';
     $final_rows[] = $d_row;
 }
 

@@ -3,7 +3,7 @@ include(__DIR__ . '/../../config/db_koneksi.php');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $code = $_POST['code'];
-    $device_type = $_POST['device_type'];
+    $device_type = strtoupper($_POST['device_type'] ?? '');
     $x = $_POST['x_coordinate'];
     $y = $_POST['y_coordinate'];
 
@@ -12,18 +12,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    $table = ($device_type === 'apar') ? '[apar].[dbo].[apars]' : '[apar].[dbo].[hydrants]';
-    
-    $sql = "UPDATE $table SET x_coordinate = ?, y_coordinate = ? WHERE code = ?";
-    $params = [$x, $y, $code];
+    $sql = "UPDATE [apar].[dbo].[SE_FIRE_PROTECTION_MASTER] 
+            SET x_coordinate = ?, y_coordinate = ?, updated_at = GETDATE() 
+            WHERE asset_code = ? AND asset_type = ?";
+    $params = [$x, $y, $code, $device_type];
     
     $stmt = sqlsrv_query($koneksi, $sql, $params);
-    
     if ($stmt) {
         echo json_encode(['status' => 'success', 'message' => 'Marker position updated']);
     } else {
-        $errors = sqlsrv_errors();
-        echo json_encode(['status' => 'error', 'message' => $errors[0]['message']]);
+        echo json_encode(['status' => 'error', 'message' => 'Database error']);
     }
 } else {
     echo json_encode(['status' => 'error', 'message' => 'Invalid request method']);

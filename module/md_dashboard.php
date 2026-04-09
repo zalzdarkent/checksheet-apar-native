@@ -1057,14 +1057,14 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
             $.ajax({
                 url: 'actions/dashboard/ac_abnormal.php',
                 type: 'POST',
+                dataType: 'json',
                 data: {
                     action: 'get_inspection_detail',
                     id: caseId,
                     type: caseType
                 },
-                success: function (resp) {
+                success: function (res) {
                     $btn.prop('disabled', false).html(prevHtml);
-                    var res = JSON.parse(resp);
 
                     if (res.status === 'success') {
                         $('#det_insp_date').text(res.inspection_date);
@@ -1168,8 +1168,9 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
                 url: 'actions/dashboard/ac_abnormal.php',
                 type: 'POST',
                 data: $(this).serialize(),
-                success: function (resp) {
-                    var res = JSON.parse(resp);
+                dataType: 'json',
+                success: function (res) {
+                    
                     if (res.status == 'success') {
                         Swal.fire('Sukses', res.message, 'success').then(() => window.location.reload());
                     } else {
@@ -1211,8 +1212,9 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
                 url: 'actions/dashboard/ac_abnormal.php',
                 type: 'POST',
                 data: $(this).serialize(),
-                success: function (resp) {
-                    var res = JSON.parse(resp);
+                dataType: 'json',
+                success: function (res) {
+                    
                     if (res.status == 'success') {
                         Swal.fire('Sukses', res.message, 'success').then(() => window.location.reload());
                     } else {
@@ -1236,11 +1238,11 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
             $.ajax({
                 url: 'actions/dashboard/ac_abnormal.php',
                 type: 'POST',
+                dataType: 'json',
                 data: formData,
                 contentType: false,
                 processData: false,
-                success: function (resp) {
-                    var res = JSON.parse(resp);
+                success: function (res) {
                     if (res.status == 'success') {
                         Swal.fire('Sukses', res.message, 'success').then(() => window.location.reload());
                     } else {
@@ -1271,13 +1273,13 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
                     $.ajax({
                         url: 'actions/dashboard/ac_abnormal.php',
                         type: 'POST',
+                        dataType: 'json',
                         data: {
                             action: 'verify_case',
                             id: caseId,
                             type: caseType
                         },
-                        success: function (resp) {
-                            var res = JSON.parse(resp);
+                        success: function (res) {
                             if (res.status == 'success') {
                                 Swal.fire('Terkonfirmasi', res.message, 'success').then(() => window.location.reload());
                             } else {

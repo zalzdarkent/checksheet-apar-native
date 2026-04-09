@@ -7,8 +7,8 @@ $query = "
     SELECT 
         u.EMPID as empid, 
         ISNULL(e.EmployeeName, u.REALNAME) as name,
-        (SELECT STRING_AGG(location_name, ',') FROM [dbo].[user_pic_locations] WHERE EMPID = u.EMPID AND device_type = 'apar') as apar_locations,
-        (SELECT STRING_AGG(location_name, ',') FROM [dbo].[user_pic_locations] WHERE EMPID = u.EMPID AND device_type = 'hydrant') as hydrant_locations
+        (SELECT STRING_AGG(area_name, ',') FROM [apar].[dbo].[SE_FIRE_PROTECTION_AREA] WHERE empid = u.EMPID AND asset_type = 'apar') as apar_locations,
+        (SELECT STRING_AGG(area_name, ',') FROM [apar].[dbo].[SE_FIRE_PROTECTION_AREA] WHERE empid = u.EMPID AND asset_type = 'hydrant') as hydrant_locations
     FROM [apar].[Users].[UserTable] u
     LEFT JOIN [apar].[dbo].[HRD_EMPLOYEE_TABLE] e ON u.EMPID = e.EmpID
     WHERE u.CF_Active = 1

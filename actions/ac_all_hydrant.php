@@ -12,8 +12,10 @@ if ($area !== 'All Areas') {
     $params[] = $area;
 }
 
+$where[] = "h.asset_type = 'Hydrant'";
+
 if ($search !== "") {
-    $where[] = "(h.code LIKE ? OR h.location LIKE ? OR h.type LIKE ? OR h.status LIKE ?)";
+    $where[] = "(h.asset_code LIKE ? OR h.location LIKE ? OR h.model_type LIKE ? OR h.status LIKE ?)";
     $search_param = "%$search%";
     for ($i = 0; $i < 4; $i++) $params[] = $search_param;
 }
@@ -22,19 +24,19 @@ $where_clause = !empty($where) ? "WHERE " . implode(" AND ", $where) : "";
 
 $sql = "SELECT 
             id,
-            code,
+            asset_code as code,
             location,
             area,
             h.status,
-            h.type,
+            h.model_type as type,
             h.last_inspection_date,
             h.is_active,
             ISNULL(e.EmployeeName, u.REALNAME) as pic_name
-        FROM [apar].[dbo].[hydrants] h
+        FROM [apar].[dbo].[SE_FIRE_PROTECTION_MASTER] h
         LEFT JOIN [apar].[dbo].[HRD_EMPLOYEE_TABLE] e ON h.pic_empid = e.EmpID
         LEFT JOIN [apar].[Users].[UserTable] u ON h.pic_empid = u.EMPID
         $where_clause
-        ORDER BY h.is_active DESC, h.area ASC, h.code ASC";
+        ORDER BY h.is_active DESC, h.area ASC, h.asset_code ASC";
 
 $result = sqlsrv_query($koneksi, $sql, $params);
 $hydrant_data = [];

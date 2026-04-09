@@ -268,7 +268,7 @@ $statusClass = ($apar['status'] === 'OK' || $apar['status'] === 'Good') ? 'statu
     <?php endif; ?>
 
 
-    <div class="section-title">Riwayat Kerusakan & Perbaikan (Abnormal History)</div>
+    <div class="section-title">Riwayat Kerusakan & Perbaikan</div>
     <?php if (empty($apar['cases'])): ?>
         <div class="empty-state">Belum ada abnormal case.</div>
     <?php else: ?>

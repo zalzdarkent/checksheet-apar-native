@@ -11,9 +11,7 @@ if (empty($area)) {
     exit;
 }
 
-$table = ($type === 'hydrant') ? '[apar].[dbo].[hydrants]' : '[apar].[dbo].[apars]';
 $prefix = "";
-
 switch ($area) {
     case 'Disa': $prefix = "D-1-"; break;
     case 'Machining': $prefix = "M-1-"; break;
@@ -23,9 +21,9 @@ switch ($area) {
         exit;
 }
 
-// Query for the highest number for this prefix
-$query = "SELECT MAX(code) as max_code FROM $table WHERE code LIKE ?";
-$params = array($prefix . '%');
+// Unified query from MASTER table using asset_code
+$query = "SELECT MAX(asset_code) as max_code FROM [apar].[dbo].[SE_FIRE_PROTECTION_MASTER] WHERE asset_code LIKE ? AND asset_type = ?";
+$params = array($prefix . '%', strtoupper($type));
 $stmt = sqlsrv_query($koneksi, $query, $params);
 
 if ($stmt === false) {
@@ -37,14 +35,11 @@ $row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
 $next_code = "";
 
 if ($row['max_code']) {
-    // Extract the numeric part (everything after the last dash)
     $parts = explode('-', $row['max_code']);
     $last_num = end($parts);
     
-    // Check if it's numeric
     if (is_numeric($last_num)) {
         $next_num = intval($last_num) + 1;
-        // Pad with zeros (e.g., 002 -> 003)
         $next_num_padded = str_pad($next_num, 3, "0", STR_PAD_LEFT);
         $next_code = $prefix . $next_num_padded;
     } else {

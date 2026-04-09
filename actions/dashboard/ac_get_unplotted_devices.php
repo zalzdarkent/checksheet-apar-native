@@ -3,27 +3,17 @@ include(__DIR__ . '/../../config/db_koneksi.php');
 
 $unplotted = [];
 
-// Get unplotted APARs
-$sql_apar = "SELECT code, type as jenis, location as lokasi, area 
-             FROM [apar].[dbo].[apars] 
-             WHERE x_coordinate IS NULL OR y_coordinate IS NULL";
-$res_apar = sqlsrv_query($koneksi, $sql_apar);
-if ($res_apar !== false) {
-    while ($row = sqlsrv_fetch_array($res_apar, SQLSRV_FETCH_ASSOC)) {
-        $row['device_type'] = 'apar';
-        $unplotted[] = $row;    
-    }
-}
+// Unified query from MASTER for both types
+$sql = "SELECT asset_code as code, model_type as jenis, location as lokasi, area, asset_type as device_type
+        FROM [apar].[dbo].[SE_FIRE_PROTECTION_MASTER] 
+        WHERE (x_coordinate IS NULL OR y_coordinate IS NULL OR x_coordinate = 0 OR y_coordinate = 0)
+        AND is_active = 1";
 
-// Get unplotted Hydrants
-$sql_hydrant = "SELECT code, type as jenis, location as lokasi, area 
-                FROM [apar].[dbo].[hydrants] 
-                WHERE x_coordinate IS NULL OR y_coordinate IS NULL";
-$res_hydrant = sqlsrv_query($koneksi, $sql_hydrant);
-if ($res_hydrant !== false) {
-    while ($row = sqlsrv_fetch_array($res_hydrant, SQLSRV_FETCH_ASSOC)) {
-        $row['device_type'] = 'hydrant';
-        $unplotted[] = $row;
+$res = sqlsrv_query($koneksi, $sql);
+if ($res !== false) {
+    while ($row = sqlsrv_fetch_array($res, SQLSRV_FETCH_ASSOC)) {
+        $row['device_type'] = strtolower($row['device_type']);
+        $unplotted[] = $row;    
     }
 }
 
