@@ -100,24 +100,51 @@ if ($id <= 0) {
             }
         }
 
-        // 3. Get Abnormal History from unified LINES table
-        $sql_cases = "SELECT l.*, 
-                           ISNULL(e_ver.EmployeeName, u_ver.REALNAME) as verified_by_name,
-                           ISNULL(e_pic.EmployeeName, u_pic.REALNAME) as pic_name
-                       FROM [PRD].[dbo].[SE_FIRE_PROTECTION_LINES] l
-                       LEFT JOIN [ATI].[Users].[UserTable] u_ver ON l.verified_by = u_ver.EMPID
-                       LEFT JOIN [ATI].[dbo].[HRD_EMPLOYEE_TABLE] e_ver ON l.verified_by = e_ver.EmpID
-                       LEFT JOIN [ATI].[Users].[UserTable] u_pic ON l.pic_empid = u_pic.EMPID
-                       LEFT JOIN [ATI].[dbo].[HRD_EMPLOYEE_TABLE] e_pic ON l.pic_empid = e_pic.EmpID
-                       WHERE l.asset_id = ? 
-                       ORDER BY l.created_at DESC";
+        // 3. Get Abnormal History from LINES — dikelompokkan per trans_id (per sesi inspeksi)
+        //    Satu inspeksi dengan >1 item NG ditampilkan sebagai 1 baris,
+        //    issue digabung dengan STRING_AGG, status terburuk dipakai sebagai representatif.
+        $sql_cases = "
+            WITH grouped AS (
+                SELECT
+                    l.trans_id,
+                    l.asset_id,
+                    STRING_AGG(l.finding_desc, ' | ')
+                        WITHIN GROUP (ORDER BY l.id)        AS abnormal_case,
+                    STRING_AGG(l.repair_photo, ',')
+                        WITHIN GROUP (ORDER BY l.id)        AS repair_photos,
+                    CASE
+                        WHEN SUM(CASE WHEN l.repair_status = 'Open'        THEN 1 ELSE 0 END) > 0 THEN 'Open'
+                        WHEN SUM(CASE WHEN l.repair_status = 'On Progress' THEN 1 ELSE 0 END) > 0 THEN 'On Progress'
+                        WHEN SUM(CASE WHEN l.repair_status = 'Closed'      THEN 1 ELSE 0 END) > 0 THEN 'Closed'
+                        ELSE 'Verified'
+                    END                                     AS repair_status,
+                    MIN(l.countermeasure)                   AS countermeasure,
+                    MIN(l.due_date)                         AS due_date,
+                    MIN(l.pic_empid)                        AS pic_empid,
+                    MIN(l.verified_by)                      AS verified_by,
+                    MIN(l.verified_at)                      AS verified_at,
+                    MAX(l.created_at)                       AS created_at,
+                    COUNT(l.id)                             AS ng_count
+                FROM [PRD].[dbo].[SE_FIRE_PROTECTION_LINES] l
+                WHERE l.asset_id = ?
+                GROUP BY l.trans_id, l.asset_id
+            )
+            SELECT
+                g.*,
+                ISNULL(e_ver.EmployeeName, u_ver.REALNAME) AS verified_by_name,
+                ISNULL(e_pic.EmployeeName, u_pic.REALNAME) AS pic_name
+            FROM grouped g
+            LEFT JOIN [ATI].[Users].[UserTable] u_ver   ON g.verified_by = u_ver.EMPID
+            LEFT JOIN [ATI].[dbo].[HRD_EMPLOYEE_TABLE] e_ver ON g.verified_by = e_ver.EmpID
+            LEFT JOIN [ATI].[Users].[UserTable] u_pic   ON g.pic_empid = u_pic.EMPID
+            LEFT JOIN [ATI].[dbo].[HRD_EMPLOYEE_TABLE] e_pic ON g.pic_empid = e_pic.EmpID
+            ORDER BY g.created_at DESC";
+
         $stmt_cases = sqlsrv_query($koneksi, $sql_cases, [$id]);
         $cases = [];
         if ($stmt_cases !== false) {
             while ($row = sqlsrv_fetch_array($stmt_cases, SQLSRV_FETCH_ASSOC)) {
-                $row['id'] = (int) $row['id'];
-                $row['abnormal_case'] = $row['finding_desc']; // legacy-naming map
-                $row['status'] = $row['repair_status']; // legacy-naming map
+                $row['status'] = $row['repair_status'];
 
                 if ($row['created_at'] instanceof DateTime) {
                     $row['created_at_fmt'] = $row['created_at']->format('d M Y');
@@ -130,6 +157,11 @@ if ($id <= 0) {
                 } else {
                     $row['due_date_fmt'] = '-';
                 }
+
+                // Foto: ambil foto pertama yang ada dari repair_photos
+                $photos = array_filter(explode(',', $row['repair_photos'] ?? ''));
+                $row['repair_photo'] = !empty($photos) ? trim($photos[0]) : null;
+
                 $cases[] = $row;
             }
         }

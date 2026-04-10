@@ -45,8 +45,6 @@ function get_total_apar()
 }
 function get_total_apar_proses()
 {
-    global $koneksi;
-    // Total APAR minus those inspected this month
     $total = get_total_apar();
     $inspected = get_stats('APAR', null, true);
     return max(0, $total - $inspected);
@@ -80,34 +78,60 @@ function get_total_hydrant_abnormal()
     return get_stats('Hydrant', null, false, true);
 }
 
-// ----------------- Abnormal Cases (Consolidated) -----------------
+// ----------------- Abnormal Cases (Grouped per Asset) -----------------
+// Setiap asset (APAR/Hydrant) yang punya >1 item NG digabung menjadi 1 baris.
+// Status ditentukan dari kondisi terburuk: Open > On Progress > Closed
 function get_all_abnormal_cases($type)
 {
     global $koneksi;
 
-    $sql = "SELECT 
-                l.id,
-                l.asset_id,
-                l.finding_desc as abnormal_case,
-                l.countermeasure,
-                l.due_date,
-                l.repair_photo,
-                l.repair_status as status,
-                l.created_at,
-                m.asset_code as code,
-                m.location,
+    $sql = "
+        WITH grouped AS (
+            SELECT
+                m.id                                                            AS id,
+                m.asset_code                                                    AS code,
                 m.area,
-                l.pic_empid as pic_id,
-                l.verified_by as verifier_id,
-                COALESCE(u_sys.REALNAME, e_pic.EmployeeName, u_emp.REALNAME) as pic_name,
-                u_sys.PicFile as pic_photo
+                m.location,
+                STRING_AGG(l.finding_desc, ' | ')
+                    WITHIN GROUP (ORDER BY l.id)                                AS abnormal_case,
+                STRING_AGG(CAST(l.id AS NVARCHAR(20)), ',')
+                    WITHIN GROUP (ORDER BY l.id)                                AS line_ids,
+                CASE
+                    WHEN SUM(CASE WHEN l.repair_status = 'Open'        THEN 1 ELSE 0 END) > 0 THEN 'Open'
+                    WHEN SUM(CASE WHEN l.repair_status = 'On Progress' THEN 1 ELSE 0 END) > 0 THEN 'On Progress'
+                    WHEN SUM(CASE WHEN l.repair_status = 'Revision'    THEN 1 ELSE 0 END) > 0 THEN 'Revision'
+                    WHEN SUM(CASE WHEN l.repair_status = 'Closed'      THEN 1 ELSE 0 END) > 0 THEN 'Closed'
+                    ELSE 'Verified'
+                END                                                             AS status,
+                MIN(l.due_date)                                                 AS due_date,
+                MAX(l.created_at)                                               AS created_at,
+                MIN(l.countermeasure)                                           AS countermeasure,
+                MIN(l.pic_empid)                                                AS pic_id,
+                COUNT(l.id)                                                     AS ng_count
             FROM [PRD].[dbo].[SE_FIRE_PROTECTION_LINES] l
             INNER JOIN [PRD].[dbo].[SE_FIRE_PROTECTION_MASTER] m ON l.asset_id = m.id
-            LEFT JOIN [ATI].[Users].[UserTable] u_sys ON LTRIM(RTRIM(l.pic_empid)) = LTRIM(RTRIM(u_sys.EMPID))
-            LEFT JOIN [ATI].[dbo].[HRD_EMPLOYEE_TABLE] e_pic ON LTRIM(RTRIM(l.pic_empid)) = LTRIM(RTRIM(e_pic.EmpID))
-            LEFT JOIN [ATI].[Users].[UserTable] u_emp ON LTRIM(RTRIM(l.pic_empid)) = LTRIM(RTRIM(u_emp.EMPID))
-            WHERE m.asset_type = ? AND l.repair_status IN ('Open', 'On Progress', 'Closed')
-            ORDER BY CASE WHEN l.repair_status='Closed' THEN 1 ELSE 0 END ASC, l.created_at DESC";
+            WHERE m.asset_type = ?
+              AND l.repair_status IN ('Open', 'On Progress', 'Closed', 'Revision')
+            GROUP BY m.id, m.asset_code, m.area, m.location
+        )
+        SELECT
+            g.*,
+            COALESCE(u_sys.REALNAME, e_pic.EmployeeName) AS pic_name,
+            u_sys.PicFile                                 AS pic_photo
+        FROM grouped g
+        LEFT JOIN [ATI].[Users].[UserTable] u_sys
+            ON LTRIM(RTRIM(g.pic_id)) = LTRIM(RTRIM(u_sys.EMPID))
+        LEFT JOIN [ATI].[dbo].[HRD_EMPLOYEE_TABLE] e_pic
+            ON LTRIM(RTRIM(g.pic_id)) = LTRIM(RTRIM(e_pic.EmpID))
+        ORDER BY
+            CASE g.status
+                WHEN 'Open'        THEN 1
+                WHEN 'On Progress' THEN 2
+                WHEN 'Revision'    THEN 3
+                WHEN 'Closed'      THEN 4
+                ELSE 5
+            END ASC,
+            g.created_at DESC";
 
     $result = sqlsrv_query($koneksi, $sql, [$type]);
     $data = [];

@@ -312,6 +312,82 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
         margin-bottom: 8px;
         text-align: center;
     }
+
+    /* Premium Modal & NG Card Styles */
+    .ng-item-card {
+        background-color: #fff !important;
+        border: 1px solid #e0e6ed !important;
+        border-radius: 12px !important;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02) !important;
+        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .ng-item-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.06) !important;
+        border-color: #d1d9e6 !important;
+    }
+
+    .ng-item-card.selected-revisi {
+        border-color: #dc3545 !important;
+        background-color: #fff5f5 !important;
+        box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1) !important;
+    }
+
+    .ng-card-checkbox {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 10;
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+    }
+
+    .info-asset-pill {
+        background: #f8f9fa;
+        border-radius: 50px;
+        padding: 5px 15px;
+        font-size: 0.75rem;
+        color: #666;
+        border: 1px solid #eee;
+        display: inline-flex;
+        align-items: center;
+        margin-right: 5px;
+        margin-bottom: 5px;
+    }
+
+    .info-asset-pill i {
+        margin-right: 6px;
+        color: #007bff;
+    }
+
+    .img-premium {
+        width: 100%;
+        height: 110px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 1px solid #eee;
+        cursor: zoom-in;
+        transition: opacity 0.2s;
+    }
+
+    .img-premium:hover {
+        opacity: 0.9;
+    }
+
+    .section-premium-label {
+        font-size: 0.8rem;
+        font-weight: 800;
+        color: #444;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-left: 3px solid #007bff;
+        padding-left: 10px;
+        margin-bottom: 15px;
+    }
 </style>
 
 <div class="page-inner">
@@ -485,8 +561,14 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
                                             <tr>
                                                 <td><strong><?= htmlspecialchars($case['code']) ?></strong></td>
                                                 <td><?= htmlspecialchars($case['area']) ?></td>
-                                                <td class="text-danger fw-bold">
+                                                <td class="text-danger fw-bold"
+                                                    style="max-width:220px; white-space:normal;">
                                                     <?= htmlspecialchars($case['abnormal_case']) ?>
+                                                    <?php if (($case['ng_count'] ?? 1) > 1): ?>
+                                                        <span class="badge bg-danger d-block mt-1" style="font-size:0.6rem;">
+                                                            <?= $case['ng_count'] ?> item NG
+                                                        </span>
+                                                    <?php endif; ?>
                                                 </td>
                                                 <td><?= htmlspecialchars($case['countermeasure'] ?: '-') ?></td>
                                                 <td>
@@ -504,6 +586,8 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
                                                     <?php
                                                     if ($case['status'] === 'Open')
                                                         echo '<span class="badge bg-danger">Open</span>';
+                                                    elseif ($case['status'] === 'Revision')
+                                                        echo '<span class="badge bg-danger"><i class="fas fa-undo me-1"></i>Revisi</span>';
                                                     elseif ($case['status'] === 'Closed')
                                                         echo '<span class="badge bg-info">Closed</span>';
                                                     elseif ($case['status'] === 'Verified')
@@ -529,9 +613,15 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
                                                             <button class="btn btn-warning btn-close-case text-dark border"
                                                                 data-id="<?= $case['id'] ?>" data-type="apar"
                                                                 data-abcase="<?= htmlspecialchars($case['abnormal_case']) ?>"
-                                                                <?= $isDisabled ?>
-                                                                title="Sedang Diperbaiki - Klik untuk Selesaikan Kasus"><i
+                                                                data-ng-count="<?= $case['ng_count'] ?? 1 ?>" <?= $isDisabled ?>
+                                                                title="Selesaikan Perbaikan (<?= $case['ng_count'] ?? 1 ?> item NG)"><i
                                                                     class="fas fa-screwdriver"></i></button>
+                                                        <?php elseif ($case['status'] === 'Revision'): ?>
+                                                            <button class="btn btn-info btn-view-detail text-white"
+                                                                data-id="<?= $case['id'] ?>" data-type="apar"
+                                                                data-status="<?= $case['status'] ?>"
+                                                                title="Detail - Perlu Perbaikan Ulang"><i
+                                                                    class="fas fa-undo"></i></button>
                                                         <?php elseif ($case['status'] === 'Closed'): ?>
                                                             <?php if (strtolower($_SESSION['user_role'] ?? '') === 'admin'): ?>
                                                                 <button class="btn btn-success btn-verify-case"
@@ -579,8 +669,14 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
                                             <tr>
                                                 <td><strong><?= htmlspecialchars($case['code']) ?></strong></td>
                                                 <td><?= htmlspecialchars($case['area']) ?></td>
-                                                <td class="text-danger fw-bold">
+                                                <td class="text-danger fw-bold"
+                                                    style="max-width:220px; white-space:normal;">
                                                     <?= htmlspecialchars($case['abnormal_case']) ?>
+                                                    <?php if (($case['ng_count'] ?? 1) > 1): ?>
+                                                        <span class="badge bg-danger d-block mt-1" style="font-size:0.6rem;">
+                                                            <?= $case['ng_count'] ?> item NG
+                                                        </span>
+                                                    <?php endif; ?>
                                                 </td>
                                                 <td><?= htmlspecialchars($case['countermeasure'] ?: '-') ?></td>
                                                 <td>
@@ -598,6 +694,8 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
                                                     <?php
                                                     if ($case['status'] === 'Open')
                                                         echo '<span class="badge bg-danger">Open</span>';
+                                                    elseif ($case['status'] === 'Revision')
+                                                        echo '<span class="badge bg-danger"><i class="fas fa-undo me-1"></i>Revisi</span>';
                                                     elseif ($case['status'] === 'Closed')
                                                         echo '<span class="badge bg-info">Closed</span>';
                                                     elseif ($case['status'] === 'Verified')
@@ -623,9 +721,15 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
                                                             <button class="btn btn-warning btn-close-case text-dark border"
                                                                 data-id="<?= $case['id'] ?>" data-type="hydrant"
                                                                 data-abcase="<?= htmlspecialchars($case['abnormal_case']) ?>"
-                                                                <?= $isDisabled ?>
-                                                                title="Sedang Diperbaiki - Klik untuk Selesaikan Kasus"><i
+                                                                data-ng-count="<?= $case['ng_count'] ?? 1 ?>" <?= $isDisabled ?>
+                                                                title="Selesaikan Perbaikan (<?= $case['ng_count'] ?? 1 ?> item NG)"><i
                                                                     class="fas fa-tools"></i></button>
+                                                        <?php elseif ($case['status'] === 'Revision'): ?>
+                                                            <button class="btn btn-info btn-view-detail text-white"
+                                                                data-id="<?= $case['id'] ?>" data-type="hydrant"
+                                                                data-status="<?= $case['status'] ?>"
+                                                                title="Detail - Perlu Perbaikan Ulang"><i
+                                                                    class="fas fa-undo"></i></button>
                                                         <?php elseif ($case['status'] === 'Closed'): ?>
                                                             <?php if (strtolower($_SESSION['user_role'] ?? '') === 'admin'): ?>
                                                                 <button class="btn btn-success btn-verify-case"
@@ -733,10 +837,11 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
                         Admin K3.
                     </div>
 
-                    <div id="repairPhotoDiv" class="mb-3">
-                        <label class="form-label">Foto Bukti Perbaikan <span class="text-danger">*</span></label>
-                        <input type="file" class="form-control" name="repair_photo" id="repair_photo" accept="image/*"
-                            required>
+                    <div id="repairPhotoDiv">
+                        <!-- Diisi dinamis via AJAX: 1 file input per item NG yang On Progress -->
+                        <div class="text-center text-muted py-3 small">
+                            <i class="fas fa-spinner fa-spin me-1"></i>Memuat daftar item perbaikan...
+                        </div>
                     </div>
 
                     <div id="newExpiredDiv" class="mb-3" style="display:none;">
@@ -769,71 +874,90 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
                     <h5 class="modal-title fw-bold">Detail Inspeksi (Abnormal)</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
-                    <div class="mb-3 bg-light p-3 rounded border">
-                        <div class="row">
-                            <div class="col-6">
-                                <span class="text-muted d-block" style="font-size:0.75rem;">Tanggal Inspeksi</span>
-                                <strong id="det_insp_date">-</strong>
-                            </div>
-                            <div class="col-6">
-                                <span class="text-muted d-block" style="font-size:0.75rem;">Catatan Umum
-                                    Inspector</span>
-                                <strong id="det_insp_notes">-</strong>
-                            </div>
+                <div class="modal-body p-4">
+                    <!-- Premium Asset Info Header -->
+                    <div class="mb-4 pb-3 border-bottom">
+                        <div id="asset_info_pills" class="d-flex flex-wrap">
+                            <!-- JS Will Populate Pills Here -->
+                        </div>
+                        <div class="mt-2 text-muted" style="font-size:0.75rem;">
+                            <i class="fas fa-calendar-alt me-1"></i>Inspeksi: <span id="det_insp_date"
+                                class="fw-bold">-</span>
+                            <span class="mx-2">|</span>
+                            <i class="fas fa-comment ms-1 me-1"></i>Catatan: <span id="det_insp_notes"
+                                class="fw-bold">-</span>
                         </div>
                     </div>
-                    <h6 class="fw-bold border-bottom pb-2 mb-3">Item yang Abnormal (NG)</h6>
+
+                    <div class="section-premium-label">Item yang Abnormal (NG)</div>
                     <div id="detail_items_container" class="row g-3">
                         <!-- Ajax Populate -->
                     </div>
 
-                    <!-- NEW INPUT SECTION for Open Status -->
-                    <div id="startProgressInputSection"
-                        class="mt-4 border-top pt-3 bg-primary bg-opacity-10 p-3 rounded" style="display: none;">
-                        <h6 class="fw-bold mb-3 text-primary"><i class="fas fa-tools"></i> Rencana Tindakan Perbaikan
-                        </h6>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Tindakan Perbaikan (Countermeasure) <span
-                                    class="text-danger">*</span></label>
-                            <textarea class="form-control" name="countermeasure" id="input_countermeasure" rows="2"
-                                placeholder="Jelaskan tindakan yang akan dilATIkan..." required></textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Tanggal Target Selesai (Due Date) <span
-                                    class="text-danger">*</span></label>
-                            <input type="date" class="form-control" name="due_date" id="input_due_date" required>
-                        </div>
+                    <!-- Input catatan revisi, muncul jika ada item yang dipilih -->
+                    <div id="revisionNotesRow" class="mt-4 d-none p-3 border rounded border-danger bg-white shadow-sm">
+                        <label class="form-label fw-bold text-danger small"><i class="fas fa-undo-alt me-1"></i>Catatan
+                            Instruksi Revisi</label>
+                        <textarea id="revisionNotesInput" class="form-control form-control-sm border-0 bg-light"
+                            rows="2"
+                            placeholder="Jelaskan apa yang perlu diperbaiki ulang secara spesifik..."></textarea>
                     </div>
 
-                    <!-- REPAIR REPORT SECTION for Closed/Verified Status -->
-                    <div id="repairReportSection" class="mt-4 border-top pt-3 bg-success bg-opacity-10 p-3 rounded"
-                        style="display: none;">
-                        <h6 class="fw-bold mb-3 text-success"><i class="fas fa-clipboard-check"></i> Laporan Tindakan
-                            Perbaikan</h6>
+                    <!-- NEW INPUT SECTION for Open Status (Clean Look) -->
+                    <div id="startProgressInputSection" class="mt-5 pt-4 border-top" style="display: none;">
+                        <div class="section-premium-label text-primary" style="border-left-color: #007bff;">Rencana
+                            Tindakan Perbaikan</div>
                         <div class="row">
-                            <div class="col-md-7">
-                                <strong class="d-block mb-1 text-muted small">Tindakan yang DilATIkan:</strong>
-                                <div id="det_countermeasure" class="text-dark bg-white p-2 rounded border mb-3">-</div>
-                                <strong class="d-block mb-1 text-muted small">Target Selesai:</strong>
-                                <div id="det_due_date" class="text-dark fw-bold">-</div>
+                            <div class="col-md-7 mb-3">
+                                <label class="form-label fw-bold small text-muted">Tindakan Perbaikan
+                                    (Countermeasure)</label>
+                                <textarea class="form-control bg-light" name="countermeasure" id="input_countermeasure"
+                                    rows="2" placeholder="Jelaskan tindakan yang akan dilakukan..." required></textarea>
                             </div>
-                            <div class="col-md-5 text-center">
-                                <strong class="d-block mb-1 text-muted small">Bukti Foto Perbaikan:</strong>
-                                <div id="det_repair_photo_container"></div>
+                            <div class="col-md-5 mb-3">
+                                <label class="form-label fw-bold small text-muted">Tanggal Target Selesai (Due
+                                    Date)</label>
+                                <input type="date" class="form-control bg-light" name="due_date" id="input_due_date"
+                                    required>
                             </div>
                         </div>
                     </div>
 
+                    <!-- REPAIR REPORT SECTION for Closed/Verified Status (Clean Look) -->
+                    <div id="repairReportSection" class="mt-5 pt-4 border-top" style="display: none;">
+                        <div class="section-premium-label text-success" style="border-left-color: #28a745;">Review
+                            Laporan Perbaikan</div>
+                        <div class="row align-items-center">
+                            <div class="col-md-12">
+                                <div class="p-3 bg-light rounded shadow-sm border">
+                                    <div class="row">
+                                        <div class="col-md-8">
+                                            <strong class="d-block mb-1 text-muted" style="font-size:0.7rem;">Tindakan
+                                                yang Telah Dilakukan:</strong>
+                                            <div id="det_countermeasure" class="fw-bold text-dark">—</div>
+                                            <div class="mt-2">
+                                                <span class="badge bg-white text-success border border-success small"
+                                                    style="font-weight:600;">
+                                                    <i class="fas fa-calendar-check me-1"></i>Selesai: <span
+                                                        id="det_due_date">—</span>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div id="det_repair_photo_container" class="col-md-4 text-end"
+                                            style="display:none;">
+                                            <!-- Thumbnails here -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer d-flex justify-content-between">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
                     <div>
-                        <button type="submit" class="btn btn-primary fw-bold" id="btnMulaiTindakan"
-                            style="display: none;">Mulai Tindakan <i class="fas fa-arrow-right ms-1"></i></button>
-                        <button type="button" class="btn btn-success fw-bold" id="btnVerifikasiModal"
-                            style="display: none;"><i class="fas fa-check-double ms-1"></i> Terima & Verifikasi
-                            Data</button>
+                        <button type="submit" class="btn btn-primary fw-bold" id="btnMulaiTindakan" style="display: none;">Mulai Tindakan <i class="fas fa-arrow-right ms-1"></i></button>
+                        <button type="button" class="btn btn-success fw-bold" id="btnVerifikasiModal" style="display: none;"><i class="fas fa-check-double ms-1"></i> Terima & Verifikasi Data</button>
                     </div>
                 </div>
             </form>
@@ -856,7 +980,6 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     $(document).ready(function () {
         // ===== DATE FILTER LOGIC (AFFECTS KPI, CHARTS, MAP - NOT ACTION REQUIRED) =====
@@ -1073,28 +1196,141 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
                         $('#det_insp_date').text(res.inspection_date);
                         $('#det_insp_notes').text(res.inspector_notes);
 
+                        // Render Asset Info Pills
+                        var pills = $('#asset_info_pills');
+                        pills.empty().addClass('gap-2');
+                        if (res.asset_info) {
+                            pills.append('<div class="info-asset-pill shadow-sm"><i class="fas fa-tag"></i>' + res.asset_info.code + '</div>');
+                            pills.append('<div class="info-asset-pill shadow-sm"><i class="fas fa-map-marker-alt"></i>' + res.asset_info.area + '</div>');
+                            pills.append('<div class="info-asset-pill shadow-sm"><i class="fas fa-compass"></i>' + res.asset_info.location + '</div>');
+                            pills.append('<div class="info-asset-pill shadow-sm"><i class="fas fa-fire-extinguisher"></i>' + res.asset_info.type + '</div>');
+                        }
+
                         var container = $('#detail_items_container');
                         container.empty();
 
                         if (res.ng_items.length === 0) {
-                            container.append('<div class="col-12 text-center text-muted">Tidak ada data item perincian.</div>');
+                            container.append('<div class="col-12 text-center text-muted py-5">Tidak ada data item perincian.</div>');
                         } else {
+                            var isAdmin = <?= strtolower($_SESSION['user_role'] ?? '') === 'admin' ? 'true' : 'false' ?>;
+                            var allClosed = res.ng_items.every(function (i) { return i.status === 'Closed'; });
+                            window._selectedRevisi = {};
+
+                            function updateRevisiUI() {
+                                var count = Object.keys(window._selectedRevisi).length;
+                                $('#revisiCountNum').text(count);
+                                if (count > 0) {
+                                    $('#btnRevisiCount').removeClass('d-none');
+                                    $('#revisionNotesRow').removeClass('d-none');
+                                    $('#btnVerifikasiLabel').text('Submit ' + count + ' Revisi').addClass('fw-bold');
+                                    $('#btnVerifikasiModal').removeClass('btn-success').addClass('btn-primary shadow');
+                                } else {
+                                    $('#btnRevisiCount').addClass('d-none');
+                                    $('#revisionNotesRow').addClass('d-none');
+                                    $('#btnVerifikasiLabel').text('Terima & Verifikasi').removeClass('fw-bold');
+                                    $('#btnVerifikasiModal').removeClass('btn-primary shadow').addClass('btn-success');
+                                }
+                            }
+
+                            var statusMap = {
+                                'Open': '<span class="badge bg-danger">Open</span>',
+                                'On Progress': '<span class="badge bg-warning text-dark">On Progress</span>',
+                                'Closed': '<span class="badge bg-info">Closed</span>',
+                                'Verified': '<span class="badge bg-success">Verified</span>',
+                                'Revision': '<span class="badge bg-danger"><i class="fas fa-undo me-1"></i>Revisi</span>'
+                            };
+
                             res.ng_items.forEach(function (item) {
-                                var photoHtml = item.photo ?
-                                    '<img src="' + item.photo + '" class="img-fluid rounded border mt-2 img-preview-btn" style="max-height:120px; object-fit:cover; cursor:pointer;" data-src="' + item.photo + '">' :
-                                    '<div class="text-muted small mt-2 fst-italic">Tidak ada foto</div>';
+                                var canSelect = isAdmin && item.status === 'Closed' && allClosed;
+                                var lid = String(item.line_id);
 
-                                var ketHtml = item.keterangan ? '<div class="small mt-1 text-danger">Ket: ' + item.keterangan + '</div>' : '';
+                                // Foto Temuan & Perbaikan Side-by-Side if both exist
+                                var photoSection = '<div class="row g-2 mt-2">';
 
-                                container.append(`
-                                    <div class="col-md-6 col-lg-4">
-                                        <div class="card card-body bg-light border p-2 h-100 text-center">
-                                            <strong class="d-block text-danger">`+ item.label + `</strong>
-                                            ` + ketHtml + `
-                                            ` + photoHtml + `
-                                        </div>
-                                    </div>
-                                `);
+                                // Container finding photo
+                                photoSection += '<div class="col-6 mb-1 text-start">' +
+                                    '<label class="d-block mb-1 text-muted" style="font-size:0.55rem; font-weight:700; text-transform:uppercase;">Temuan:</label>';
+                                if (item.photo) {
+                                    photoSection += '<img src="' + item.photo + '" class="img-premium img-preview-btn" data-src="' + item.photo + '">';
+                                } else {
+                                    photoSection += '<div class="d-flex align-items-center justify-content-center bg-light rounded shadow-inner" style="height:90px; border:1px dashed #ddd;">' +
+                                        '<span class="text-muted" style="font-size:0.6rem;">No Photo</span>' +
+                                        '</div>';
+                                }
+                                photoSection += '</div>';
+
+                                // Container repair photo
+                                if (item.repair_photo) {
+                                    photoSection += '<div class="col-6 mb-1 text-start">' +
+                                        '<label class="d-block mb-1 text-success" style="font-size:0.55rem; font-weight:700; text-transform:uppercase;">Perbaikan:</label>' +
+                                        '<img src="' + item.repair_photo + '" class="img-premium img-preview-btn" data-src="' + item.repair_photo + '" style="height:90px;">' +
+                                        '</div>';
+                                } else if (item.photo) {
+                                    // if finding photo exists but repair not yet, fill with empty space to keep layout
+                                    photoSection += '<div class="col-6 mb-1"></div>';
+                                }
+
+                                photoSection += '</div>';
+
+                                var revisionAlert = '';
+                                if (item.status === 'Revision' && item.revision_notes) {
+                                    revisionAlert = '<div class="alert alert-danger py-1 px-2 mt-2 mb-0" style="font-size:0.7rem;text-align:left;">' +
+                                        '<strong>Alasan Reol:</strong> ' + item.revision_notes + '</div>';
+                                }
+
+                                var $col = $('<div class="col-md-6 col-lg-4"></div>');
+                                var $card = $('<div class="card ng-item-card p-3 h-100" data-line-id="' + item.line_id + '"></div>');
+
+                                var checkboxHtml = canSelect ? '<input type="checkbox" class="ng-card-checkbox" id="chk_' + lid + '">' : '';
+
+                                $card.html(
+                                    checkboxHtml +
+                                    '<div class="d-flex justify-content-between align-items-start mb-2">' +
+                                    '<div class="fw-bold text-dark small text-start" style="line-height:1.2;">' + item.label + '</div>' +
+                                    '<div class="badge-status-wrap">' + (statusMap[item.status] || '') + '</div>' +
+                                    '</div>' +
+                                    (item.keterangan ? '<div class="text-muted small mb-1 text-start" style="font-size:0.7rem;">' + item.keterangan + '</div>' : '') +
+                                    revisionAlert +
+                                    photoSection +
+                                    (canSelect ? '<div class="mt-2 text-primary small text-start" style="font-size:0.6rem;"><i class="fas fa-check-square me-1"></i>Pilih untuk revisi</div>' : '')
+                                );
+
+                                if (canSelect) {
+                                    $card.css('cursor', 'pointer');
+
+                                    var toggleAction = function (e) {
+                                        // Ignore click if it originated from the image preview button
+                                        if ($(e.target).closest('.img-preview-btn').length > 0) return;
+
+                                        if (window._selectedRevisi[lid]) {
+                                            delete window._selectedRevisi[lid];
+                                            $card.removeClass('selected-revisi');
+                                            $card.find('.ng-card-checkbox').prop('checked', false);
+                                            $card.find('.badge-status-wrap').html(statusMap[item.status]);
+                                        } else {
+                                            window._selectedRevisi[lid] = true;
+                                            $card.addClass('selected-revisi');
+                                            $card.find('.ng-card-checkbox').prop('checked', true);
+                                            $card.find('.badge-status-wrap').html('<span class="badge bg-danger">REVISI</span>');
+                                        }
+                                        updateRevisiUI();
+                                    };
+
+                                    $card.on('click', toggleAction);
+                                    $card.find('.ng-card-checkbox').on('click', function (e) {
+                                        e.stopPropagation(); // prevent double toggle from label/card click
+                                        toggleAction(e);
+                                    });
+                                }
+
+                                $col.append($card);
+                                container.append($col);
+                            });
+
+                            $('#inspectionDetailModal').off('hidden.bs.modal.revisi').on('hidden.bs.modal.revisi', function () {
+                                window._selectedRevisi = {};
+                                updateRevisiUI();
+                                $('#revisionNotesInput').val('');
                             });
                         }
 
@@ -1107,7 +1343,6 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
                             $('#btnMulaiTindakan').show();
                             $('#input_countermeasure').val('').prop('required', true);
                             $('#input_due_date').val('').prop('required', true);
-
                             $('#repairReportSection').hide();
                             $('#btnVerifikasiModal').hide();
                         } else {
@@ -1116,25 +1351,27 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
                             $('#input_countermeasure').prop('required', false);
                             $('#input_due_date').prop('required', false);
 
-                            // For Close and Verified, show repair report section if case_info exists
                             if (res.case_info) {
                                 $('#repairReportSection').show();
                                 $('#det_countermeasure').text(res.case_info.countermeasure);
                                 $('#det_due_date').text(res.case_info.due_date);
 
-                                if (res.case_info.repair_photo) {
-                                    $('#det_repair_photo_container').html('<img src="' + res.case_info.repair_photo + '" class="img-fluid rounded border img-preview-btn" style="max-height:150px; cursor:pointer;" data-src="' + res.case_info.repair_photo + '">');
-                                } else {
-                                    $('#det_repair_photo_container').html('<div class="text-muted fst-italic">Belum ada foto repair</div>');
-                                }
+                                // Show all repair photos in a gallery in the report section
+                                var repairGallery = $('#det_repair_photo_container');
+                                repairGallery.empty().show();
+                                res.ng_items.forEach(function (item) {
+                                    if (item.repair_photo) {
+                                        repairGallery.append('<img src="' + item.repair_photo + '" class="img-thumbnail me-1 img-preview-btn" style="width:50px;height:50px;object-fit:cover;cursor:pointer;" data-src="' + item.repair_photo + '">');
+                                    }
+                                });
                             } else {
                                 $('#repairReportSection').hide();
                             }
 
-                            // If isVerifying, show verify button
-                            if (isVerifying) {
-                                $('#btnVerifikasiModal').show().off('click').on('click', function () {
-                                    triggerVerification(caseId, caseType);
+                            var isAdminCheck = <?= strtolower($_SESSION['user_role'] ?? '') === 'admin' ? 'true' : 'false' ?>;
+                            if (isAdminCheck && caseStatus === 'Closed') {
+                                $('#btnVerifikasiModal').show().off('click.verify').on('click.verify', function () {
+                                    triggerDecision(caseId, caseType);
                                 });
                             } else {
                                 $('#btnVerifikasiModal').hide();
@@ -1188,23 +1425,69 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
             });
         });
 
-        // Close Case Click
+        // Close Case Click — load item NG secara dinamis per asset
         $(document).on('click', '.btn-close-case', function () {
-            var abcase = $(this).data('abcase');
-            $('#status_case_id').val($(this).data('id'));
-            $('#status_case_type').val($(this).data('type'));
-            $('#status_abnormal_text').val(abcase);
+            var assetId = $(this).data('id');
+            var caseType = $(this).data('type');
+            var ngCount = $(this).data('ng-count') || 1;
 
-            if (abcase.toUpperCase().indexOf('EXPIRED') !== -1) {
-                $('#newExpiredDiv').show();
-                $('#new_expired_date').attr('required', true);
-            } else {
-                $('#newExpiredDiv').hide();
-                $('#new_expired_date').removeAttr('required');
-            }
+            $('#status_case_id').val(assetId);
+            $('#status_case_type').val(caseType);
+            $('#newExpiredDiv').hide();
+            $('#new_expired_date').removeAttr('required');
+
+            // Tampilkan loading spinner, lalu buka modal
+            $('#repairPhotoDiv').html(
+                '<div class="text-center text-muted py-3 small">' +
+                '<i class="fas fa-spinner fa-spin me-1"></i>Memuat ' + ngCount + ' item perbaikan...</div>'
+            );
 
             var modal = new bootstrap.Modal(document.getElementById('updateStatusModal'));
             modal.show();
+
+            // AJAX: ambil semua On Progress items untuk asset ini
+            $.ajax({
+                url: 'actions/dashboard/ac_abnormal.php',
+                type: 'POST',
+                dataType: 'json',
+                data: { action: 'get_ng_items_for_close', id: assetId, type: caseType },
+                success: function (res) {
+                    if (res.status !== 'success' || !res.items || !res.items.length) {
+                        $('#repairPhotoDiv').html(
+                            '<div class="alert alert-warning py-2 small">Tidak ada item On Progress untuk unit ini.</div>'
+                        );
+                        return;
+                    }
+
+                    var html = '';
+                    res.items.forEach(function (item) {
+                        html += '<div class="card border mb-2">' +
+                            '<div class="card-body p-2">' +
+                            '<div class="fw-bold text-danger small mb-1">' +
+                            '<i class="fas fa-exclamation-triangle me-1"></i>' + item.label +
+                            (item.finding && item.finding !== item.label
+                                ? ' <span class="text-dark fw-normal">— ' + item.finding + '</span>'
+                                : '') +
+                            '</div>' +
+                            '<label class="form-label small mb-1">Foto Bukti Perbaikan <span class="text-danger">*</span></label>' +
+                            '<input type="file" class="form-control form-control-sm" ' +
+                            'name="repair_photo_' + item.line_id + '" accept="image/*" required>' +
+                            '</div></div>';
+                    });
+                    $('#repairPhotoDiv').html(html);
+
+                    // Toggle expired date input jika ada item terkait exp date
+                    if (res.has_expired) {
+                        $('#newExpiredDiv').show();
+                        $('#new_expired_date').attr('required', true);
+                    }
+                },
+                error: function () {
+                    $('#repairPhotoDiv').html(
+                        '<div class="alert alert-danger py-2 small">Gagal memuat data item perbaikan.</div>'
+                    );
+                }
+            });
         });
 
         // Submit Edit Form
@@ -1260,42 +1543,59 @@ $hydrantAbnormalCases = get_hydrant_abnormal_cases();
             });
         });
 
-        // Function Verification from Modal Button
-        function triggerVerification(caseId, caseType) {
-            Swal.fire({
-                title: 'Konfirmasi Verifikasi',
-                text: 'Setelah diverifikasi, unit APAR/Hydrant masuk kembali ke daftar aman (OK). Data riwayat tindakan akan tersimpan selamanya.',
+        // Function: Kirim keputusan Admin (Verified / Revision per-item)
+        function triggerDecision(caseId, caseType) {
+            var revisionIds = Object.keys(window._selectedRevisi || {});
+            var revisionNotes = $('#revisionNotesInput').val().trim();
+            var hasRevisi = revisionIds.length > 0;
+
+            var confirmText = hasRevisi
+                ? revisionIds.length + ' item akan ditandai REVISI, sisanya akan DIVERIFIKASI.'
+                : 'Semua item perbaikan akan diverifikasi dan unit kembali ke status OK.';
+
+            swal({
+                title: hasRevisi ? 'Simpan Keputusan?' : 'Verifikasi Semua?',
+                text: confirmText,
                 icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#28a745',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Ya, Verifikasi & Tutup'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $('#btnVerifikasiModal').prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Memverifikasi...');
-                    $.ajax({
-                        url: 'actions/dashboard/ac_abnormal.php',
-                        type: 'POST',
-                        dataType: 'json',
-                        data: {
-                            action: 'verify_case',
-                            id: caseId,
-                            type: caseType
-                        },
-                        success: function (res) {
-                            if (res.status == 'success') {
-                                Swal.fire('Terkonfirmasi', res.message, 'success').then(() => window.location.reload());
-                            } else {
-                                Swal.fire('Gagal', res.message, 'error');
-                                $('#btnVerifikasiModal').prop('disabled', false).html('<i class="fas fa-check-double ms-1"></i> Terima & Verifikasi Data');
-                            }
-                        },
-                        error: function () {
-                            Swal.fire('Error', 'Terjadi kesalahan sistem', 'error');
-                            $('#btnVerifikasiModal').prop('disabled', false).html('<i class="fas fa-check-double ms-1"></i> Terima & Verifikasi Data');
-                        }
-                    });
+                buttons: {
+                    cancel: {
+                        visible: true,
+                        text: 'Batal',
+                        className: 'btn btn-secondary'
+                    },
+                    confirm: {
+                        text: hasRevisi ? 'Ya, Simpan' : 'Ya, Verifikasi',
+                        className: hasRevisi ? 'btn btn-primary' : 'btn btn-success'
+                    }
                 }
+            }).then(function (result) {
+                if (!result) return;
+
+                $('#btnVerifikasiModal').prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Memproses...');
+                $.ajax({
+                    url: 'actions/dashboard/ac_abnormal.php',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        action: 'submit_decision',
+                        id: caseId,
+                        type: caseType,
+                        revision_line_ids: JSON.stringify(revisionIds),
+                        revision_notes: revisionNotes
+                    },
+                    success: function (res) {
+                        if (res.status === 'success') {
+                            swal('Berhasil', res.message, 'success').then(() => window.location.reload());
+                        } else {
+                            swal('Gagal', res.message, 'error');
+                            $('#btnVerifikasiModal').prop('disabled', false).html('<i class="fas fa-check-double me-1"></i><span id="btnVerifikasiLabel">Terima &amp; Verifikasi</span>');
+                        }
+                    },
+                    error: function () {
+                        swal('Error', 'Terjadi kesalahan sistem', 'error');
+                        $('#btnVerifikasiModal').prop('disabled', false).html('<i class="fas fa-check-double me-1"></i><span id="btnVerifikasiLabel">Terima &amp; Verifikasi</span>');
+                    }
+                });
             });
         }
     });
